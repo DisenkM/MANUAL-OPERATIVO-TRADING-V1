@@ -1,0 +1,861 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #0b1018;
+      --panel: #131c29;
+      --panel2: #192536;
+      --line: #29384c;
+      --text: #e8eef7;
+      --muted: #91a0b5;
+      --green: #27c98b;
+      --red: #f06464;
+      --yellow: #f3bd58;
+      --blue: #6da9ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    h1 { margin: 0; font-size: 21px; }
+    h2 { font-size: 18px; margin-top: 0; }
+    h3 { font-size: 15px; }
+
+    .muted { color: var(--muted); font-size: 12px; }
+    .container { padding: 22px; max-width: 1400px; margin: auto; }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 12px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    button {
+      background: var(--panel2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:hover { border-color: var(--blue); }
+    button.primary { background: #245b9e; border-color: #397ac8; }
+    button.danger { background: #542b35; border-color: #80414e; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+
+    .tab { display: none; }
+    .tab.active { display: block; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .two {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      font-size: 25px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin: 12px 0 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: #0c1420;
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 11px;
+      border-radius: 7px;
+      outline: none;
+    }
+
+    textarea { min-height: 75px; resize: vertical; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .rule {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .rule input { width: auto; margin-top: 3px; }
+    .rule-text { flex: 1; font-size: 13px; line-height: 1.4; }
+
+    .status {
+      padding: 12px;
+      border-radius: 8px;
+      margin: 12px 0;
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      white-space: pre-wrap;
+      font-size: 13px;
+    }
+
+    .success { border-color: var(--green); }
+    .error { border-color: var(--red); }
+    .warning { border-color: var(--yellow); }
+
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th { color: var(--muted); }
+
+    .table-wrap { overflow-x: auto; }
+    .hidden { display: none !important; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+
+    @media(max-width: 800px) {
+      .grid, .two, .field-row { grid-template-columns: 1fr; }
+      .container { padding: 14px; }
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div>
+    <h1>CUADERNO DEL TRADER <span class="muted">V5.3 MVP</span></h1>
+    <div class="muted">Registro, disciplina y control de riesgo</div>
+  </div>
+  <div class="muted" id="connection">Conectando...</div>
+</header>
+
+<nav>
+  <button onclick="showTab('dashboard')">Resumen</button>
+  <button onclick="showTab('newTrade')">Nueva operación</button>
+  <button onclick="showTab('strategies')">Estrategias y reglas</button>
+  <button onclick="showTab('journal')">Diario</button>
+  <button onclick="showTab('settings')">Configuración</button>
+</nav>
+
+<main class="container">
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="tab active">
+    <h2>Resumen de actividad</h2>
+
+    <div class="grid">
+      <div class="card">
+        <div class="muted">Capital de referencia</div>
+        <div class="metric" id="capitalMetric">—</div>
+      </div>
+      <div class="card">
+        <div class="muted">Operaciones registradas</div>
+        <div class="metric" id="tradesMetric">0</div>
+      </div>
+      <div class="card">
+        <div class="muted">Resultado neto cerrado</div>
+        <div class="metric" id="pnlMetric">$0.00</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Estado del sistema</h3>
+      <p class="muted">
+        El sistema registra operaciones y verifica reglas.
+        No ejecuta órdenes ni consulta precios en tiempo real.
+      </p>
+      <div id="dashboardStatus" class="status">Cargando información...</div>
+    </div>
+  </section>
+
+  <!-- NUEVA OPERACIÓN -->
+  <section id="newTrade" class="tab">
+    <h2>Nueva operación</h2>
+
+    <div class="card">
+      <h3>1. Parámetros de la operación</h3>
+
+      <div class="field-row">
+        <div>
+          <label>Estrategia</label>
+          <select id="strategySelect"></select>
+        </div>
+        <div>
+          <label>Par</label>
+          <input id="symbol" value="BTCUSDT">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div>
+          <label>Capital USD</label>
+          <input id="capital" type="number" value="80" step="0.01">
+        </div>
+        <div>
+          <label>Riesgo (%)</label>
+          <input id="riskPct" type="number" value="0.5" step="0.1">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div>
+          <label>Precio de entrada</label>
+          <input id="entry" type="number" step="0.00000001">
+        </div>
+        <div>
+          <label>Stop Loss</label>
+          <input id="stop" type="number" step="0.00000001">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div>
+          <label>Relación riesgo/beneficio</label>
+          <input id="rr" type="number" value="2" step="0.1">
+        </div>
+        <div>
+          <label>Modalidad</label>
+          <select id="mode">
+            <option value="REAL">Real (límite 0,5%)</option>
+            <option value="TEST">Prueba (límite 1%)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" onclick="calculate()">Calcular posición</button>
+      </div>
+
+      <div id="calcResult" class="status">Introduce los datos y calcula.</div>
+    </div>
+
+    <div class="card">
+      <h3>2. Checklist previo</h3>
+      <p class="muted">
+        Todas las reglas obligatorias deben cumplirse.
+        Una respuesta negativa bloquea la autorización.
+      </p>
+      <div id="preChecklist"></div>
+      <div class="actions">
+        <button class="primary" onclick="authorizeTrade()">Validar y registrar operación</button>
+      </div>
+      <div id="authorizeResult" class="status">
+        La operación todavía no está autorizada.
+      </div>
+    </div>
+  </section>
+
+  <!-- ESTRATEGIAS -->
+  <section id="strategies" class="tab">
+    <h2>Estrategias y reglas</h2>
+
+    <div class="card">
+      <h3>Crear estrategia</h3>
+      <label>Nombre</label>
+      <input id="newStrategyName" placeholder="Nombre de la estrategia">
+      <label>Temporalidad</label>
+      <input id="newStrategyTimeframe" placeholder="Ej. M15">
+      <div class="actions">
+        <button class="primary" onclick="createStrategy()">Crear estrategia</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Agregar regla</h3>
+      <label>Estrategia</label>
+      <select id="ruleStrategy"></select>
+
+      <label>Fase</label>
+      <select id="rulePhase">
+        <option value="PRE">Antes de operar</option>
+        <option value="DURANTE">Durante la operación</option>
+        <option value="DESPUES">Después de la operación</option>
+      </select>
+
+      <label>Descripción de la regla</label>
+      <textarea id="ruleDescription" placeholder="Escribe una condición clara y verificable"></textarea>
+
+      <label>
+        <input type="checkbox" id="ruleMandatory" checked style="width:auto">
+        Regla obligatoria
+      </label>
+
+      <div class="actions">
+        <button class="primary" onclick="addRule()">Agregar regla</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Reglas existentes</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Fase</th><th>Descripción</th>
+              <th>Obligatoria</th><th>Activa</th><th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="rulesTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIARIO -->
+  <section id="journal" class="tab">
+    <h2>Diario de operaciones</h2>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Fecha</th><th>Par</th><th>Entrada</th>
+              <th>Stop</th><th>TP</th><th>Cantidad</th><th>Estado</th>
+              <th>PnL neto</th><th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tradesTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tradeDetail" class="card hidden">
+      <h3 id="detailTitle">Seguimiento de operación</h3>
+      <input type="hidden" id="detailTradeId">
+
+      <div class="two">
+        <div>
+          <h3>Durante la operación</h3>
+          <div id="duringChecklist"></div>
+          <label>Observaciones</label>
+          <textarea id="duringNotes"></textarea>
+          <button onclick="savePhase('DURANTE')">Guardar seguimiento</button>
+        </div>
+
+        <div>
+          <h3>Cerrar operación</h3>
+          <label>Precio real de salida</label>
+          <input id="exitPrice" type="number" step="0.00000001">
+          <label>Comisión de entrada real (USD)</label>
+          <input id="entryFee" type="number" value="0" step="0.000001">
+          <label>Comisión de salida real (USD)</label>
+          <input id="exitFee" type="number" value="0" step="0.000001">
+          <label>Notas de cierre</label>
+          <textarea id="closeNotes"></textarea>
+          <button class="primary" onclick="closeTrade()">Registrar cierre</button>
+          <div id="closeResult" class="status"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Después de la operación</h3>
+        <div id="postChecklist"></div>
+        <label>Aprendizaje y observaciones</label>
+        <textarea id="postNotes"></textarea>
+        <button onclick="savePhase('DESPUES')">Guardar evaluación posterior</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONFIGURACIÓN -->
+  <section id="settings" class="tab">
+    <h2>Configuración</h2>
+
+    <div class="card">
+      <p class="muted">
+        Los valores son editables. Las comisiones y el mínimo nominal
+        deben contrastarse con las condiciones vigentes de Binance.
+      </p>
+
+      <div class="field-row">
+        <div>
+          <label>Capital USD</label>
+          <input id="cfgCapital" type="number" step="0.01">
+        </div>
+        <div>
+          <label>Riesgo real (%)</label>
+          <input id="cfgRisk" type="number" step="0.1">
+        </div>
+        <div>
+          <label>Riesgo de prueba (%)</label>
+          <input id="cfgTestRisk" type="number" step="0.1">
+        </div>
+        <div>
+          <label>Comisión estimada por lado (%)</label>
+          <input id="cfgFee" type="number" step="0.001">
+        </div>
+        <div>
+          <label>Mínimo nominal USD</label>
+          <input id="cfgMin" type="number" step="0.01">
+        </div>
+        <div>
+          <label>Riesgo/beneficio</label>
+          <input id="cfgRR" type="number" step="0.1">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" onclick="saveConfig()">Guardar configuración</button>
+      </div>
+      <div id="configResult" class="status"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+let APP = {
+  config: {},
+  strategies: [],
+  rules: [],
+  trades: [],
+  lastCalculation: null
+};
+
+function showTab(id) {
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function callApi(method, data, success, failure) {
+  google.script.run
+    .withSuccessHandler(success)
+    .withFailureHandler(err => {
+      const message = err && err.message ? err.message : String(err);
+      if (failure) failure(message);
+      else alert(message);
+    })[method](data);
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  })[char]);
+}
+
+function money(value) {
+  return '$' + Number(value || 0).toFixed(2);
+}
+
+function loadApp() {
+  callApi('api_getInitialData', null, data => {
+    APP = { ...APP, ...data };
+    document.getElementById('connection').textContent =
+      'Conectado · ' + data.version;
+
+    renderAll();
+  });
+}
+
+function renderAll() {
+  renderDashboard();
+  renderStrategySelects();
+  renderPreChecklist();
+  renderRules();
+  renderTrades();
+  renderConfig();
+}
+
+function renderDashboard() {
+  const closed = APP.trades.filter(t => t.ESTADO === 'CERRADA');
+  const pnl = closed.reduce((sum, t) => sum + Number(t.PNL_NETO || 0), 0);
+
+  document.getElementById('capitalMetric').textContent =
+    money(APP.config.CAPITAL_USD);
+
+  document.getElementById('tradesMetric').textContent =
+    APP.trades.length;
+
+  const pnlEl = document.getElementById('pnlMetric');
+  pnlEl.textContent = money(pnl);
+  pnlEl.className = 'metric ' + (pnl >= 0 ? 'positive' : 'negative');
+
+  document.getElementById('dashboardStatus').textContent =
+    'Estrategias: ' + APP.strategies.length +
+    '\nOperaciones abiertas: ' +
+    APP.trades.filter(t => t.ESTADO === 'ABIERTA').length +
+    '\nOperaciones cerradas: ' + closed.length;
+}
+
+function renderStrategySelects() {
+  const options = APP.strategies.map(s =>
+    `<option value="${escapeHtml(s.ID)}">${escapeHtml(s.NOMBRE)} · v${s.VERSION}</option>`
+  ).join('');
+
+  document.getElementById('strategySelect').innerHTML = options;
+  document.getElementById('ruleStrategy').innerHTML = options;
+}
+
+function getSelectedStrategy() {
+  return document.getElementById('strategySelect').value;
+}
+
+function getRules(strategyId, phase) {
+  const strategy = APP.strategies.find(s => s.ID === strategyId);
+  if (!strategy) return [];
+
+  return APP.rules.filter(r =>
+    r.ID_ESTRATEGIA === strategyId &&
+    Number(r.VERSION) === Number(strategy.VERSION) &&
+    r.FASE === phase &&
+    r.ACTIVA === true
+  );
+}
+
+function renderPreChecklist() {
+  const strategyId = getSelectedStrategy();
+  const rules = getRules(strategyId, 'PRE');
+
+  document.getElementById('preChecklist').innerHTML =
+    rules.map(r => `
+      <div class="rule">
+        <input type="checkbox" id="pre_${escapeHtml(r.ID_REGLA)}">
+        <div class="rule-text">
+          ${escapeHtml(r.DESCRIPCION)}
+          ${r.OBLIGATORIA ? '<span class="muted"> · Obligatoria</span>' : ''}
+        </div>
+      </div>
+    `).join('') || '<p class="muted">Esta estrategia no tiene reglas previas.</p>';
+}
+
+function calculate() {
+  const riskPct = Number(document.getElementById('riskPct').value) / 100;
+
+  const data = {
+    capital: Number(document.getElementById('capital').value),
+    entry: Number(document.getElementById('entry').value),
+    stop: Number(document.getElementById('stop').value),
+    rr: Number(document.getElementById('rr').value),
+    riskPct: riskPct,
+    mode: document.getElementById('mode').value
+  };
+
+  callApi('api_calculatePosition', data, result => {
+    APP.lastCalculation = result;
+
+    if (!result.ok) {
+      document.getElementById('calcResult').className = 'status warning';
+      document.getElementById('calcResult').textContent =
+        result.reason + '\nNominal calculado: ' + money(result.notional);
+      return;
+    }
+
+    document.getElementById('calcResult').className = 'status success';
+    document.getElementById('calcResult').textContent =
+      'Cantidad: ' + result.quantity +
+      '\nValor nominal: ' + money(result.notional) +
+      '\nRiesgo estimado: ' + money(result.estimatedRisk) +
+      '\nPresupuesto de riesgo: ' + money(result.riskBudget) +
+      '\nTake Profit: ' + result.takeProfit +
+      '\nBeneficio neto estimado: ' + money(result.netPotential);
+  });
+}
+
+function authorizeTrade() {
+  const strategyId = getSelectedStrategy();
+  const rules = getRules(strategyId, 'PRE');
+  const answers = {};
+
+  rules.forEach(r => {
+    const checkbox = document.getElementById('pre_' + r.ID_REGLA);
+    if (checkbox) answers[r.ID_REGLA] = checkbox.checked;
+  });
+
+  const riskPct = Number(document.getElementById('riskPct').value) / 100;
+
+  const data = {
+    strategyId,
+    symbol: document.getElementById('symbol').value.trim(),
+    direction: 'LONG',
+    capital: Number(document.getElementById('capital').value),
+    entry: Number(document.getElementById('entry').value),
+    stop: Number(document.getElementById('stop').value),
+    rr: Number(document.getElementById('rr').value),
+    riskPct,
+    mode: document.getElementById('mode').value,
+    calculatedRisk: APP.lastCalculation?.estimatedRisk,
+    riskBudget: APP.lastCalculation?.riskBudget,
+    answers
+  };
+
+  if (!APP.lastCalculation || !APP.lastCalculation.ok) {
+    document.getElementById('authorizeResult').className = 'status error';
+    document.getElementById('authorizeResult').textContent =
+      'Primero debes calcular una posición válida.';
+    return;
+  }
+
+  callApi('api_authorizeTrade', data, result => {
+    const box = document.getElementById('authorizeResult');
+
+    if (!result.authorized) {
+      box.className = 'status error';
+      box.textContent = 'OPERACIÓN BLOQUEADA:\n' +
+        result.missing.map(x => '• ' + x).join('\n');
+      return;
+    }
+
+    box.className = 'status success';
+    box.textContent = 'Operación registrada: ' + result.tradeId +
+      '\nCantidad: ' + result.calculation.quantity;
+
+    loadApp();
+    showTab('journal');
+  });
+}
+
+function createStrategy() {
+  const data = {
+    nombre: document.getElementById('newStrategyName').value,
+    timeframe: document.getElementById('newStrategyTimeframe').value
+  };
+
+  callApi('api_createStrategy', data, result => {
+    alert('Estrategia creada: ' + result.id);
+    document.getElementById('newStrategyName').value = '';
+    document.getElementById('newStrategyTimeframe').value = '';
+    loadApp();
+  });
+}
+
+function addRule() {
+  const data = {
+    strategyId: document.getElementById('ruleStrategy').value,
+    fase: document.getElementById('rulePhase').value,
+    descripcion: document.getElementById('ruleDescription').value,
+    obligatoria: document.getElementById('ruleMandatory').checked
+  };
+
+  callApi('api_addRule', data, result => {
+    alert('Regla agregada: ' + result.id);
+    document.getElementById('ruleDescription').value = '';
+    loadApp();
+  });
+}
+
+function renderRules() {
+  const rows = APP.rules.map(r => `
+    <tr>
+      <td>${escapeHtml(r.ID_REGLA)}</td>
+      <td>${escapeHtml(r.FASE)}</td>
+      <td>${escapeHtml(r.DESCRIPCION)}</td>
+      <td>${r.OBLIGATORIA ? 'Sí' : 'No'}</td>
+      <td>${r.ACTIVA ? 'Sí' : 'No'}</td>
+      <td>
+        ${r.ACTIVA
+          ? `<button class="danger" onclick="deactivateRule('${escapeHtml(r.ID_REGLA)}')">Desactivar</button>`
+          : '—'}
+      </td>
+    </tr>
+  `).join('');
+
+  document.getElementById('rulesTable').innerHTML = rows;
+}
+
+function deactivateRule(id) {
+  if (!confirm('¿Desactivar esta regla? La estrategia pasará a una nueva versión.')) return;
+
+  callApi('api_deactivateRule', id, () => {
+    alert('Regla desactivada.');
+    loadApp();
+  });
+}
+
+function renderTrades() {
+  const rows = APP.trades.slice().reverse().map(t => `
+    <tr>
+      <td>${escapeHtml(t.ID)}</td>
+      <td>${t.FECHA_APERTURA ? new Date(t.FECHA_APERTURA).toLocaleString() : ''}</td>
+      <td>${escapeHtml(t.SIMBOLO)}</td>
+      <td>${escapeHtml(t.ENTRADA)}</td>
+      <td>${escapeHtml(t.STOP_LOSS)}</td>
+      <td>${escapeHtml(t.TAKE_PROFIT)}</td>
+      <td>${escapeHtml(t.CANTIDAD)}</td>
+      <td>${escapeHtml(t.ESTADO)}</td>
+      <td>${t.PNL_NETO === '' ? '—' : money(t.PNL_NETO)}</td>
+      <td>
+        <button onclick="openTrade('${escapeHtml(t.ID)}')">Ver</button>
+      </td>
+    </tr>
+  `).join('');
+
+  document.getElementById('tradesTable').innerHTML =
+    rows || '<tr><td colspan="10">Todavía no hay operaciones.</td></tr>';
+}
+
+function openTrade(tradeId) {
+  const trade = APP.trades.find(t => t.ID === tradeId);
+  if (!trade) return;
+
+  document.getElementById('tradeDetail').classList.remove('hidden');
+  document.getElementById('detailTradeId').value = tradeId;
+  document.getElementById('detailTitle').textContent =
+    'Seguimiento · ' + tradeId + ' · ' + trade.ESTADO;
+
+  renderPhaseChecklist(trade, 'DURANTE', 'duringChecklist');
+  renderPhaseChecklist(trade, 'DESPUES', 'postChecklist');
+
+  showTab('journal');
+}
+
+function renderPhaseChecklist(trade, phase, targetId) {
+  const rules = getRules(trade.ESTRATEGIA_ID, phase);
+
+  document.getElementById(targetId).innerHTML =
+    rules.map(r => `
+      <div class="rule">
+        <input type="checkbox" id="${phase}_${escapeHtml(r.ID_REGLA)}">
+        <div class="rule-text">${escapeHtml(r.DESCRIPCION)}</div>
+      </div>
+    `).join('') || '<p class="muted">No hay reglas activas para esta fase.</p>';
+}
+
+function savePhase(phase) {
+  const tradeId = document.getElementById('detailTradeId').value;
+  const trade = APP.trades.find(t => t.ID === tradeId);
+  if (!trade) return;
+
+  const rules = getRules(trade.ESTRATEGIA_ID, phase);
+  const answers = {};
+
+  rules.forEach(r => {
+    const el = document.getElementById(phase + '_' + r.ID_REGLA);
+    if (el) answers[r.ID_REGLA] = el.checked;
+  });
+
+  const notes = {};
+  const noteText = phase === 'DURANTE'
+    ? document.getElementById('duringNotes').value
+    : document.getElementById('postNotes').value;
+
+  rules.forEach(r => notes[r.ID_REGLA] = noteText);
+
+  callApi('api_saveChecklist', {
+    tradeId, fase: phase, answers, notes
+  }, () => alert('Checklist ' + phase + ' guardado.'));
+}
+
+function closeTrade() {
+  const data = {
+    tradeId: document.getElementById('detailTradeId').value,
+    exit: Number(document.getElementById('exitPrice').value),
+    entryFee: Number(document.getElementById('entryFee').value),
+    exitFee: Number(document.getElementById('exitFee').value),
+    notes: document.getElementById('closeNotes').value
+  };
+
+  if (!data.exit || data.exit <= 0) {
+    alert('Introduce un precio de salida válido.');
+    return;
+  }
+
+  if (!confirm('¿Confirmas el cierre y registro de esta operación?')) return;
+
+  callApi('api_closeTrade', data, result => {
+    document.getElementById('closeResult').className = 'status success';
+    document.getElementById('closeResult').textContent =
+      'Operación cerrada.\nPnL bruto: ' + money(result.gross) +
+      '\nPnL neto: ' + money(result.net) +
+      '\nResultado: ' + Number(result.resultR).toFixed(2) + ' R';
+
+    loadApp();
+  });
+}
+
+function renderConfig() {
+  const c = APP.config;
+
+  document.getElementById('cfgCapital').value = c.CAPITAL_USD;
+  document.getElementById('cfgRisk').value = Number(c.RIESGO_REAL_PCT) * 100;
+  document.getElementById('cfgTestRisk').value = Number(c.RIESGO_TEST_PCT) * 100;
+  document.getElementById('cfgFee').value = Number(c.FEE_RATE) * 100;
+  document.getElementById('cfgMin').value = c.MIN_NOTIONAL_USD;
+  document.getElementById('cfgRR').value = c.RR;
+}
+
+function saveConfig() {
+  const data = {
+    CAPITAL_USD: Number(document.getElementById('cfgCapital').value),
+    RIESGO_REAL_PCT: Number(document.getElementById('cfgRisk').value) / 100,
+    RIESGO_TEST_PCT: Number(document.getElementById('cfgTestRisk').value) / 100,
+    FEE_RATE: Number(document.getElementById('cfgFee').value) / 100,
+    MIN_NOTIONAL_USD: Number(document.getElementById('cfgMin').value),
+    RR: Number(document.getElementById('cfgRR').value)
+  };
+
+  callApi('api_saveConfig', data, result => {
+    APP.config = result.config;
+    document.getElementById('configResult').className = 'status success';
+    document.getElementById('configResult').textContent =
+      'Configuración guardada.';
+    renderDashboard();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadApp();
+
+  document.getElementById('strategySelect')
+    .addEventListener('change', renderPreChecklist);
+});
+</script>
+</body>
+</html>
