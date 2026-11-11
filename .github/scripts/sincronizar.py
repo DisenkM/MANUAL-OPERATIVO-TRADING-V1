@@ -9,7 +9,7 @@ SCOPES = ["https://" + "www.googleapis.com" + "/auth/documents"]
 creds = service_account.Credentials.from_service_account_info(creds_json, scopes=SCOPES)
 service = build('docs', 'v1', credentials=creds)
 
-DOC_ID = os.environ['DOC_ID'].strip()
+DOCTRADING_ID = os.environ['DOCTRADING_ID'].strip()
 
 
 # 2. Recopilar el código del repositorio
@@ -65,5 +65,5 @@ requests.append({
 })
 
 # 4. Ejecutar la actualización en Google Docs
-service.documents().batchUpdate(documentId=DOC_ID, body={'requests': requests}).execute()
+service.documents().batchUpdate(documentId=DOCTRADING_ID, body={'requests': requests}).execute()
 print("¡Sincronización con Google Docs completada con éxito!")
