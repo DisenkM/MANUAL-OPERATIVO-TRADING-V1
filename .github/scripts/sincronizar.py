@@ -5,11 +5,12 @@ from googleapiclient.discovery import build
 
 # 1. Autenticación con las credenciales de GitHub Secrets
 creds_json = json.loads(os.environ['GOOGLE_CREDENTIALS'])
-SCOPES = ['https://googleapis.com']
+SCOPES = ["https://" + "www.googleapis.com" + "/auth/documents"]
 creds = service_account.Credentials.from_service_account_info(creds_json, scopes=SCOPES)
 service = build('docs', 'v1', credentials=creds)
 
-DOC_ID = os.environ['DOC_ID']
+DOC_ID = os.environ['DOC_ID'].strip()
+
 
 # 2. Recopilar el código del repositorio
 # Extensiones que quieres incluir (puedes agregar o quitar según tu proyecto)
