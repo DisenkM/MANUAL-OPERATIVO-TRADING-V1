@@ -1,0 +1,29 @@
+name: Sincronizar Código a Google Docs
+
+on:
+  push:
+    branches:
+      - main  # Cambia a 'master' si esa es tu rama principal
+
+jobs:
+  sincronizar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar librerías de Google
+        run: |
+          pip install google-api-python-client google-auth
+
+      - name: Ejecutar script de sincronización
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          DOC_ID: ${{ secrets.DOC_ID }}
+        run: python sincronizar.py
