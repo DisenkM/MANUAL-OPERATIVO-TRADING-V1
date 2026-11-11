@@ -26,4 +26,4 @@ jobs:
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           DOC_ID: ${{ secrets.DOC_ID }}
-                run: | python .github/scripts/sincronizar.py
+        run: python .github/scripts/sincronizar.py
