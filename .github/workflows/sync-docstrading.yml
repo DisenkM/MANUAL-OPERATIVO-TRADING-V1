@@ -25,5 +25,5 @@ jobs:
       - name: Ejecutar script de sincronización
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-          DOC_ID: ${{ secrets.DOC_ID }}
+          DOCTRADING_ID: ${{ secrets.DOCTRADING_ID }}
         run: python .github/scripts/sincronizar.py
