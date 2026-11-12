@@ -1,861 +1,3307 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="tool">
+  <meta name="design-style" content="aurora">
+  <title>Cuaderno del Trader — Consola de Trading y Gestión Cuantitativa</title>
+
+  <!-- Google Fonts: Instrument Sans, Plus Jakarta Sans, Geist Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Instrument+Sans:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons & Chart.js -->
+  <script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+
   <style>
     :root {
-      --bg: #0b1018;
-      --panel: #131c29;
-      --panel2: #192536;
-      --line: #29384c;
-      --text: #e8eef7;
-      --muted: #91a0b5;
-      --green: #27c98b;
-      --red: #f06464;
-      --yellow: #f3bd58;
-      --blue: #6da9ff;
+      color-scheme: dark;
+
+      /* Aurora Dark Theme Base */
+      --background: #0c1214;
+      --surface-container-low: #111a1e;
+      --surface-container: #152024;
+      --surface-container-high: #1c2a30;
+      --surface-container-highest: #23343c;
+
+      /* Text */
+      --on-surface: #edf3f5;
+      --on-surface-variant: #94a8b0;
+      --on-surface-muted: #647d87;
+
+      /* Borders & Dividers */
+      --outline: #38515c;
+      --outline-variant: #213138;
+
+      /* Accents & Signals */
+      --primary: #63c7d6;
+      --on-primary: #081214;
+      --primary-container: #163840;
+      --on-primary-container: #c7f0f7;
+
+      --secondary: #5d7882;
+      --tertiary: #87d69b;
+      --on-tertiary: #081c0e;
+      --tertiary-container: #173822;
+
+      --error: #f27474;
+      --on-error: #1f0808;
+      --error-container: #3d1414;
+
+      --warning: #e8b954;
+      --warning-container: #3b2d10;
+      --on-warning: #1c1404;
+      --positive: #87d69b;
+
+      /* Data series */
+      --data-1: #63c7d6;
+      --data-2: #87d69b;
+      --data-3: #e8b954;
+      --data-4: #f08c70;
+      --data-context: #415861;
+
+      /* Fonts */
+      --font-headline: 'Instrument Sans', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-label: 'Geist Mono', monospace;
+
+      /* Sizing & Radii */
+      --rounded-sm: 0.375rem;
+      --rounded: 0.5rem;
+      --rounded-lg: 0.75rem;
+      --rounded-xl: 1rem;
+      --rounded-full: 9999px;
+
+      /* Spacing Scale (4pt base) */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+
+      /* Typography Scale */
+      --display-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
+      --headline-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+      --subhead-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+      --body-size: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
+      --label-size: 0.75rem;
+
+      /* Aurora Effects */
+      --hairline: 1px solid var(--outline-variant);
+      --hairline-strong: 1px solid var(--outline);
+      --panel-gradient: linear-gradient(180deg, #162226 0%, #111a1e 100%);
+      --card-gradient: linear-gradient(180deg, #18252b 0%, #131c20 100%);
+      --heading-tracking: -0.025em;
+      --label-tracking: 0.06em;
+      --sage-tint: color-mix(in srgb, var(--tertiary) 13%, transparent);
+      --cyan-tint: color-mix(in srgb, var(--primary) 13%, transparent);
+      --error-tint: color-mix(in srgb, var(--error) 13%, transparent);
+      --warning-tint: color-mix(in srgb, var(--warning) 13%, transparent);
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+      --dur-long: 420ms;
     }
 
-    * { box-sizing: border-box; }
-
-    body {
+    /* Base Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
       margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Arial, sans-serif;
+      padding: 0;
+    }
+
+    html, body {
+      overflow-x: clip;
+      background-color: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
 
     header {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--line);
+      position: static !important;
+    }
+
+    .page-container {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xl);
+      min-width: 0;
+    }
+
+    /* Typography Utilities */
+    .title-display {
+      font-family: var(--font-headline);
+      font-size: var(--display-size);
+      font-weight: 700;
+      letter-spacing: var(--heading-tracking);
+      color: var(--on-surface);
+      line-height: 1.15;
+    }
+
+    .title-section {
+      font-family: var(--font-headline);
+      font-size: var(--headline-size);
+      font-weight: 600;
+      letter-spacing: var(--heading-tracking);
+      color: var(--on-surface);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .text-muted {
+      color: var(--on-surface-variant);
+    }
+
+    .data-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      display: block;
+    }
+
+    .mono-num {
+      font-family: var(--font-label);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Panels & Containers */
+    .panel {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+    }
+
+    .panel-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      margin-bottom: var(--space-md);
       flex-wrap: wrap;
+      gap: var(--space-sm);
     }
 
-    h1 { margin: 0; font-size: 21px; }
-    h2 { font-size: 18px; margin-top: 0; }
-    h3 { font-size: 15px; }
+    .well {
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+    }
 
-    .muted { color: var(--muted); font-size: 12px; }
-    .container { padding: 22px; max-width: 1400px; margin: auto; }
+    /* Badges & Chips */
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--rounded);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+    .chip-cyan {
+      background: var(--cyan-tint);
+      color: var(--primary);
+      border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+    }
+    .chip-sage {
+      background: var(--sage-tint);
+      color: var(--tertiary);
+      border: 1px solid color-mix(in srgb, var(--tertiary) 35%, transparent);
+    }
+    .chip-error {
+      background: var(--error-tint);
+      color: var(--error);
+      border: 1px solid color-mix(in srgb, var(--error) 35%, transparent);
+    }
+    .chip-warning {
+      background: var(--warning-tint);
+      color: var(--warning);
+      border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent);
+    }
+    .chip-neutral {
+      background: var(--surface-container-high);
+      color: var(--on-surface-variant);
+      border: var(--hairline);
+    }
 
-    nav {
+    /* Header & Bar */
+    .app-header {
       display: flex;
-      gap: 8px;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-lg);
       flex-wrap: wrap;
-      padding: 12px 22px;
-      border-bottom: 1px solid var(--line);
+      padding-bottom: var(--space-md);
+      border-bottom: var(--hairline);
     }
 
-    button {
-      background: var(--panel2);
-      color: var(--text);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 10px 14px;
+    .app-header-left {
+      max-width: 680px;
+    }
+
+    .app-header-actions {
+      display: flex;
+      gap: var(--space-sm);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* Button Styles */
+    .btn {
+      font-family: var(--font-label);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      border-radius: var(--rounded);
+      padding: 0.45rem 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
       cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-out),
+                  border-color var(--dur-micro) var(--ease-out),
+                  color var(--dur-micro) var(--ease-out);
+      text-decoration: none;
+      border: none;
+      user-select: none;
+    }
+    .btn:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+    .btn-primary:hover {
+      background: color-mix(in srgb, var(--primary) 88%, white);
+    }
+    .btn-secondary {
+      background: var(--surface-container-high);
+      border: var(--hairline);
+      color: var(--on-surface);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-container-highest);
+      border-color: var(--outline);
+    }
+    .btn-sm {
+      padding: 0.25rem 0.55rem;
+      font-size: 0.75rem;
+    }
+    .btn-danger {
+      background: var(--error-tint);
+      color: var(--error);
+      border: 1px solid color-mix(in srgb, var(--error) 40%, transparent);
+    }
+    .btn-danger:hover {
+      background: var(--error);
+      color: var(--on-error);
+    }
+
+    /* KPI Top Bar */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+    .kpi-tile {
+      background: var(--card-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      position: relative;
+    }
+    .kpi-tile::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: var(--rounded-lg);
+      right: var(--rounded-lg);
+      height: 2px;
+      background: var(--outline-variant);
+    }
+    .kpi-tile.active-accent::before {
+      background: var(--primary);
+    }
+    .kpi-tile.active-tertiary::before {
+      background: var(--tertiary);
+    }
+    .kpi-tile.active-warning::before {
+      background: var(--warning);
+    }
+    .kpi-value {
+      font-family: var(--font-headline);
+      font-size: 1.625rem;
+      font-weight: 700;
+      letter-spacing: var(--heading-tracking);
+      color: var(--on-surface);
+      font-variant-numeric: tabular-nums;
+    }
+    .kpi-sub {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    /* Grid Layouts */
+    .layout-split {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .layout-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Tri-Phase Checklist System */
+    .phase-tabs {
+      display: flex;
+      gap: var(--space-xs);
+      background: var(--background);
+      padding: var(--space-xs);
+      border-radius: var(--rounded);
+      border: var(--hairline);
+      margin-bottom: var(--space-md);
+      overflow-x: auto;
+    }
+    .phase-tab-btn {
+      flex: 1;
+      min-width: 160px;
+      padding: var(--space-sm) var(--space-md);
+      background: transparent;
+      border: none;
+      border-radius: var(--rounded-sm);
+      color: var(--on-surface-variant);
+      font-family: var(--font-label);
+      font-size: 0.8125rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+    }
+    .phase-tab-btn:hover {
+      color: var(--on-surface);
+      background: var(--surface-container-low);
+    }
+    .phase-tab-btn.active {
+      background: var(--surface-container-high);
+      color: var(--primary);
       font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .phase-tab-btn.completed {
+      color: var(--tertiary);
     }
 
-    button:hover { border-color: var(--blue); }
-    button.primary { background: #245b9e; border-color: #397ac8; }
-    button.danger { background: #542b35; border-color: #80414e; }
-    button:disabled { opacity: .45; cursor: not-allowed; }
+    .checklist-container {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
 
-    .tab { display: none; }
-    .tab.active { display: block; }
+    .checklist-card {
+      background: var(--surface-container);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+      transition: border-color var(--dur-micro) var(--ease-out);
+    }
+    .checklist-card.checked {
+      border-color: color-mix(in srgb, var(--tertiary) 45%, transparent);
+      background: color-mix(in srgb, var(--surface-container) 95%, var(--tertiary) 5%);
+    }
 
-    .grid {
+    .check-header {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      cursor: pointer;
+    }
+
+    .custom-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 1.5px solid var(--outline);
+      background: var(--background);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+      cursor: pointer;
+      transition: background-color var(--dur-micro), border-color var(--dur-micro);
+    }
+    .checklist-card.checked .custom-checkbox {
+      background: var(--tertiary);
+      border-color: var(--tertiary);
+      color: var(--on-tertiary);
+    }
+
+    .check-title {
+      font-weight: 600;
+      font-size: 0.9375rem;
+      color: var(--on-surface);
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+    .checklist-card.checked .check-title {
+      color: var(--tertiary);
+    }
+
+    .check-desc {
+      font-size: 0.84rem;
+      color: var(--on-surface-variant);
+      margin-top: var(--space-xs);
+      line-height: 1.45;
+    }
+
+    .check-interactive {
+      margin-top: var(--space-sm);
+      padding-top: var(--space-sm);
+      border-top: 1px dashed var(--outline-variant);
+    }
+
+    /* Forms & Inputs */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .field-row {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: var(--space-sm);
     }
-
-    .two {
+    .field-row-3 {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-sm);
     }
-
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 18px;
-      margin-bottom: 14px;
-    }
-
-    .metric {
-      font-size: 25px;
-      font-weight: bold;
-      margin-top: 8px;
+    @media (max-width: 600px) {
+      .field-row-3 {
+        grid-template-columns: 1fr;
+      }
     }
 
     label {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-      margin: 12px 0 6px;
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: var(--label-tracking);
+      color: var(--on-surface-variant);
+      text-transform: uppercase;
+      font-weight: 500;
     }
 
     input, select, textarea {
+      font-family: var(--font-label);
+      font-size: 0.875rem;
+      background: var(--background);
+      border: var(--hairline-strong);
+      border-radius: var(--rounded);
+      color: var(--on-surface);
+      padding: 0.5rem 0.75rem;
       width: 100%;
-      background: #0c1420;
-      border: 1px solid var(--line);
-      color: var(--text);
-      padding: 11px;
-      border-radius: 7px;
       outline: none;
+      transition: border-color var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out);
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--cyan-tint);
+    }
+    input[type="number"] {
+      font-variant-numeric: tabular-nums;
     }
 
-    textarea { min-height: 75px; resize: vertical; }
-
-    .field-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .rule {
+    /* Direction Radio Toggle */
+    .direction-toggle {
       display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--line);
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: 2px;
+      gap: 2px;
+    }
+    .dir-btn {
+      flex: 1;
+      padding: 0.4rem;
+      border: none;
+      background: transparent;
+      color: var(--on-surface-variant);
+      font-family: var(--font-label);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      border-radius: var(--rounded-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      transition: background-color var(--dur-micro), color var(--dur-micro);
+    }
+    .dir-btn.active.long {
+      background: var(--tertiary-container);
+      color: var(--tertiary);
+    }
+    .dir-btn.active.short {
+      background: var(--error-container);
+      color: var(--error);
     }
 
-    .rule input { width: auto; margin-top: 3px; }
-    .rule-text { flex: 1; font-size: 13px; line-height: 1.4; }
-
-    .status {
-      padding: 12px;
-      border-radius: 8px;
-      margin: 12px 0;
-      background: var(--panel2);
-      border: 1px solid var(--line);
-      white-space: pre-wrap;
-      font-size: 13px;
+    /* Position Sizing Output Cards */
+    .outputs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+    }
+    .out-card {
+      background: var(--surface-container-high);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-sm) var(--space-md);
+      display: flex;
+      flex-direction: column;
+    }
+    .out-card-hero {
+      grid-column: span 2;
+      background: linear-gradient(135deg, var(--surface-container-high) 0%, var(--primary-container) 100%);
+      border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+      padding: var(--space-md);
+    }
+    .out-title {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .out-value {
+      font-family: var(--font-headline);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--on-surface);
+      font-variant-numeric: tabular-nums;
+    }
+    .out-sub {
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      color: var(--on-surface-muted);
+      margin-top: 2px;
     }
 
-    .success { border-color: var(--green); }
-    .error { border-color: var(--red); }
-    .warning { border-color: var(--yellow); }
+    /* Math & Statistics Section */
+    .math-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+    }
+    .math-card {
+      background: var(--surface-container);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .formula-tag {
+      font-family: var(--font-label);
+      font-size: 0.7rem;
+      background: var(--background);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      color: var(--primary);
+      width: fit-content;
+      margin-bottom: 4px;
+    }
 
-    .positive { color: var(--green); }
-    .negative { color: var(--red); }
+    /* Candlestick Pattern Catalog Modal/Drawer/Grid */
+    .patterns-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: var(--space-sm);
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: var(--space-xs);
+    }
+    .pattern-card {
+      background: var(--surface-container);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-sm) var(--space-md);
+      cursor: pointer;
+      transition: border-color var(--dur-micro), transform var(--dur-micro);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .pattern-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+    .pattern-card.selected {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--surface-container) 90%, var(--primary) 10%);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
 
+    .pattern-preview-box {
+      background: var(--background);
+      border-radius: var(--rounded-sm);
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+    }
+
+    /* Journal Table */
+    .table-responsive {
+      overflow-x: auto;
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      background: var(--surface-container-low);
+    }
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
-    }
-
-    th, td {
       text-align: left;
-      padding: 10px 8px;
-      border-bottom: 1px solid var(--line);
+      font-size: 0.8125rem;
+    }
+    th {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 500;
+      color: var(--on-surface-variant);
+      text-transform: uppercase;
+      padding: 0.65rem 0.85rem;
+      border-bottom: var(--hairline-strong);
+      background: var(--surface-container);
+      white-space: nowrap;
+    }
+    td {
+      padding: 0.65rem 0.85rem;
+      border-bottom: var(--hairline);
+      color: var(--on-surface);
+      font-variant-numeric: tabular-nums;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:hover td {
+      background: var(--surface-container-high);
     }
 
-    th { color: var(--muted); }
+    /* Progress bar */
+    .progress-bar-container {
+      background: var(--background);
+      height: 6px;
+      border-radius: var(--rounded-full);
+      overflow: hidden;
+      margin: var(--space-xs) 0;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: var(--rounded-full);
+      transition: width var(--dur-short) var(--ease-out);
+    }
+    .progress-bar-fill.complete {
+      background: var(--tertiary);
+    }
 
-    .table-wrap { overflow-x: auto; }
-    .hidden { display: none !important; }
-    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+    /* Chart Container */
+    .chart-box {
+      min-height: 240px;
+      height: 240px;
+      position: relative;
+      margin-top: var(--space-md);
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-sm);
+    }
 
-    @media(max-width: 800px) {
-      .grid, .two, .field-row { grid-template-columns: 1fr; }
-      .container { padding: 14px; }
+    /* Tabs Bar for Main Workspace */
+    .nav-tabs {
+      display: flex;
+      gap: var(--space-xs);
+      border-bottom: var(--hairline);
+      padding-bottom: var(--space-xs);
+      flex-wrap: wrap;
+    }
+    .nav-tab {
+      background: transparent;
+      border: none;
+      color: var(--on-surface-variant);
+      font-family: var(--font-headline);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: var(--rounded);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background-color var(--dur-micro), color var(--dur-micro);
+    }
+    .nav-tab:hover {
+      color: var(--on-surface);
+      background: var(--surface-container);
+    }
+    .nav-tab.active {
+      color: var(--primary);
+      background: var(--primary-container);
+    }
+
+    /* Accordion / Details Drawer */
+    details summary {
+      cursor: pointer;
+      user-select: none;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-sm) 0;
+      color: var(--primary);
+      font-family: var(--font-label);
+      font-size: 0.8125rem;
+    }
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    /* Modal for Quick Close Trade */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(8, 14, 16, 0.8);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: var(--space-md);
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-card {
+      background: var(--panel-gradient);
+      border: var(--hairline-strong);
+      border-radius: var(--rounded-lg);
+      width: 100%;
+      max-width: 480px;
+      padding: var(--space-lg);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.5);
+    }
+
+    /* Utility */
+    .text-tertiary { color: var(--tertiary); }
+    .text-error { color: var(--error); }
+    .text-primary { color: var(--primary); }
+    .text-warning { color: var(--warning); }
+    .flex-center { display: flex; align-items: center; }
+    .gap-xs { gap: var(--space-xs); }
+    .gap-sm { gap: var(--space-sm); }
+    .gap-md { gap: var(--space-md); }
+    .mt-xs { margin-top: var(--space-xs); }
+    .mt-sm { margin-top: var(--space-sm); }
+    .mt-md { margin-top: var(--space-md); }
+
+    /* Print / Responsive adjustments */
+    @media (max-width: 640px) {
+      .page-container {
+        padding: var(--space-sm);
+        gap: var(--space-lg);
+      }
+      .panel {
+        padding: var(--space-md);
+      }
+      .outputs-grid {
+        grid-template-columns: 1fr;
+      }
+      .out-card-hero {
+        grid-column: span 1;
+      }
+    }
+
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
     }
   </style>
 </head>
-
 <body>
-<header>
-  <div>
-    <h1>CUADERNO DEL TRADER <span class="muted">V5.3 MVP</span></h1>
-    <div class="muted">Registro, disciplina y control de riesgo</div>
-  </div>
-  <div class="muted" id="connection">Conectando...</div>
-</header>
 
-<nav>
-  <button onclick="showTab('dashboard')">Resumen</button>
-  <button onclick="showTab('newTrade')">Nueva operación</button>
-  <button onclick="showTab('strategies')">Estrategias y reglas</button>
-  <button onclick="showTab('journal')">Diario</button>
-  <button onclick="showTab('settings')">Configuración</button>
-</nav>
+<div class="page-container">
 
-<main class="container">
-
-  <!-- DASHBOARD -->
-  <section id="dashboard" class="tab active">
-    <h2>Resumen de actividad</h2>
-
-    <div class="grid">
-      <div class="card">
-        <div class="muted">Capital de referencia</div>
-        <div class="metric" id="capitalMetric">—</div>
+  <!-- ==================== HEADER ==================== -->
+  <header class="app-header">
+    <div class="app-header-left">
+      <div class="flex-center gap-sm">
+        <span class="status-chip chip-cyan">PROTOCOLO CUANTITATIVO</span>
+        <span class="data-label" id="currentSessionLabel">SISTEMA ACTIVO</span>
       </div>
-      <div class="card">
-        <div class="muted">Operaciones registradas</div>
-        <div class="metric" id="tradesMetric">0</div>
-      </div>
-      <div class="card">
-        <div class="muted">Resultado neto cerrado</div>
-        <div class="metric" id="pnlMetric">$0.00</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>Estado del sistema</h3>
-      <p class="muted">
-        El sistema registra operaciones y verifica reglas.
-        No ejecuta órdenes ni consulta precios en tiempo real.
+      <h1 class="title-display mt-xs">Cuaderno del Trader</h1>
+      <p class="text-muted mt-xs">
+        Panel unificado de protocolo tri-fase (Pre, Durante y Post-Mercado), gestión matemática de riesgo y analítica de expectativa estadística en R-múltiplos.
       </p>
-      <div id="dashboardStatus" class="status">Cargando información...</div>
-    </div>
-  </section>
-
-  <!-- NUEVA OPERACIÓN -->
-  <section id="newTrade" class="tab">
-    <h2>Nueva operación</h2>
-
-    <div class="card">
-      <h3>1. Parámetros de la operación</h3>
-
-      <div class="field-row">
-        <div>
-          <label>Estrategia</label>
-          <select id="strategySelect"></select>
-        </div>
-        <div>
-          <label>Par</label>
-          <input id="symbol" value="BTCUSDT">
-        </div>
-      </div>
-
-      <div class="field-row">
-        <div>
-          <label>Capital USD</label>
-          <input id="capital" type="number" value="80" step="0.01">
-        </div>
-        <div>
-          <label>Riesgo (%)</label>
-          <input id="riskPct" type="number" value="0.5" step="0.1">
-        </div>
-      </div>
-
-      <div class="field-row">
-        <div>
-          <label>Precio de entrada</label>
-          <input id="entry" type="number" step="0.00000001">
-        </div>
-        <div>
-          <label>Stop Loss</label>
-          <input id="stop" type="number" step="0.00000001">
-        </div>
-      </div>
-
-      <div class="field-row">
-        <div>
-          <label>Relación riesgo/beneficio</label>
-          <input id="rr" type="number" value="2" step="0.1">
-        </div>
-        <div>
-          <label>Modalidad</label>
-          <select id="mode">
-            <option value="REAL">Real (límite 0,5%)</option>
-            <option value="TEST">Prueba (límite 1%)</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="primary" onclick="calculate()">Calcular posición</button>
-      </div>
-
-      <div id="calcResult" class="status">Introduce los datos y calcula.</div>
     </div>
 
-    <div class="card">
-      <h3>2. Checklist previo</h3>
-      <p class="muted">
-        Todas las reglas obligatorias deben cumplirse.
-        Una respuesta negativa bloquea la autorización.
-      </p>
-      <div id="preChecklist"></div>
-      <div class="actions">
-        <button class="primary" onclick="authorizeTrade()">Validar y registrar operación</button>
+    <div class="app-header-actions">
+      <button class="btn btn-secondary" onclick="exportJournalCSV()" title="Descargar bitácora en formato CSV">
+        <i data-lucide="download" style="width:15px; height:15px;"></i>
+        Exportar CSV
+      </button>
+      <button class="btn btn-secondary" onclick="resetToSampleData()" title="Recargar datos de muestra verídicos">
+        <i data-lucide="rotate-ccw" style="width:15px; height:15px;"></i>
+        Datos Demo
+      </button>
+      <button class="btn btn-primary" onclick="saveActiveAppState()" title="Guardar estado de trabajo">
+        <i data-lucide="save" style="width:15px; height:15px;"></i>
+        Guardar Sesión
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== TOP KPI STRIP ==================== -->
+  <section class="kpi-strip" aria-label="Métricas Clave de la Cuenta">
+    <div class="kpi-tile active-accent">
+      <span class="data-label">Capital de Cuenta</span>
+      <div class="kpi-value" id="kpiBalance">$10,000.00</div>
+      <div class="kpi-sub">
+        <span>Riesgo Base:</span>
+        <span class="mono-num text-primary" id="kpiRiskPct">1.0% ($100)</span>
       </div>
-      <div id="authorizeResult" class="status">
-        La operación todavía no está autorizada.
+    </div>
+
+    <div class="kpi-tile active-tertiary">
+      <span class="data-label">Esperanza Matemática (E)</span>
+      <div class="kpi-value text-tertiary" id="kpiExpectancyR">+0.68 R</div>
+      <div class="kpi-sub" id="kpiExpectancyUSDSub">
+        <span class="status-chip chip-sage" style="padding:1px 6px;">Edge Positivo</span>
+        <span class="mono-num" id="kpiExpectancyUSD">+$68.00 / trade</span>
+      </div>
+    </div>
+
+    <div class="kpi-tile">
+      <span class="data-label">Tasa de Acierto (Win Rate)</span>
+      <div class="kpi-value" id="kpiWinRate">55.0%</div>
+      <div class="kpi-sub">
+        <span id="kpiWinLossRatio">11W - 9L (20 trades)</span>
+      </div>
+    </div>
+
+    <div class="kpi-tile active-warning">
+      <span class="data-label">Payoff Ratio (W/L) & Kelly</span>
+      <div class="kpi-value" id="kpiPayoff">2.05 : 1</div>
+      <div class="kpi-sub">
+        <span>Kelly Óptimo:</span>
+        <span class="mono-num text-warning" id="kpiKelly">33.1% (1/4 K: 8.3%)</span>
+      </div>
+    </div>
+
+    <div class="kpi-tile">
+      <span class="data-label">R Acumulado / P&L Total</span>
+      <div class="kpi-value text-tertiary" id="kpiTotalR">+13.60 R</div>
+      <div class="kpi-sub">
+        <span class="mono-num text-tertiary" id="kpiTotalPnL">+$1,360.00</span>
+        <span class="text-muted">(PF: <span id="kpiProfitFactor">2.51</span>)</span>
       </div>
     </div>
   </section>
 
-  <!-- ESTRATEGIAS -->
-  <section id="strategies" class="tab">
-    <h2>Estrategias y reglas</h2>
+  <!-- ==================== MAIN TABS NAVIGATION ==================== -->
+  <nav class="nav-tabs" aria-label="Secciones del Cuaderno">
+    <button class="nav-tab active" id="tabBtnProtocol" onclick="switchMainTab('protocol')">
+      <i data-lucide="check-square" style="width:16px; height:16px;"></i>
+      1. Protocolo Tri-Fase
+    </button>
+    <button class="nav-tab" id="tabBtnPosition" onclick="switchMainTab('position')">
+      <i data-lucide="calculator" style="width:16px; height:16px;"></i>
+      2. Calculadora & Inserción de Posición
+    </button>
+    <button class="nav-tab" id="tabBtnAnalytics" onclick="switchMainTab('analytics')">
+      <i data-lucide="line-chart" style="width:16px; height:16px;"></i>
+      3. Analítica Cuantitativa & Curva R
+    </button>
+    <button class="nav-tab" id="tabBtnJournal" onclick="switchMainTab('journal')">
+      <i data-lucide="book-open" style="width:16px; height:16px;"></i>
+      4. Bitácora de Operaciones (Journal)
+    </button>
+    <button class="nav-tab" id="tabBtnPatterns" onclick="switchMainTab('patterns')">
+      <i data-lucide="candlestick-chart" style="width:16px; height:16px;"></i>
+      5. Catálogo 18 Patrones de Velas
+    </button>
+  </nav>
 
-    <div class="card">
-      <h3>Crear estrategia</h3>
-      <label>Nombre</label>
-      <input id="newStrategyName" placeholder="Nombre de la estrategia">
-      <label>Temporalidad</label>
-      <input id="newStrategyTimeframe" placeholder="Ej. M15">
-      <div class="actions">
-        <button class="primary" onclick="createStrategy()">Crear estrategia</button>
+  <!-- ==================== SECTION 1: PROTOCOLO TRI-FASE ==================== -->
+  <section id="sectionProtocol" class="panel">
+    <div class="panel-header">
+      <div>
+        <h2 class="title-section">
+          <i data-lucide="shield-check" class="text-primary" style="width:20px; height:20px;"></i>
+          Panel de Checklist Tri-Fase: Pre, Durante y Post Sesión
+        </h2>
+        <p class="text-muted" style="font-size:0.875rem;">
+          Estructura basada en la Regla de las 3 Ms (Mente, Money, Método) y la disciplina pre-vuelo de ejecución profesional.
+        </p>
+      </div>
+
+      <div class="flex-center gap-sm">
+        <span class="data-label">Progreso Global:</span>
+        <span class="status-chip chip-cyan" id="phaseGlobalBadge">0 / 15 Reglas Cumplidas</span>
       </div>
     </div>
 
-    <div class="card">
-      <h3>Agregar regla</h3>
-      <label>Estrategia</label>
-      <select id="ruleStrategy"></select>
+    <!-- Phase Selector Buttons -->
+    <div class="phase-tabs" role="tablist">
+      <button class="phase-tab-btn active" id="phaseBtn1" onclick="switchPhase('pre')">
+        <i data-lucide="sunrise" style="width:15px; height:15px;"></i>
+        Fase 1: Pre-Mercado (<span id="countPre">0/4</span>)
+      </button>
+      <button class="phase-tab-btn" id="phaseBtn2" onclick="switchPhase('during')">
+        <i data-lucide="activity" style="width:15px; height:15px;"></i>
+        Fase 2: Durante Sesión (<span id="countDuring">0/7</span>)
+      </button>
+      <button class="phase-tab-btn" id="phaseBtn3" onclick="switchPhase('post')">
+        <i data-lucide="sunset" style="width:15px; height:15px;"></i>
+        Fase 3: Post-Mercado (<span id="countPost">0/4</span>)
+      </button>
+    </div>
 
-      <label>Fase</label>
-      <select id="rulePhase">
-        <option value="PRE">Antes de operar</option>
-        <option value="DURANTE">Durante la operación</option>
-        <option value="DESPUES">Después de la operación</option>
+    <!-- Phase 1: Pre-Mercado Container -->
+    <div id="phasePreContainer" class="checklist-container">
+      <div class="checklist-card" id="card_pre_1">
+        <div class="check-header" onclick="toggleCheck('pre_1')">
+          <div class="custom-checkbox" id="box_pre_1">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>1.1 Calendario Económico & Eventos de Alto Impacto (Minutos 1–5)</span>
+              <span class="status-chip chip-warning">Requerido</span>
+            </div>
+            <div class="check-desc">
+              Revisar NFP, FOMC, IPC, decisiones de tasas o comparecencias de bancos centrales. Si hay un evento durante tu sesión, decide antes de abrir el gráfico si operas antes, después o te abstienes. Nunca decidas con el precio moviéndose.
+            </div>
+          </div>
+        </div>
+        <div class="check-interactive">
+          <div class="field-row">
+            <div>
+              <label>Eventos Detectados Hoy</label>
+              <input type="text" id="inputPreNews" placeholder="Ej: Sin noticias rojas / IPC a las 08:30 EST" onchange="autoSaveRoutine()">
+            </div>
+            <div>
+              <label>Política Operativa de la Sesión</label>
+              <select id="selectPreNewsAction" onchange="autoSaveRoutine()">
+                <option value="clear">Mercado despejado: Operativa normal</option>
+                <option value="wait">Pausa 30 min antes y después de noticia</option>
+                <option value="standoff">No operar este activo hoy (Risk-Off)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card" id="card_pre_2">
+        <div class="check-header" onclick="toggleCheck('pre_2')">
+          <div class="custom-checkbox" id="box_pre_2">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>1.2 Mapeo de Niveles Clave & Liquidez Institucional (Minutos 6–14)</span>
+            </div>
+            <div class="check-desc">
+              Elegir máximo 2 o 3 activos. Trazar soportes, resistencias mayores, rango del día anterior (PDH / PDL) y el rango asiático (High/Low) para anticipar barridos de liquidez y trampas antes de Londres o Nueva York.
+            </div>
+          </div>
+        </div>
+        <div class="check-interactive">
+          <label>Niveles y Zonas Clave Marcadas</label>
+          <input type="text" id="inputPreLevels" placeholder="Ej: ETH $2,411 soporte validado; XAUUSD High asiático en $2,680; NQ rango 20,800-21,050" onchange="autoSaveRoutine()">
+        </div>
+      </div>
+
+      <div class="checklist-card" id="card_pre_3">
+        <div class="check-header" onclick="toggleCheck('pre_3')">
+          <div class="custom-checkbox" id="box_pre_3">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>1.3 Bias Direccional del Día en Una Sola Frase (Minutos 15–20)</span>
+            </div>
+            <div class="check-desc">
+              Define en una línea: ¿Alcista, bajista o neutral? ¿Por qué? Si no puedes justificarlo en una sola frase concisa, el mercado no tiene setup claro para ti hoy: no operar también es una decisión profesional válida.
+            </div>
+          </div>
+        </div>
+        <div class="check-interactive">
+          <div class="field-row">
+            <div>
+              <label>Sesgo (Bias)</label>
+              <select id="selectPreBias" onchange="updateBiasIndicator(); autoSaveRoutine();">
+                <option value="Alcista">Alcista (Buscar compras en soportes / retrocesos)</option>
+                <option value="Bajista">Bajista (Buscar ventas tras toma de liquidez)</option>
+                <option value="Neutral">Neutral / Rango (Esperar confirmación de ruptura)</option>
+                <option value="RiskOff">Risk-Off (Mercado errático, sin ventaja clara)</option>
+              </select>
+            </div>
+            <div>
+              <label>Tesis Sintética (1 línea)</label>
+              <input type="text" id="inputPreThesis" placeholder="Ej: Alcista tras barrido de mínimo asiático y rechazo con martillo en H1" onchange="autoSaveRoutine()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card" id="card_pre_4">
+        <div class="check-header" onclick="toggleCheck('pre_4')">
+          <div class="custom-checkbox" id="box_pre_4">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>1.4 Filtro de Psicotrading & Condición Mental (La Regla de la Mente)</span>
+            </div>
+            <div class="check-desc">
+              Confirmar descanso óptimo, ausencia de necesidad urgente de revancha, cero euforia por racha previa y total aceptación de que el resultado de cada trade individual es incierto e independiente.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2: Durante la Sesión Container -->
+    <div id="phaseDuringContainer" class="checklist-container" style="display:none;">
+      <div class="checklist-card" id="card_dur_1">
+        <div class="check-header" onclick="toggleCheck('dur_1')">
+          <div class="custom-checkbox" id="box_dur_1">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>2.1 Regla del Setup: Entrada 100% Alineada al Manual Operativo</span>
+            </div>
+            <div class="check-desc">
+              El trade responde a un patrón estadístico probado (Ruptura con retest, retroceso OTE Fibonacci, o barrido de liquidez). Cero operaciones por aburrimiento o FOMO al ver una vela verde rápida.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card" id="card_dur_2">
+        <div class="check-header" onclick="toggleCheck('dur_2')">
+          <div class="custom-checkbox" id="box_dur_2">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>2.2 Confirmación de Acción del Precio (Patrón de Vela Japonesa)</span>
+            </div>
+            <div class="check-desc">
+              Verificar gatillo con uno de los 18 patrones de velas reconocidos (ej. Envolvente, Martillo, Estrella del Amanecer/Atardecer, Harami o Doji de rechazo). Esperar siempre el cierre de la vela en la temporalidad operativa.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card" id="card_dur_3">
+        <div class="check-header" onclick="toggleCheck('dur_3')">
+          <div class="custom-checkbox" id="box_dur_3">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>2.3 Verificación Matemática de Ratio Riesgo:Beneficio (R:R ≥ 1:1.5)</span>
+              <span class="status-chip chip-cyan">Filtro R</span>
+            </div>
+            <div class="check-desc">
+              El objetivo técnico (TP) debe ofrecer al menos 1.5 a 2 veces la distancia al Stop Loss antes de encontrarse con una resistencia o soporte estructural mayor. Si el R:R es menor a 1.5, se descarta la operación.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card" id="card_dur_4">
+        <div class="check-header" onclick="toggleCheck('dur_4')">
+          <div class="custom-checkbox" id="box_dur_4">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>2.4 Dimensionamiento Estricto de Posición (Riesgo Fijo 1% a 2%)</span>
+              <span class="status-chip chip-warning">Regla Money</span>
+            </div>
+            <div class="check-desc">
+              El tamaño en lotes/unidades debe calcularse a partir del Stop Loss técnico, nunca al revés. El monto total en riesgo debe ser exactamente igual o inferior a tu límite predefinido por trade.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card" id="card_dur_5">
+        <div class="check-header" onclick="toggleCheck('dur_5')">
+          <div class="custom-checkbox" id="box_dur_5">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>2.5 Órdenes Duras en Broker: Stop Loss & Take Profit Inmediatos</span>
+            </div>
+            <div class="check-desc">
+              La orden se envía con Stop Loss y Take Profit fijos colocados en la plataforma del broker al momento de la ejecución. Jamás se opera con "Stop Loss mental".
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card" id="card_dur_6">
+        <div class="check-header" onclick="toggleCheck('dur_6')">
+          <div class="custom-checkbox" id="box_dur_6">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>2.6 Regla Inquebrantable: Prohibido Mover el Stop Loss en Contra</span>
+              <span class="status-chip chip-error">Anti-Quiebra</span>
+            </div>
+            <div class="check-desc">
+              Bajo ninguna circunstancia se amplía la distancia del Stop Loss para darle "más aire" al mercado. Si el precio alcanza el stop, la hipótesis inicial quedó invalidada y se asume la pérdida planificada (1R).
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card" id="card_dur_7">
+        <div class="check-header" onclick="toggleCheck('dur_7')">
+          <div class="custom-checkbox" id="box_dur_7">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>2.7 Límite de Frecuencia Operativa (Máximo 2 a 3 Trades por Sesión)</span>
+            </div>
+            <div class="check-desc">
+              Control de sobreoperativa. Tras alcanzar el límite de operaciones o 2 pérdidas consecutivas, la sesión concluye inmediatamente sin importar qué oportunidades parezca ofrecer el mercado.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 3: Post-Mercado Container -->
+    <div id="phasePostContainer" class="checklist-container" style="display:none;">
+      <div class="checklist-card" id="card_post_1">
+        <div class="check-header" onclick="toggleCheck('post_1')">
+          <div class="custom-checkbox" id="box_post_1">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>3.1 Registro Completo en el Journal sin Modificar la Realidad</span>
+            </div>
+            <div class="check-desc">
+              Anotar cada trade ejecutado con su activo, dirección, precio de entrada, stop loss, salida real, resultado en R y en dólares. Registrar los errores con la misma honestidad que los aciertos.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card" id="card_post_2">
+        <div class="check-header" onclick="toggleCheck('post_2')">
+          <div class="custom-checkbox" id="box_post_2">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>3.2 Evaluación de Ejecución en R-Múltiplos (Enfoque de Proceso)</span>
+            </div>
+            <div class="check-desc">
+              Evaluar el desempeño en R y no en dólares. ¿Se siguió el plan? Un trade perdedor de -1R que respetó todas las reglas es un trade de ejecución perfecta; un trade ganador por azar fuera del plan es un error de sistema.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card" id="card_post_3">
+        <div class="check-header" onclick="toggleCheck('post_3')">
+          <div class="custom-checkbox" id="box_post_3">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>3.3 La Regla del Aprendizaje: 1 Acierto y 1 Aspecto por Pulir</span>
+            </div>
+            <div class="check-desc">
+              Identificar con precisión quirúrgica una sola cosa bien hecha (ej. paciencia al esperar el retest) y una sola cosa a corregir (ej. cierre prematuro por ansiedad). La especificidad genera maestría.
+            </div>
+          </div>
+        </div>
+        <div class="check-interactive">
+          <div class="field-row">
+            <div>
+              <label>1 Acierto Técnico o Emocional</label>
+              <input type="text" id="inputPostGood" placeholder="Ej: Esperé confirmación en H1 sin perseguir la mecha" onchange="autoSaveRoutine()">
+            </div>
+            <div>
+              <label>1 Error o Aspecto a Perfeccionar</label>
+              <input type="text" id="inputPostImprove" placeholder="Ej: No mirar el PnL flotante durante el trade" onchange="autoSaveRoutine()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card" id="card_post_4">
+        <div class="check-header" onclick="toggleCheck('post_4')">
+          <div class="custom-checkbox" id="box_post_4">
+            <i data-lucide="check" style="width:13px; height:13px; display:none;"></i>
+          </div>
+          <div>
+            <div class="check-title">
+              <span>3.4 Apagar Pantallas & Desconexión Cognitiva Total</span>
+            </div>
+            <div class="check-desc">
+              Una vez concluida la bitácora, cerrar plataformas de trading y redes sociales. El mercado siempre tendrá fluctuaciones; tu jornada operativa ha finalizado exitosamente.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SECTION 2: POSITION SIZING CALCULATOR ==================== -->
+  <section id="sectionPosition" class="panel" style="display:none;">
+    <div class="panel-header">
+      <div>
+        <h2 class="title-section">
+          <i data-lucide="calculator" class="text-primary" style="width:20px; height:20px;"></i>
+          Calculadora de Posición & Evaluador de Viabilidad
+        </h2>
+        <p class="text-muted" style="font-size:0.875rem;">
+          Dimensionamiento paramétrico exacto basado en Stop Loss, control de riesgo por operación y ratio R:R antes de enviar órdenes al mercado.
+        </p>
+      </div>
+
+      <div class="flex-center gap-xs">
+        <span class="data-label">Presets Rápidos:</span>
+        <button class="btn btn-secondary btn-sm" onclick="loadPreset('ETH')">ETH/USDT</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadPreset('BTC')">BTC/USDT</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadPreset('XAU')">XAU/USD</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadPreset('NQ')">NQ E-mini</button>
+      </div>
+    </div>
+
+    <div class="layout-split">
+      <!-- Input Form Column -->
+      <div class="well">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-sm);">
+          <span class="data-label">Parámetros de Entrada</span>
+          <span class="status-chip chip-cyan" id="calcModeBadge">Modo % Fijo</span>
+        </div>
+
+        <div class="field-row" style="margin-bottom:var(--space-sm);">
+          <div class="field-group">
+            <label for="posSymbol">Par / Activo</label>
+            <input type="text" id="posSymbol" value="ETHUSDT" oninput="recalcPosition()">
+          </div>
+          <div class="field-group">
+            <label>Dirección</label>
+            <div class="direction-toggle">
+              <button type="button" class="dir-btn active long" id="btnDirLong" onclick="setDirection('LONG')">
+                <i data-lucide="trending-up" style="width:14px; height:14px;"></i>
+                LONG
+              </button>
+              <button type="button" class="dir-btn short" id="btnDirShort" onclick="setDirection('SHORT')">
+                <i data-lucide="trending-down" style="width:14px; height:14px;"></i>
+                SHORT
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-row" style="margin-bottom:var(--space-sm);">
+          <div class="field-group">
+            <label for="posAccountBalance">Capital de Cuenta ($ USD)</label>
+            <input type="number" id="posAccountBalance" value="10000" step="100" min="10" oninput="recalcPosition()">
+          </div>
+          <div class="field-group">
+            <label for="posRiskPct">Riesgo por Trade (%)</label>
+            <input type="number" id="posRiskPct" value="1.0" step="0.1" min="0.1" max="10" oninput="recalcPosition()">
+          </div>
+        </div>
+
+        <div class="field-row-3" style="margin-bottom:var(--space-sm);">
+          <div class="field-group">
+            <label for="posEntry">Precio Entrada ($)</label>
+            <input type="number" id="posEntry" value="2411.66" step="0.01" oninput="recalcPosition()">
+          </div>
+          <div class="field-group">
+            <label for="posStopLoss">Stop Loss ($)</label>
+            <input type="number" id="posStopLoss" value="2100.00" step="0.01" oninput="recalcPosition()">
+          </div>
+          <div class="field-group">
+            <label for="posTakeProfit">Take Profit ($)</label>
+            <input type="number" id="posTakeProfit" value="2875.00" step="0.01" oninput="recalcPosition()">
+          </div>
+        </div>
+
+        <div class="field-row" style="margin-bottom:var(--space-sm);">
+          <div class="field-group">
+            <label for="posStrategy">Estrategia</label>
+            <select id="posStrategy" onchange="recalcPosition()">
+              <option value="Reversión por Vela Clave">Reversión por Vela Clave (Candlestick)</option>
+              <option value="Ruptura de Rango + Retest">Ruptura de Rango + Retest</option>
+              <option value="Toma de Liquidez (Swing Failure)">Toma de Liquidez (Swing Failure)</option>
+              <option value="Retroceso Fibonacci OTE">Retroceso Fibonacci OTE (0.618 - 0.786)</option>
+              <option value="Continuación de Tendencia">Continuación de Tendencia</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="posPatternSelect">Patrón de Vela Confirmatorio</label>
+            <select id="posPatternSelect" onchange="syncPatternFromSelect()">
+              <option value="Martillo">Martillo (Alcista - Alta Eficacia)</option>
+              <option value="Envolvente alcista">Envolvente alcista (Alta)</option>
+              <option value="Estrella del amanecer">Estrella del amanecer (Alta)</option>
+              <option value="Tres soldados blancos">Tres soldados blancos (Alta)</option>
+              <option value="Perforación">Perforación (Alta)</option>
+              <option value="Libélula o Bullish DOJI">Libélula / Bullish DOJI (Media-Alta)</option>
+              <option value="Martillo invertido">Martillo invertido (Baja-Media)</option>
+              <option value="Harami alcista">Harami alcista (Baja)</option>
+              <option value="Envolvente bajista">Envolvente bajista (Alta)</option>
+              <option value="Estrella del atardecer">Estrella del atardecer (Alta)</option>
+              <option value="Tres cuervos negros">Tres cuervos negros (Alta)</option>
+              <option value="Cubierta de nube negra">Cubierta de nube negra (Alta)</option>
+              <option value="Hombre colgado">Hombre colgado (Alta)</option>
+              <option value="Lápida o Bearish DOJI">Lápida / Bearish DOJI (Media-Alta)</option>
+              <option value="Estrella fugaz">Estrella fugaz (Baja-Media)</option>
+              <option value="Harami bajista">Harami bajista (Baja)</option>
+              <option value="DOJI">DOJI Clásico (Indecisión)</option>
+              <option value="DOJI de piernas largas">DOJI Piernas Largas (Alta Volatilidad)</option>
+              <option value="Sin Patrón Específico">Sin Patrón Específico (Estructura pura)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group" style="margin-bottom:var(--space-md);">
+          <label for="posNotes">Tesis / Justificación de Entrada</label>
+          <input type="text" id="posNotes" value="ETH rechazó el swing low en $2,111.89 cerrando en $2,411.66 con vela martillo. SL bajo el mínimo." placeholder="¿Por qué este trade cumple todas las reglas?">
+        </div>
+
+        <button class="btn btn-primary" style="width:100%; justify-content:center; padding:0.65rem;" onclick="addTradeToJournal()">
+          <i data-lucide="plus-circle" style="width:16px; height:16px;"></i>
+          Registrar Operación en Bitácora (Journal)
+        </button>
+      </div>
+
+      <!-- Real-Time Output Calculation Column -->
+      <div>
+        <div class="panel" style="padding:var(--space-md);">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="data-label">Evaluador Cuantitativo de Posición</span>
+            <span class="status-chip chip-sage" id="verdictChip">Setup Válido</span>
+          </div>
+
+          <div class="outputs-grid">
+            <div class="out-card out-card-hero">
+              <span class="out-title">Tamaño de Posición Recomendado</span>
+              <div class="out-value" id="calcUnits">0.321 ETH</div>
+              <div class="out-sub">Valor Nocional: <span id="calcNotional" class="mono-num text-primary">$774.14 USD</span></div>
+            </div>
+
+            <div class="out-card">
+              <span class="out-title">Riesgo Monetario (1R)</span>
+              <div class="out-value text-error" id="calcRiskAmount">$100.00</div>
+              <div class="out-sub" id="calcStopDistance">Distancia SL: $311.66 (12.92%)</div>
+            </div>
+
+            <div class="out-card">
+              <span class="out-title">Ganancia Potencial (TP)</span>
+              <div class="out-value text-tertiary" id="calcRewardAmount">+$148.66</div>
+              <div class="out-sub" id="calcTakeDistance">Distancia TP: $463.34 (19.21%)</div>
+            </div>
+
+            <div class="out-card">
+              <span class="out-title">Ratio Riesgo : Beneficio</span>
+              <div class="out-value text-primary" id="calcRR">1 : 1.49</div>
+              <div class="out-sub" id="calcRRSub">Mínimo sugerido: 1:1.50</div>
+            </div>
+
+            <div class="out-card">
+              <span class="out-title">Impacto en Portafolio</span>
+              <div class="out-value" id="calcAllocation">7.74%</div>
+              <div class="out-sub" id="calcLeverageSub">Apalancamiento implícito: 0.08x (Spot)</div>
+            </div>
+          </div>
+
+          <!-- Mini Validation Rules Check -->
+          <div class="well mt-md" style="padding:var(--space-sm);">
+            <div style="font-size:0.75rem; font-family:var(--font-label); color:var(--on-surface-variant); margin-bottom:4px;">VERIFICACIÓN PRE-ORDEN:</div>
+            <div id="calcValidationMsg" style="font-size:0.84rem; display:flex; align-items:center; gap:var(--space-xs); color:var(--tertiary);">
+              <i data-lucide="check-circle" style="width:14px; height:14px;"></i>
+              Parámetros dentro de las tolerancias de riesgo institucional.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SECTION 3: ANALÍTICA & ESPERANZA MATEMÁTICA ==================== -->
+  <section id="sectionAnalytics" class="panel" style="display:none;">
+    <div class="panel-header">
+      <div>
+        <h2 class="title-section">
+          <i data-lucide="line-chart" class="text-primary" style="width:20px; height:20px;"></i>
+          Evaluador Cuantitativo de Esperanza Matemática & Edge
+        </h2>
+        <p class="text-muted" style="font-size:0.875rem;">
+          Análisis probabilístico riguroso de tu ventaja matemática según la fórmula de expectativa en R-múltiplos y el Criterio de Kelly.
+        </p>
+      </div>
+
+      <div class="flex-center gap-sm">
+        <span class="data-label">Vista de Curva:</span>
+        <button class="btn btn-secondary btn-sm" id="btnToggleChartR" onclick="setChartMode('R')">En R-Múltiplos</button>
+        <button class="btn btn-secondary btn-sm" id="btnToggleChartUSD" onclick="setChartMode('USD')">En Saldo USD</button>
+      </div>
+    </div>
+
+    <!-- Math Cards Grid -->
+    <div class="math-grid">
+      <div class="math-card">
+        <span class="formula-tag">E(R) = (W × Ganancia Media R) - (L × Pérdida Media R)</span>
+        <span class="data-label">Esperanza Matemática por Operación</span>
+        <div class="kpi-value text-tertiary" id="mathExpR">+0.68 R</div>
+        <p style="font-size:0.8125rem; color:var(--on-surface-variant);">
+          Por cada $1.00 o 1R que arriesgas en este sistema, el mercado te devuelve históricamente un beneficio neto promedio de <strong class="text-tertiary" id="mathExpRDesc">+0.68R ($68.00)</strong>.
+        </p>
+      </div>
+
+      <div class="math-card">
+        <span class="formula-tag">Kelly % = W - [(1 - W) / R_ratio]</span>
+        <span class="data-label">Criterio de Kelly Óptimo</span>
+        <div class="kpi-value text-warning" id="mathKellyPct">33.1%</div>
+        <p style="font-size:0.8125rem; color:var(--on-surface-variant);">
+          Fracción teórica de crecimiento máximo. En la práctica real se aplica <strong>Quarter-Kelly (1/4 K = <span id="mathQuarterKelly">8.3%</span>)</strong> para erradicar el riesgo de ruina.
+        </p>
+      </div>
+
+      <div class="math-card">
+        <span class="formula-tag">Profit Factor = ∑ Ganancias Brutas / ∑ Pérdidas Brutas</span>
+        <span class="data-label">Factor de Recuperación (Profit Factor)</span>
+        <div class="kpi-value text-primary" id="mathProfitFactor">2.51</div>
+        <p style="font-size:0.8125rem; color:var(--on-surface-variant);">
+          Un factor superior a 1.75 indica una estrategia robusta y consistente frente a condiciones adversas del mercado.
+        </p>
+      </div>
+
+      <div class="math-card">
+        <span class="formula-tag">Racha Máxima: W & L Consecutivos</span>
+        <span class="data-label">Secuencias & Resiliencia</span>
+        <div class="kpi-value" id="mathStreaks">Max W: 4 | Max L: 3</div>
+        <p style="font-size:0.8125rem; color:var(--on-surface-variant);">
+          Racha actual: <span id="mathCurrentStreak" class="text-tertiary">2 Ganadores</span>. Tasa de recuperación de drawdown óptima.
+        </p>
+      </div>
+    </div>
+
+    <!-- Chart Canvas -->
+    <div class="chart-box">
+      <canvas id="equityChart" style="width:100%; height:100%;"></canvas>
+    </div>
+  </section>
+
+  <!-- ==================== SECTION 4: BITÁCORA OPERATIVA (JOURNAL) ==================== -->
+  <section id="sectionJournal" class="panel" style="display:none;">
+    <div class="panel-header">
+      <div>
+        <h2 class="title-section">
+          <i data-lucide="book-open" class="text-primary" style="width:20px; height:20px;"></i>
+          Bitácora de Operaciones & Registro R-Múltiplos
+        </h2>
+        <p class="text-muted" style="font-size:0.875rem;">
+          Historial estructurado de ejecuciones con análisis de resultado técnico, estado emocional y respeto a las reglas del plan.
+        </p>
+      </div>
+
+      <div class="flex-center gap-sm">
+        <select id="filterJournalStatus" onchange="renderJournalTable()" style="padding:0.35rem 0.6rem; font-size:0.75rem; width:auto;">
+          <option value="ALL">Todos los Trades</option>
+          <option value="OPEN">Sólo Abiertos</option>
+          <option value="CLOSED">Sólo Cerrados</option>
+          <option value="WIN">Sólo Ganados (+R)</option>
+          <option value="LOSS">Sólo Perdidos (-R)</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="clearAllJournalData()">
+          <i data-lucide="trash-2" style="width:13px; height:13px;"></i>
+          Limpiar
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table id="journalTable">
+        <thead>
+          <tr>
+            <th>ID / Fecha</th>
+            <th>Activo</th>
+            <th>Dirección</th>
+            <th>Entrada</th>
+            <th>Stop Loss</th>
+            <th>Take Profit</th>
+            <th>R:R Plan</th>
+            <th>Patrón Vela</th>
+            <th>Resultado R</th>
+            <th>P&L USD</th>
+            <th>Estado Emocional</th>
+            <th>Plan</th>
+            <th style="text-align:right;">Acción</th>
+          </tr>
+        </thead>
+        <tbody id="journalTableBody">
+          <!-- Rendered dynamically -->
+        </tbody>
+      </table>
+    </div>
+
+    <div id="journalEmptyState" class="well text-center" style="display:none; text-align:center; padding:var(--space-xl);">
+      <i data-lucide="inbox" style="width:32px; height:32px; margin:0 auto; color:var(--on-surface-variant); display:block;"></i>
+      <h3 style="font-family:var(--font-headline); margin-top:var(--space-sm);">No hay operaciones registradas</h3>
+      <p class="text-muted" style="font-size:0.875rem; max-width:400px; margin:var(--space-xs) auto var(--space-md);">
+        Usa la pestaña <strong>Calculadora & Inserción de Posición</strong> para calcular tus parámetros de riesgo y guardar tu primer trade.
+      </p>
+      <button class="btn btn-primary btn-sm" onclick="switchMainTab('position')">Ir a la Calculadora</button>
+    </div>
+  </section>
+
+  <!-- ==================== SECTION 5: CATÁLOGO DE 18 PATRONES DE VELAS ==================== -->
+  <section id="sectionPatterns" class="panel" style="display:none;">
+    <div class="panel-header">
+      <div>
+        <h2 class="title-section">
+          <i data-lucide="candlestick-chart" class="text-primary" style="width:20px; height:20px;"></i>
+          Manual de Referencia: 18 Patrones de Velas Japonesas
+        </h2>
+        <p class="text-muted" style="font-size:0.875rem;">
+          Catálogo técnico interactivo con efectividad probabilística, tipo de formación y anatomía visual (Fuente: Trading FX).
+        </p>
+      </div>
+
+      <div class="flex-center gap-xs">
+        <button class="btn btn-secondary btn-sm" onclick="filterPatterns('ALL')">Todos (18)</button>
+        <button class="btn btn-secondary btn-sm" onclick="filterPatterns('BAJISTA')">Bajistas (8)</button>
+        <button class="btn btn-secondary btn-sm" onclick="filterPatterns('ALCISTA')">Alcistas (8)</button>
+        <button class="btn btn-secondary btn-sm" onclick="filterPatterns('NEUTRAL')">Neutrales (2)</button>
+      </div>
+    </div>
+
+    <div class="patterns-grid" id="patternsGrid">
+      <!-- Generated via JS with SVG candle diagrams -->
+    </div>
+  </section>
+
+</div>
+
+<!-- ==================== MODAL: CLOSE TRADE QUICK ACTION ==================== -->
+<div class="modal-overlay" id="closeTradeModal">
+  <div class="modal-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-md);">
+      <h3 class="title-section" style="font-size:1.15rem;">Cerrar Operación en Bitácora</h3>
+      <button class="btn btn-secondary btn-sm" onclick="closeModal()">✕</button>
+    </div>
+
+    <input type="hidden" id="modalTradeId">
+
+    <div class="field-group" style="margin-bottom:var(--space-sm);">
+      <label>Resultado Operativo</label>
+      <select id="modalOutcome" onchange="onModalOutcomeChange()">
+        <option value="TP">Take Profit Alcanzado (Victoria Planificada)</option>
+        <option value="SL">Stop Loss Alcanzado (-1.0R Pérdida Controlada)</option>
+        <option value="BE">Breakeven / Salida en Cero (0.0R)</option>
+        <option value="PARTIAL">Salida Manual / Parcial</option>
       </select>
+    </div>
 
-      <label>Descripción de la regla</label>
-      <textarea id="ruleDescription" placeholder="Escribe una condición clara y verificable"></textarea>
-
-      <label>
-        <input type="checkbox" id="ruleMandatory" checked style="width:auto">
-        Regla obligatoria
-      </label>
-
-      <div class="actions">
-        <button class="primary" onclick="addRule()">Agregar regla</button>
+    <div class="field-row" style="margin-bottom:var(--space-sm);">
+      <div class="field-group">
+        <label for="modalExitPrice">Precio de Salida Real ($)</label>
+        <input type="number" id="modalExitPrice" step="0.01">
+      </div>
+      <div class="field-group">
+        <label for="modalResultR">R-Múltiplo Obtenido</label>
+        <input type="number" id="modalResultR" step="0.01" value="2.0">
       </div>
     </div>
 
-    <div class="card">
-      <h3>Reglas existentes</h3>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th><th>Fase</th><th>Descripción</th>
-              <th>Obligatoria</th><th>Activa</th><th>Acción</th>
-            </tr>
-          </thead>
-          <tbody id="rulesTable"></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- DIARIO -->
-  <section id="journal" class="tab">
-    <h2>Diario de operaciones</h2>
-    <div class="card">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th><th>Fecha</th><th>Par</th><th>Entrada</th>
-              <th>Stop</th><th>TP</th><th>Cantidad</th><th>Estado</th>
-              <th>PnL neto</th><th>Acción</th>
-            </tr>
-          </thead>
-          <tbody id="tradesTable"></tbody>
-        </table>
-      </div>
+    <div class="field-group" style="margin-bottom:var(--space-sm);">
+      <label for="modalEmotion">Estado Emocional en el Trade</label>
+      <select id="modalEmotion">
+        <option value="Disciplinado">Disciplinado (Paz mental, cumplió reglas)</option>
+        <option value="Ansioso">Ansioso (Tentación de cerrar antes o mover stop)</option>
+        <option value="FOMO">FOMO (Entrada tardía por miedo a quedar fuera)</option>
+        <option value="Revancha">Revancha (Deseo de recuperar pérdida previa)</option>
+        <option value="Neutral">Neutral (Ejecución robótica)</option>
+      </select>
     </div>
 
-    <div id="tradeDetail" class="card hidden">
-      <h3 id="detailTitle">Seguimiento de operación</h3>
-      <input type="hidden" id="detailTradeId">
-
-      <div class="two">
-        <div>
-          <h3>Durante la operación</h3>
-          <div id="duringChecklist"></div>
-          <label>Observaciones</label>
-          <textarea id="duringNotes"></textarea>
-          <button onclick="savePhase('DURANTE')">Guardar seguimiento</button>
-        </div>
-
-        <div>
-          <h3>Cerrar operación</h3>
-          <label>Precio real de salida</label>
-          <input id="exitPrice" type="number" step="0.00000001">
-          <label>Comisión de entrada real (USD)</label>
-          <input id="entryFee" type="number" value="0" step="0.000001">
-          <label>Comisión de salida real (USD)</label>
-          <input id="exitFee" type="number" value="0" step="0.000001">
-          <label>Notas de cierre</label>
-          <textarea id="closeNotes"></textarea>
-          <button class="primary" onclick="closeTrade()">Registrar cierre</button>
-          <div id="closeResult" class="status"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Después de la operación</h3>
-        <div id="postChecklist"></div>
-        <label>Aprendizaje y observaciones</label>
-        <textarea id="postNotes"></textarea>
-        <button onclick="savePhase('DESPUES')">Guardar evaluación posterior</button>
-      </div>
+    <div class="field-group" style="margin-bottom:var(--space-md);">
+      <label for="modalLesson">Nota de Aprendizaje o Comentario</label>
+      <input type="text" id="modalLesson" placeholder="Ej: Se respetó el TP al milímetro sin apresurarse">
     </div>
-  </section>
 
-  <!-- CONFIGURACIÓN -->
-  <section id="settings" class="tab">
-    <h2>Configuración</h2>
-
-    <div class="card">
-      <p class="muted">
-        Los valores son editables. Las comisiones y el mínimo nominal
-        deben contrastarse con las condiciones vigentes de Binance.
-      </p>
-
-      <div class="field-row">
-        <div>
-          <label>Capital USD</label>
-          <input id="cfgCapital" type="number" step="0.01">
-        </div>
-        <div>
-          <label>Riesgo real (%)</label>
-          <input id="cfgRisk" type="number" step="0.1">
-        </div>
-        <div>
-          <label>Riesgo de prueba (%)</label>
-          <input id="cfgTestRisk" type="number" step="0.1">
-        </div>
-        <div>
-          <label>Comisión estimada por lado (%)</label>
-          <input id="cfgFee" type="number" step="0.001">
-        </div>
-        <div>
-          <label>Mínimo nominal USD</label>
-          <input id="cfgMin" type="number" step="0.01">
-        </div>
-        <div>
-          <label>Riesgo/beneficio</label>
-          <input id="cfgRR" type="number" step="0.1">
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="primary" onclick="saveConfig()">Guardar configuración</button>
-      </div>
-      <div id="configResult" class="status"></div>
+    <div style="display:flex; justify-content:flex-end; gap:var(--space-sm);">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmCloseTrade()">Guardar Salida</button>
     </div>
-  </section>
-</main>
+  </div>
+</div>
+
+<api-shim></api-shim>
 
 <script>
-let APP = {
-  config: {},
-  strategies: [],
-  rules: [],
-  trades: [],
-  lastCalculation: null
-};
+  /* ==========================================================================
+     GLOBAL STATE & DATA STRUCTURES
+     ========================================================================== */
 
-function showTab(id) {
-  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
+  // 18 Patrones de Velas según el manual "18 Patrones de velas que debes conocer"
+  const CANDLESTICK_PATTERNS = [
+    // 8 Patrones Bajistas
+    {
+      id: "envolvente-bajista",
+      name: "Envolvente bajista",
+      category: "BAJISTA",
+      type: "Reversión",
+      effectiveness: "Alta",
+      description: "Formado por una vela alcista seguida de una segunda vela bajista que envuelve por completo el cuerpo de la primera. Mientras más velas envuelva, más efectivo es el patrón.",
+      svgType: "bearish-engulfing"
+    },
+    {
+      id: "lapida-bearish-doji",
+      name: "Lápida o Bearish DOJI",
+      category: "BAJISTA",
+      type: "Continuidad o Reversión",
+      effectiveness: "Media-Alta",
+      description: "Vela con una gran mecha superior y un pequeño cuerpo en la parte inferior. Si viene de un impulso alcista marca reversión bajista; si viene en impulso bajista confirma continuidad.",
+      svgType: "gravestone-doji"
+    },
+    {
+      id: "hombre-colgado",
+      name: "Hombre colgado",
+      category: "BAJISTA",
+      type: "Reversión / Continuidad",
+      effectiveness: "Alta",
+      description: "Su característica principal es poseer una mecha inferior dos veces más grande que el cuerpo (el cuerpo mide 1/3 del patrón total). Aparece comúnmente al final de impulsos alcistas.",
+      svgType: "hanging-man"
+    },
+    {
+      id: "estrella-fugaz",
+      name: "Estrella fugaz",
+      category: "BAJISTA",
+      type: "Reversión",
+      effectiveness: "Baja-Media",
+      description: "Similar al hombre colgado pero con la mecha larga ubicada en la parte superior. Muestra rechazo contundente a precios mayores e indica potencial cambio alcista a bajista.",
+      svgType: "shooting-star"
+    },
+    {
+      id: "estrella-del-atardecer",
+      name: "Estrella del atardecer",
+      category: "BAJISTA",
+      type: "Reversión",
+      effectiveness: "Alta",
+      description: "Patrón de 3 velas: 1) vela alcista de gran cuerpo, 2) vela pequeña de indecisión (star), 3) vela de gran cuerpo bajista que envuelve al menos el 50% de la primera vela.",
+      svgType: "evening-star"
+    },
+    {
+      id: "cubierta-de-nube-negra",
+      name: "Cubierta de nube negra",
+      category: "BAJISTA",
+      type: "Reversión",
+      effectiveness: "Alta",
+      description: "Vela alcista de gran tamaño, seguida de un pequeño gap alcista y una vela bajista que cierra superando al menos el 50% del cuerpo de la vela alcista previa.",
+      svgType: "dark-cloud-cover"
+    },
+    {
+      id: "harami-bajista",
+      name: "Harami bajista",
+      category: "BAJISTA",
+      type: "Reversión",
+      effectiveness: "Baja",
+      description: "Vela alcista de gran tamaño seguida de una pequeña vela bajista contenida por completo dentro del rango del cuerpo de la vela anterior. Indica debilidad en la fuerza compradora.",
+      svgType: "bearish-harami"
+    },
+    {
+      id: "tres-cuervos-negros",
+      name: "Tres cuervos negros",
+      category: "BAJISTA",
+      type: "Reversión",
+      effectiveness: "Alta",
+      description: "Conjunto consecutivo de tres velas bajistas de gran cuerpo con sombras cortas o inexistentes. Muy fiable en techos de mercado, confirma fuerte toma de control vendedor.",
+      svgType: "three-black-crows"
+    },
 
-function callApi(method, data, success, failure) {
-  google.script.run
-    .withSuccessHandler(success)
-    .withFailureHandler(err => {
-      const message = err && err.message ? err.message : String(err);
-      if (failure) failure(message);
-      else alert(message);
-    })[method](data);
-}
+    // 8 Patrones Alcistas
+    {
+      id: "envolvente-alcista",
+      name: "Envolvente alcista",
+      category: "ALCISTA",
+      type: "Reversión",
+      effectiveness: "Alta",
+      description: "Formado por una vela bajista, seguida de una segunda vela alcista de gran cuerpo que envuelve por completo el cuerpo de la primera. Mientras más velas envuelva, más potente la señal.",
+      svgType: "bullish-engulfing"
+    },
+    {
+      id: "libelula-bullish-doji",
+      name: "Libélula o Bullish DOJI",
+      category: "ALCISTA",
+      type: "Continuidad o Reversión",
+      effectiveness: "Media-Alta",
+      description: "Gran mecha inferior y un pequeño cuerpo en su parte superior. Si aparece en un impulso bajista marca rechazo de mínimos y reversión al alza; en impulso alcista marca continuidad.",
+      svgType: "dragonfly-doji"
+    },
+    {
+      id: "martillo",
+      name: "Martillo",
+      category: "ALCISTA",
+      type: "Reversión / Continuidad",
+      effectiveness: "Alta",
+      description: "Posee una mecha inferior dos veces más grande que su cuerpo, dándole forma de martillo. Los compradores rechazaron agresivamente la caída intradía.",
+      svgType: "hammer"
+    },
+    {
+      id: "martillo-invertido",
+      name: "Martillo invertido",
+      category: "ALCISTA",
+      type: "Reversión",
+      effectiveness: "Baja-Media",
+      description: "Mismo aspecto que el martillo pero con la mecha larga en la parte superior y el cuerpo abajo. Indica que los compradores comenzaron a probar niveles superiores tras una caída.",
+      svgType: "inverted-hammer"
+    },
+    {
+      id: "estrella-del-amanecer",
+      name: "Estrella del amanecer",
+      category: "ALCISTA",
+      type: "Reversión",
+      effectiveness: "Alta",
+      description: "Opuesto a la estrella del atardecer. 3 velas: 1) bajista de gran cuerpo, 2) vela de indecisión, 3) alcista de gran cuerpo que penetra al menos el 50% de la primera vela.",
+      svgType: "morning-star"
+    },
+    {
+      id: "perforacion",
+      name: "Perforación",
+      category: "ALCISTA",
+      type: "Reversión",
+      effectiveness: "Alta",
+      description: "Vela bajista de gran tamaño, seguida de un pequeño gap bajista y una vela alcista que cierra como mínimo sobre el 50% del cuerpo de la primera vela.",
+      svgType: "piercing-line"
+    },
+    {
+      id: "harami-alcista",
+      name: "Harami alcista",
+      category: "ALCISTA",
+      type: "Reversión",
+      effectiveness: "Baja",
+      description: "Vela bajista de gran tamaño seguida de una pequeña vela alcista cuyo cuerpo queda contenido dentro del cuerpo bajista previo. Anticipa desaceleración de la caída.",
+      svgType: "bullish-harami"
+    },
+    {
+      id: "tres-soldados-blancos",
+      name: "Tres soldados blancos",
+      category: "ALCISTA",
+      type: "Reversión",
+      effectiveness: "Alta",
+      description: "Tres velas alcistas consecutivas de cuerpo grande y sombras reducidas. Muy común y altamente fiable para confirmar el inicio de un nuevo ciclo alcista sostenido.",
+      svgType: "three-white-soldiers"
+    },
 
-function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>"']/g, char => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  })[char]);
-}
+    // 2 Patrones Neutrales
+    {
+      id: "doji",
+      name: "DOJI",
+      category: "NEUTRAL",
+      type: "Indecisión",
+      effectiveness: "Alta",
+      description: "Apertura y cierre prácticamente idénticos con mechas simétricas. Refleja equilibrio temporal absoluto entre compradores y vendedores. No operar sin confirmación posterior.",
+      svgType: "classic-doji"
+    },
+    {
+      id: "doji-piernas-largas",
+      name: "DOJI de piernas largas",
+      category: "NEUTRAL",
+      type: "Indecisión / Volatilidad",
+      effectiveness: "Alta",
+      description: "Cuerpo mínimo o nulo con mechas superior e inferior excepcionalmente largas. Revela batalla encarnizada y gran volatilidad en el mercado.",
+      svgType: "long-legged-doji"
+    }
+  ];
 
-function money(value) {
-  return '$' + Number(value || 0).toFixed(2);
-}
+  // Checklist Items Config
+  const CHECKLIST_ITEMS = [
+    { id: "pre_1", phase: "pre" },
+    { id: "pre_2", phase: "pre" },
+    { id: "pre_3", phase: "pre" },
+    { id: "pre_4", phase: "pre" },
+    { id: "dur_1", phase: "during" },
+    { id: "dur_2", phase: "during" },
+    { id: "dur_3", phase: "during" },
+    { id: "dur_4", phase: "during" },
+    { id: "dur_5", phase: "during" },
+    { id: "dur_6", phase: "during" },
+    { id: "dur_7", phase: "during" },
+    { id: "post_1", phase: "post" },
+    { id: "post_2", phase: "post" },
+    { id: "post_3", phase: "post" },
+    { id: "post_4", phase: "post" }
+  ];
 
-function loadApp() {
-  callApi('api_getInitialData', null, data => {
-    APP = { ...APP, ...data };
-    document.getElementById('connection').textContent =
-      'Conectado · ' + data.version;
+  // Sample trades to provide immediate mathematical substance
+  const DEFAULT_SAMPLE_TRADES = [
+    {
+      id: "TRD-101",
+      date: "2026-10-24 09:15",
+      symbol: "ETHUSDT",
+      direction: "LONG",
+      entry: 2411.66,
+      stopLoss: 2100.00,
+      takeProfit: 2875.00,
+      exitPrice: 2875.00,
+      riskUSD: 100.00,
+      plannedRR: 1.49,
+      resultR: 1.49,
+      pnlUSD: 148.66,
+      strategy: "Reversión por Vela Clave",
+      pattern: "Martillo",
+      emotion: "Disciplinado",
+      followedPlan: true,
+      status: "CLOSED",
+      notes: "ETH rebotó en swing low $2,111 con martillo alcista perfecto."
+    },
+    {
+      id: "TRD-102",
+      date: "2026-10-25 14:30",
+      symbol: "BTCUSDT",
+      direction: "SHORT",
+      entry: 68400.00,
+      stopLoss: 69200.00,
+      takeProfit: 66000.00,
+      exitPrice: 66000.00,
+      riskUSD: 100.00,
+      plannedRR: 3.00,
+      resultR: 3.00,
+      pnlUSD: 300.00,
+      strategy: "Toma de Liquidez (Swing Failure)",
+      pattern: "Estrella fugaz",
+      emotion: "Disciplinado",
+      followedPlan: true,
+      status: "CLOSED",
+      notes: "Barrido de máximos con estrella fugaz en H4."
+    },
+    {
+      id: "TRD-103",
+      date: "2026-10-27 10:00",
+      symbol: "XAUUSD",
+      direction: "LONG",
+      entry: 2650.00,
+      stopLoss: 2640.00,
+      takeProfit: 2680.00,
+      exitPrice: 2640.00,
+      riskUSD: 100.00,
+      plannedRR: 3.00,
+      resultR: -1.00,
+      pnlUSD: -100.00,
+      strategy: "Ruptura de Rango + Retest",
+      pattern: "Envolvente alcista",
+      emotion: "Disciplinado",
+      followedPlan: true,
+      status: "CLOSED",
+      notes: "Falsa ruptura provocada por datos de empleo. SL respetado a rajatabla."
+    },
+    {
+      id: "TRD-104",
+      date: "2026-10-29 11:20",
+      symbol: "NQ",
+      direction: "SHORT",
+      entry: 20450.00,
+      stopLoss: 20520.00,
+      takeProfit: 20240.00,
+      exitPrice: 20240.00,
+      riskUSD: 100.00,
+      plannedRR: 3.00,
+      resultR: 3.00,
+      pnlUSD: 300.00,
+      strategy: "Reversión por Vela Clave",
+      pattern: "Estrella del atardecer",
+      emotion: "Disciplinado",
+      followedPlan: true,
+      status: "CLOSED",
+      notes: "Estrella del atardecer en apertura de NY."
+    },
+    {
+      id: "TRD-105",
+      date: "2026-11-02 08:45",
+      symbol: "ETHUSDT",
+      direction: "LONG",
+      entry: 2510.00,
+      stopLoss: 2470.00,
+      takeProfit: 2610.00,
+      exitPrice: 2470.00,
+      riskUSD: 100.00,
+      plannedRR: 2.50,
+      resultR: -1.00,
+      pnlUSD: -100.00,
+      strategy: "Retroceso Fibonacci OTE",
+      pattern: "Perforación",
+      emotion: "Ansioso",
+      followedPlan: true,
+      status: "CLOSED",
+      notes: "Pérdida asumida. Mercado rompió soporte 0.786."
+    },
+    {
+      id: "TRD-106",
+      date: "2026-11-05 15:10",
+      symbol: "BTCUSDT",
+      direction: "LONG",
+      entry: 71200.00,
+      stopLoss: 70400.00,
+      takeProfit: 73600.00,
+      exitPrice: 73600.00,
+      riskUSD: 100.00,
+      plannedRR: 3.00,
+      resultR: 3.00,
+      pnlUSD: 300.00,
+      strategy: "Continuación de Tendencia",
+      pattern: "Tres soldados blancos",
+      emotion: "Disciplinado",
+      followedPlan: true,
+      status: "CLOSED",
+      notes: "Tres soldados blancos en gráfico de 4 horas con volumen creciente."
+    }
+  ];
 
-    renderAll();
+  // App Master State
+  let appState = {
+    accountBalance: 10000.00,
+    riskPercentage: 1.0,
+    currentSessionBias: "Alcista",
+    checks: {},
+    routineNotes: {
+      news: "Sin noticias de impacto rojo en sesión actual",
+      newsAction: "clear",
+      levels: "ETH soporte $2,411; BTC resistencia $72,500",
+      thesis: "Alcista tras barrido de mínimo asiático y rechazo con martillo",
+      good: "Paciencia en la confirmación de la vela horaria",
+      improve: "Evitar observar el PnL no realizado durante el trade"
+    },
+    journal: JSON.parse(JSON.stringify(DEFAULT_SAMPLE_TRADES)),
+    calculatorParams: {
+      symbol: "ETHUSDT",
+      direction: "LONG",
+      entry: 2411.66,
+      stopLoss: 2100.00,
+      takeProfit: 2875.00,
+      strategy: "Reversión por Vela Clave",
+      pattern: "Martillo",
+      notes: "ETH rechazó el swing low en $2,111.89 cerrando en $2,411.66 con vela martillo."
+    },
+    chartMode: "R" // 'R' or 'USD'
+  };
+
+  let equityChartInstance = null;
+
+  /* ==========================================================================
+     INITIALIZATION & LIFECYCLE
+     ========================================================================== */
+
+  window.addEventListener("DOMContentLoaded", async function () {
+    // 1. Restore state if available via NotebookAppApi
+    if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === "function") {
+      try {
+        const savedState = await window.notebookAppApi.getAppState();
+        if (savedState && typeof savedState === "object") {
+          appState = Object.assign(appState, savedState);
+        }
+      } catch (err) {
+        console.warn("No se pudo cargar estado previo:", err);
+      }
+    }
+
+    // 2. Populate routine inputs from state
+    restoreRoutineInputs();
+
+    // 3. Render patterns grid
+    renderPatternsGrid("ALL");
+
+    // 4. Initial calculations & Journal rendering
+    recalcPosition();
+    renderJournalTable();
+    updateGlobalMetrics();
+
+    // 5. Initialize Icons
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons();
+    }
+
+    // 6. Signal readiness to host
+    if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === "function") {
+      window.notebookAppApi.notifyAppReady();
+    }
   });
-}
 
-function renderAll() {
-  renderDashboard();
-  renderStrategySelects();
-  renderPreChecklist();
-  renderRules();
-  renderTrades();
-  renderConfig();
-}
+  /* ==========================================================================
+     NAVIGATION & TAB SWITCHING
+     ========================================================================== */
 
-function renderDashboard() {
-  const closed = APP.trades.filter(t => t.ESTADO === 'CERRADA');
-  const pnl = closed.reduce((sum, t) => sum + Number(t.PNL_NETO || 0), 0);
+  function switchMainTab(tabKey) {
+    const tabs = ["protocol", "position", "analytics", "journal", "patterns"];
+    tabs.forEach(function (key) {
+      const btn = document.getElementById("tabBtn" + key.charAt(0).toUpperCase() + key.slice(1));
+      const sec = document.getElementById("section" + key.charAt(0).toUpperCase() + key.slice(1));
+      if (btn && sec) {
+        if (key === tabKey) {
+          btn.classList.add("active");
+          sec.style.display = "block";
+        } else {
+          btn.classList.remove("active");
+          sec.style.display = "none";
+        }
+      }
+    });
 
-  document.getElementById('capitalMetric').textContent =
-    money(APP.config.CAPITAL_USD);
+    if (tabKey === "analytics") {
+      setTimeout(renderEquityChart, 50);
+    }
 
-  document.getElementById('tradesMetric').textContent =
-    APP.trades.length;
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons();
+    }
+  }
 
-  const pnlEl = document.getElementById('pnlMetric');
-  pnlEl.textContent = money(pnl);
-  pnlEl.className = 'metric ' + (pnl >= 0 ? 'positive' : 'negative');
+  function switchPhase(phaseKey) {
+    const phases = ["pre", "during", "post"];
+    phases.forEach(function (p, idx) {
+      const btn = document.getElementById("phaseBtn" + (idx + 1));
+      const container = document.getElementById("phase" + p.charAt(0).toUpperCase() + p.slice(1) + "Container");
+      if (btn && container) {
+        if (p === phaseKey) {
+          btn.classList.add("active");
+          container.style.display = "flex";
+        } else {
+          btn.classList.remove("active");
+          container.style.display = "none";
+        }
+      }
+    });
 
-  document.getElementById('dashboardStatus').textContent =
-    'Estrategias: ' + APP.strategies.length +
-    '\nOperaciones abiertas: ' +
-    APP.trades.filter(t => t.ESTADO === 'ABIERTA').length +
-    '\nOperaciones cerradas: ' + closed.length;
-}
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons();
+    }
+  }
 
-function renderStrategySelects() {
-  const options = APP.strategies.map(s =>
-    `<option value="${escapeHtml(s.ID)}">${escapeHtml(s.NOMBRE)} · v${s.VERSION}</option>`
-  ).join('');
+  /* ==========================================================================
+     CHECKLIST TRI-FASE LOGIC
+     ========================================================================== */
 
-  document.getElementById('strategySelect').innerHTML = options;
-  document.getElementById('ruleStrategy').innerHTML = options;
-}
+  function toggleCheck(checkId) {
+    appState.checks[checkId] = !appState.checks[checkId];
+    updateCheckCardUI(checkId);
+    updateChecklistCounters();
+    saveActiveAppState();
+  }
 
-function getSelectedStrategy() {
-  return document.getElementById('strategySelect').value;
-}
+  function updateCheckCardUI(checkId) {
+    const card = document.getElementById("card_" + checkId);
+    const box = document.getElementById("box_" + checkId);
+    if (!card || !box) return;
 
-function getRules(strategyId, phase) {
-  const strategy = APP.strategies.find(s => s.ID === strategyId);
-  if (!strategy) return [];
+    const isChecked = !!appState.checks[checkId];
+    const icon = box.querySelector("i") || box.querySelector("svg");
 
-  return APP.rules.filter(r =>
-    r.ID_ESTRATEGIA === strategyId &&
-    Number(r.VERSION) === Number(strategy.VERSION) &&
-    r.FASE === phase &&
-    r.ACTIVA === true
-  );
-}
+    if (isChecked) {
+      card.classList.add("checked");
+      if (icon) icon.style.display = "block";
+    } else {
+      card.classList.remove("checked");
+      if (icon) icon.style.display = "none";
+    }
+  }
 
-function renderPreChecklist() {
-  const strategyId = getSelectedStrategy();
-  const rules = getRules(strategyId, 'PRE');
+  function updateChecklistCounters() {
+    let preCount = 0, durCount = 0, postCount = 0;
+    CHECKLIST_ITEMS.forEach(function (item) {
+      if (appState.checks[item.id]) {
+        if (item.phase === "pre") preCount++;
+        if (item.phase === "during") durCount++;
+        if (item.phase === "post") postCount++;
+      }
+    });
 
-  document.getElementById('preChecklist').innerHTML =
-    rules.map(r => `
-      <div class="rule">
-        <input type="checkbox" id="pre_${escapeHtml(r.ID_REGLA)}">
-        <div class="rule-text">
-          ${escapeHtml(r.DESCRIPCION)}
-          ${r.OBLIGATORIA ? '<span class="muted"> · Obligatoria</span>' : ''}
+    const total = preCount + durCount + postCount;
+    const badge = document.getElementById("phaseGlobalBadge");
+    if (badge) {
+      badge.textContent = total + " / 15 Reglas Cumplidas";
+      if (total >= 11) {
+        badge.className = "status-chip chip-sage";
+      } else {
+        badge.className = "status-chip chip-cyan";
+      }
+    }
+
+    const cPre = document.getElementById("countPre");
+    if (cPre) cPre.textContent = preCount + "/4";
+    const cDur = document.getElementById("countDuring");
+    if (cDur) cDur.textContent = durCount + "/7";
+    const cPost = document.getElementById("countPost");
+    if (cPost) cPost.textContent = postCount + "/4";
+
+    const btn1 = document.getElementById("phaseBtn1");
+    if (btn1) btn1.classList.toggle("completed", preCount === 4);
+    const btn2 = document.getElementById("phaseBtn2");
+    if (btn2) btn2.classList.toggle("completed", durCount === 7);
+    const btn3 = document.getElementById("phaseBtn3");
+    if (btn3) btn3.classList.toggle("completed", postCount === 4);
+  }
+
+  function restoreRoutineInputs() {
+    // Restore checkboxes
+    CHECKLIST_ITEMS.forEach(function (item) {
+      updateCheckCardUI(item.id);
+    });
+    updateChecklistCounters();
+
+    // Restore text inputs
+    if (appState.routineNotes) {
+      const nNews = document.getElementById("inputPreNews");
+      if (nNews && appState.routineNotes.news) nNews.value = appState.routineNotes.news;
+      const sAction = document.getElementById("selectPreNewsAction");
+      if (sAction && appState.routineNotes.newsAction) sAction.value = appState.routineNotes.newsAction;
+      const nLevels = document.getElementById("inputPreLevels");
+      if (nLevels && appState.routineNotes.levels) nLevels.value = appState.routineNotes.levels;
+      const sBias = document.getElementById("selectPreBias");
+      if (sBias && appState.currentSessionBias) sBias.value = appState.currentSessionBias;
+      const nThesis = document.getElementById("inputPreThesis");
+      if (nThesis && appState.routineNotes.thesis) nThesis.value = appState.routineNotes.thesis;
+      const nGood = document.getElementById("inputPostGood");
+      if (nGood && appState.routineNotes.good) nGood.value = appState.routineNotes.good;
+      const nImprove = document.getElementById("inputPostImprove");
+      if (nImprove && appState.routineNotes.improve) nImprove.value = appState.routineNotes.improve;
+    }
+  }
+
+  function autoSaveRoutine() {
+    const nNews = document.getElementById("inputPreNews");
+    const sAction = document.getElementById("selectPreNewsAction");
+    const nLevels = document.getElementById("inputPreLevels");
+    const sBias = document.getElementById("selectPreBias");
+    const nThesis = document.getElementById("inputPreThesis");
+    const nGood = document.getElementById("inputPostGood");
+    const nImprove = document.getElementById("inputPostImprove");
+
+    appState.routineNotes = {
+      news: nNews ? nNews.value : "",
+      newsAction: sAction ? sAction.value : "clear",
+      levels: nLevels ? nLevels.value : "",
+      thesis: nThesis ? nThesis.value : "",
+      good: nGood ? nGood.value : "",
+      improve: nImprove ? nImprove.value : ""
+    };
+
+    if (sBias) {
+      appState.currentSessionBias = sBias.value;
+    }
+
+    saveActiveAppState();
+  }
+
+  function updateBiasIndicator() {
+    const sBias = document.getElementById("selectPreBias");
+    if (!sBias) return;
+    appState.currentSessionBias = sBias.value;
+    const sessionLabel = document.getElementById("currentSessionLabel");
+    if (sessionLabel) {
+      sessionLabel.textContent = "SESIÓN ACTIVA — BIAS: " + sBias.value.toUpperCase();
+    }
+  }
+
+  /* ==========================================================================
+     POSITION SIZING WORKSTATION CALCULATIONS
+     ========================================================================== */
+
+  let currentDirection = "LONG";
+
+  function setDirection(dir) {
+    currentDirection = dir;
+    const bLong = document.getElementById("btnDirLong");
+    const bShort = document.getElementById("btnDirShort");
+    if (dir === "LONG") {
+      bLong.classList.add("active");
+      bShort.classList.remove("active");
+    } else {
+      bShort.classList.add("active");
+      bLong.classList.remove("active");
+    }
+    recalcPosition();
+  }
+
+  function loadPreset(presetKey) {
+    if (presetKey === "ETH") {
+      document.getElementById("posSymbol").value = "ETHUSDT";
+      document.getElementById("posEntry").value = 2411.66;
+      document.getElementById("posStopLoss").value = 2100.00;
+      document.getElementById("posTakeProfit").value = 2875.00;
+      setDirection("LONG");
+      document.getElementById("posPatternSelect").value = "Martillo";
+      document.getElementById("posNotes").value = "ETH comprando swing low $2,111 con objetivo en el máximo de $2,875.";
+    } else if (presetKey === "BTC") {
+      document.getElementById("posSymbol").value = "BTCUSDT";
+      document.getElementById("posEntry").value = 69800.00;
+      document.getElementById("posStopLoss").value = 70500.00;
+      document.getElementById("posTakeProfit").value = 67500.00;
+      setDirection("SHORT");
+      document.getElementById("posPatternSelect").value = "Estrella fugaz";
+      document.getElementById("posNotes").value = "BTC rechazo en resistencia mayor con estrella fugaz.";
+    } else if (presetKey === "XAU") {
+      document.getElementById("posSymbol").value = "XAUUSD";
+      document.getElementById("posEntry").value = 2665.00;
+      document.getElementById("posStopLoss").value = 2655.00;
+      document.getElementById("posTakeProfit").value = 2690.00;
+      setDirection("LONG");
+      document.getElementById("posPatternSelect").value = "Envolvente alcista";
+      document.getElementById("posNotes").value = "Oro rebotando en soporte asiático.";
+    } else if (presetKey === "NQ") {
+      document.getElementById("posSymbol").value = "NQ";
+      document.getElementById("posEntry").value = 20850.00;
+      document.getElementById("posStopLoss").value = 20920.00;
+      document.getElementById("posTakeProfit").value = 20640.00;
+      setDirection("SHORT");
+      document.getElementById("posPatternSelect").value = "Estrella del atardecer";
+      document.getElementById("posNotes").value = "NQ barrido de apertura y estrella del atardecer.";
+    }
+    recalcPosition();
+  }
+
+  function recalcPosition() {
+    const balanceInput = document.getElementById("posAccountBalance");
+    const riskPctInput = document.getElementById("posRiskPct");
+    const entryInput = document.getElementById("posEntry");
+    const slInput = document.getElementById("posStopLoss");
+    const tpInput = document.getElementById("posTakeProfit");
+    const symbolInput = document.getElementById("posSymbol");
+
+    const balance = parseFloat(balanceInput.value) || 10000;
+    const riskPct = parseFloat(riskPctInput.value) || 1.0;
+    const entry = parseFloat(entryInput.value) || 1;
+    const sl = parseFloat(slInput.value) || 0;
+    const tp = parseFloat(tpInput.value) || 0;
+    const symbol = symbolInput ? symbolInput.value.toUpperCase() : "ACTIVO";
+
+    appState.accountBalance = balance;
+    appState.riskPercentage = riskPct;
+
+    // Dollar risk (1R)
+    const riskAmountUSD = balance * (riskPct / 100);
+
+    let stopDistance = 0;
+    let takeDistance = 0;
+    let isValidOrder = true;
+    let errorMsg = "";
+
+    if (currentDirection === "LONG") {
+      stopDistance = entry - sl;
+      takeDistance = tp - entry;
+      if (sl >= entry) {
+        isValidOrder = false;
+        errorMsg = "En posición LONG, el Stop Loss debe ser menor al Precio de Entrada.";
+      }
+      if (tp <= entry) {
+        isValidOrder = false;
+        errorMsg = "En posición LONG, el Take Profit debe ser mayor al Precio de Entrada.";
+      }
+    } else {
+      stopDistance = sl - entry;
+      takeDistance = entry - tp;
+      if (sl <= entry) {
+        isValidOrder = false;
+        errorMsg = "En posición SHORT, el Stop Loss debe ser mayor al Precio de Entrada.";
+      }
+      if (tp >= entry) {
+        isValidOrder = false;
+        errorMsg = "En posición SHORT, el Take Profit debe ser menor al Precio de Entrada.";
+      }
+    }
+
+    if (stopDistance <= 0) {
+      isValidOrder = false;
+      stopDistance = 0.0001;
+    }
+
+    // Units and notional
+    const units = riskAmountUSD / stopDistance;
+    const notionalUSD = units * entry;
+    const rrRatio = takeDistance / stopDistance;
+    const potentialProfitUSD = units * takeDistance;
+    const allocationPct = (notionalUSD / balance) * 100;
+    const leverageFactor = notionalUSD / balance;
+
+    // Update DOM outputs
+    document.getElementById("calcUnits").textContent = units > 1000 ? units.toFixed(1) : units.toFixed(4) + " " + symbol.replace("USDT", "");
+    document.getElementById("calcNotional").textContent = "$" + notionalUSD.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " USD";
+    document.getElementById("calcRiskAmount").textContent = "$" + riskAmountUSD.toFixed(2);
+
+    const slPctDistance = ((stopDistance / entry) * 100).toFixed(2);
+    document.getElementById("calcStopDistance").textContent = "Distancia SL: $" + stopDistance.toFixed(2) + " (" + slPctDistance + "%)";
+
+    document.getElementById("calcRewardAmount").textContent = "+$" + potentialProfitUSD.toFixed(2);
+    const tpPctDistance = ((takeDistance / entry) * 100).toFixed(2);
+    document.getElementById("calcTakeDistance").textContent = "Distancia TP: $" + takeDistance.toFixed(2) + " (" + tpPctDistance + "%)";
+
+    document.getElementById("calcRR").textContent = "1 : " + (rrRatio > 0 ? rrRatio.toFixed(2) : "0.00");
+    document.getElementById("calcAllocation").textContent = allocationPct.toFixed(2) + "%";
+    document.getElementById("calcLeverageSub").textContent = "Apalancamiento implícito: " + leverageFactor.toFixed(2) + "x" + (leverageFactor <= 1.0 ? " (Spot)" : " (Apalancado)");
+
+    // Verdict Chip and Validation Message
+    const verdictChip = document.getElementById("verdictChip");
+    const valMsg = document.getElementById("calcValidationMsg");
+
+    if (!isValidOrder) {
+      verdictChip.className = "status-chip chip-error";
+      verdictChip.textContent = "Parámetros Inválidos";
+      valMsg.style.color = "var(--error)";
+      valMsg.innerHTML = `<i data-lucide="alert-triangle" style="width:14px; height:14px;"></i> ` + errorMsg;
+    } else if (rrRatio < 1.5) {
+      verdictChip.className = "status-chip chip-warning";
+      verdictChip.textContent = "R:R Desfavorable (< 1:1.5)";
+      valMsg.style.color = "var(--warning)";
+      valMsg.innerHTML = `<i data-lucide="alert-circle" style="width:14px; height:14px;"></i> Ratio R:R de 1:${rrRatio.toFixed(2)} por debajo del estándar mínimo de 1:1.50.`;
+    } else {
+      verdictChip.className = "status-chip chip-sage";
+      verdictChip.textContent = "Setup Cuantitativamente Aprobado";
+      valMsg.style.color = "var(--tertiary)";
+      valMsg.innerHTML = `<i data-lucide="check-circle" style="width:14px; height:14px;"></i> Parámetros válidos: R:R favorable de 1:${rrRatio.toFixed(2)} y riesgo controlado en ${riskPct.toFixed(1)}%.`;
+    }
+
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons();
+    }
+  }
+
+  function syncPatternFromSelect() {
+    const sel = document.getElementById("posPatternSelect");
+    if (!sel) return;
+    const patternName = sel.value;
+    highlightPatternInGrid(patternName);
+  }
+
+  function selectPatternFromCatalog(patternName) {
+    const sel = document.getElementById("posPatternSelect");
+    if (sel) {
+      sel.value = patternName;
+    }
+    highlightPatternInGrid(patternName);
+    switchMainTab("position");
+  }
+
+  function highlightPatternInGrid(patternName) {
+    const cards = document.querySelectorAll(".pattern-card");
+    cards.forEach(function (c) {
+      if (c.getAttribute("data-pattern-name") === patternName) {
+        c.classList.add("selected");
+      } else {
+        c.classList.remove("selected");
+      }
+    });
+  }
+
+  /* ==========================================================================
+     JOURNAL & MATHEMATICAL EXPECTANCY ENGINE
+     ========================================================================== */
+
+  function addTradeToJournal() {
+    const symbol = document.getElementById("posSymbol").value.toUpperCase() || "BTCUSDT";
+    const entry = parseFloat(document.getElementById("posEntry").value) || 0;
+    const sl = parseFloat(document.getElementById("posStopLoss").value) || 0;
+    const tp = parseFloat(document.getElementById("posTakeProfit").value) || 0;
+    const strategy = document.getElementById("posStrategy").value;
+    const pattern = document.getElementById("posPatternSelect").value;
+    const notes = document.getElementById("posNotes").value;
+    const balance = appState.accountBalance || 10000;
+    const riskPct = appState.riskPercentage || 1.0;
+    const riskUSD = balance * (riskPct / 100);
+
+    let stopDistance = currentDirection === "LONG" ? (entry - sl) : (sl - entry);
+    let takeDistance = currentDirection === "LONG" ? (tp - entry) : (entry - tp);
+
+    if (stopDistance <= 0 || takeDistance <= 0) {
+      alert("Por favor verifica los precios de Entrada, Stop Loss y Take Profit antes de registrar.");
+      return;
+    }
+
+    const plannedRR = takeDistance / stopDistance;
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10) + " " + now.toTimeString().slice(0, 5);
+    const newId = "TRD-" + (appState.journal.length + 101);
+
+    const newTrade = {
+      id: newId,
+      date: dateStr,
+      symbol: symbol,
+      direction: currentDirection,
+      entry: entry,
+      stopLoss: sl,
+      takeProfit: tp,
+      exitPrice: null,
+      riskUSD: riskUSD,
+      plannedRR: parseFloat(plannedRR.toFixed(2)),
+      resultR: null,
+      pnlUSD: null,
+      strategy: strategy,
+      pattern: pattern,
+      emotion: "Disciplinado",
+      followedPlan: true,
+      status: "OPEN",
+      notes: notes
+    };
+
+    appState.journal.unshift(newTrade);
+    saveActiveAppState();
+    renderJournalTable();
+    updateGlobalMetrics();
+    switchMainTab("journal");
+  }
+
+  function renderJournalTable() {
+    const tbody = document.getElementById("journalTableBody");
+    const emptyState = document.getElementById("journalEmptyState");
+    const filter = document.getElementById("filterJournalStatus").value;
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    let filtered = appState.journal.filter(function (t) {
+      if (filter === "OPEN") return t.status === "OPEN";
+      if (filter === "CLOSED") return t.status === "CLOSED";
+      if (filter === "WIN") return t.resultR !== null && t.resultR > 0;
+      if (filter === "LOSS") return t.resultR !== null && t.resultR <= 0;
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      tbody.parentElement.style.display = "none";
+      if (emptyState) emptyState.style.display = "block";
+      return;
+    } else {
+      tbody.parentElement.style.display = "table";
+      if (emptyState) emptyState.style.display = "none";
+    }
+
+    filtered.forEach(function (trade) {
+      const tr = document.createElement("tr");
+
+      const dirClass = trade.direction === "LONG" ? "chip-sage" : "chip-error";
+      let resBadge = "";
+      let pnlBadge = "";
+
+      if (trade.status === "OPEN") {
+        resBadge = `<span class="status-chip chip-cyan">En Curso</span>`;
+        pnlBadge = `<span class="text-muted">Abierto</span>`;
+      } else {
+        if (trade.resultR > 0) {
+          resBadge = `<span class="status-chip chip-sage">+${trade.resultR.toFixed(2)} R</span>`;
+          pnlBadge = `<span class="text-tertiary mono-num">+$${trade.pnlUSD.toFixed(2)}</span>`;
+        } else if (trade.resultR < 0) {
+          resBadge = `<span class="status-chip chip-error">${trade.resultR.toFixed(2)} R</span>`;
+          pnlBadge = `<span class="text-error mono-num">-$${Math.abs(trade.pnlUSD).toFixed(2)}</span>`;
+        } else {
+          resBadge = `<span class="status-chip chip-neutral">0.00 R (BE)</span>`;
+          pnlBadge = `<span class="mono-num">$0.00</span>`;
+        }
+      }
+
+      const planIcon = trade.followedPlan
+        ? `<i data-lucide="check" class="text-tertiary" style="width:14px; height:14px;"></i>`
+        : `<i data-lucide="x" class="text-error" style="width:14px; height:14px;"></i>`;
+
+      tr.innerHTML = `
+        <td>
+          <div style="font-weight:600; font-family:var(--font-label);">${trade.id}</div>
+          <div style="font-size:0.7rem; color:var(--on-surface-variant);">${trade.date}</div>
+        </td>
+        <td><strong>${trade.symbol}</strong></td>
+        <td><span class="status-chip ${dirClass}">${trade.direction}</span></td>
+        <td class="mono-num">$${trade.entry.toFixed(2)}</td>
+        <td class="mono-num text-error">$${trade.stopLoss.toFixed(2)}</td>
+        <td class="mono-num text-tertiary">$${trade.takeProfit.toFixed(2)}</td>
+        <td class="mono-num text-primary">1 : ${trade.plannedRR.toFixed(2)}</td>
+        <td style="font-size:0.75rem;">${trade.pattern}</td>
+        <td>${resBadge}</td>
+        <td>${pnlBadge}</td>
+        <td><span class="status-chip chip-neutral" style="font-size:0.7rem;">${trade.emotion}</span></td>
+        <td>${planIcon}</td>
+        <td style="text-align:right;">
+          ${trade.status === "OPEN" ?
+            `<button class="btn btn-primary btn-sm" onclick="openCloseModal('${trade.id}')">Cerrar</button>` :
+            `<button class="btn btn-secondary btn-sm" onclick="deleteTrade('${trade.id}')" title="Eliminar"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>`
+          }
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons();
+    }
+  }
+
+  function deleteTrade(tradeId) {
+    if (!confirm("¿Deseas eliminar este trade de la bitácora?")) return;
+    appState.journal = appState.journal.filter(t => t.id !== tradeId);
+    saveActiveAppState();
+    renderJournalTable();
+    updateGlobalMetrics();
+  }
+
+  function clearAllJournalData() {
+    if (!confirm("¿Estás seguro de vaciar todas las operaciones del Journal?")) return;
+    appState.journal = [];
+    saveActiveAppState();
+    renderJournalTable();
+    updateGlobalMetrics();
+  }
+
+  function resetToSampleData() {
+    appState.journal = JSON.parse(JSON.stringify(DEFAULT_SAMPLE_TRADES));
+    saveActiveAppState();
+    renderJournalTable();
+    updateGlobalMetrics();
+    alert("Datos de demostración cargados exitosamente.");
+  }
+
+  /* Close Trade Modal Handlers */
+  let activeModalTrade = null;
+
+  function openCloseModal(tradeId) {
+    activeModalTrade = appState.journal.find(t => t.id === tradeId);
+    if (!activeModalTrade) return;
+
+    document.getElementById("modalTradeId").value = tradeId;
+    document.getElementById("modalOutcome").value = "TP";
+    document.getElementById("modalExitPrice").value = activeModalTrade.takeProfit;
+    document.getElementById("modalResultR").value = activeModalTrade.plannedRR;
+    document.getElementById("closeTradeModal").classList.add("open");
+  }
+
+  function closeModal() {
+    document.getElementById("closeTradeModal").classList.remove("open");
+    activeModalTrade = null;
+  }
+
+  function onModalOutcomeChange() {
+    if (!activeModalTrade) return;
+    const outcome = document.getElementById("modalOutcome").value;
+    const exitInput = document.getElementById("modalExitPrice");
+    const rInput = document.getElementById("modalResultR");
+
+    if (outcome === "TP") {
+      exitInput.value = activeModalTrade.takeProfit;
+      rInput.value = activeModalTrade.plannedRR;
+    } else if (outcome === "SL") {
+      exitInput.value = activeModalTrade.stopLoss;
+      rInput.value = -1.0;
+    } else if (outcome === "BE") {
+      exitInput.value = activeModalTrade.entry;
+      rInput.value = 0.0;
+    }
+  }
+
+  function confirmCloseTrade() {
+    if (!activeModalTrade) return;
+
+    const outcome = document.getElementById("modalOutcome").value;
+    const exitPrice = parseFloat(document.getElementById("modalExitPrice").value) || activeModalTrade.entry;
+    const resultR = parseFloat(document.getElementById("modalResultR").value) || 0;
+    const emotion = document.getElementById("modalEmotion").value;
+    const lesson = document.getElementById("modalLesson").value;
+
+    const riskUSD = activeModalTrade.riskUSD || (appState.accountBalance * 0.01);
+    const pnlUSD = resultR * riskUSD;
+
+    activeModalTrade.exitPrice = exitPrice;
+    activeModalTrade.resultR = resultR;
+    activeModalTrade.pnlUSD = pnlUSD;
+    activeModalTrade.emotion = emotion;
+    activeModalTrade.status = "CLOSED";
+    if (lesson) activeModalTrade.notes += " | Salida: " + lesson;
+
+    closeModal();
+    saveActiveAppState();
+    renderJournalTable();
+    updateGlobalMetrics();
+  }
+
+  /* ==========================================================================
+     MATHEMATICAL EXPECTANCY & METRICS AGGREGATION
+     ========================================================================== */
+
+  function updateGlobalMetrics() {
+    const closedTrades = appState.journal.filter(t => t.status === "CLOSED" && t.resultR !== null);
+
+    const balance = appState.accountBalance || 10000;
+    const riskPct = appState.riskPercentage || 1.0;
+    const riskUSD = balance * (riskPct / 100);
+
+    document.getElementById("kpiBalance").textContent = "$" + balance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById("kpiRiskPct").textContent = riskPct.toFixed(1) + "% ($" + riskUSD.toFixed(0) + ")";
+
+    if (closedTrades.length === 0) {
+      document.getElementById("kpiExpectancyR").textContent = "0.00 R";
+      document.getElementById("kpiExpectancyUSD").textContent = "$0.00 / trade";
+      document.getElementById("kpiWinRate").textContent = "0.0%";
+      document.getElementById("kpiWinLossRatio").textContent = "0W - 0L (0 trades)";
+      document.getElementById("kpiPayoff").textContent = "0.00 : 1";
+      document.getElementById("kpiKelly").textContent = "0.0%";
+      document.getElementById("kpiTotalR").textContent = "0.00 R";
+      document.getElementById("kpiTotalPnL").textContent = "$0.00";
+      document.getElementById("kpiProfitFactor").textContent = "0.00";
+      return;
+    }
+
+    const wins = closedTrades.filter(t => t.resultR > 0);
+    const losses = closedTrades.filter(t => t.resultR < 0);
+    const bes = closedTrades.filter(t => t.resultR === 0);
+
+    const totalTrades = closedTrades.length;
+    const winRate = wins.length / totalTrades;
+    const lossRate = losses.length / totalTrades;
+
+    // Average Win R and Average Loss R
+    const sumWinR = wins.reduce((acc, t) => acc + t.resultR, 0);
+    const sumLossR = losses.reduce((acc, t) => acc + Math.abs(t.resultR), 0);
+    const avgWinR = wins.length > 0 ? (sumWinR / wins.length) : 0;
+    const avgLossR = losses.length > 0 ? (sumLossR / losses.length) : 1;
+
+    // Mathematical Expectancy in R: E(R) = (W * AvgWin) - (L * AvgLoss)
+    const expectancyR = (winRate * avgWinR) - (lossRate * avgLossR);
+    const expectancyUSD = expectancyR * riskUSD;
+
+    // Payoff Ratio = AvgWin / AvgLoss
+    const payoff = avgLossR > 0 ? (avgWinR / avgLossR) : avgWinR;
+
+    // Kelly Criterion % = W - [(1 - W) / Payoff]
+    let kellyPct = 0;
+    if (payoff > 0) {
+      kellyPct = (winRate - ((1 - winRate) / payoff)) * 100;
+    }
+    const quarterKelly = Math.max(0, kellyPct / 4);
+
+    // Cumulative R and PnL
+    const totalR = closedTrades.reduce((acc, t) => acc + t.resultR, 0);
+    const totalPnL = closedTrades.reduce((acc, t) => acc + t.pnlUSD, 0);
+
+    // Profit Factor = Total Gross Profit / Total Gross Loss
+    const grossProfit = wins.reduce((acc, t) => acc + t.pnlUSD, 0);
+    const grossLoss = Math.abs(losses.reduce((acc, t) => acc + t.pnlUSD, 0));
+    const profitFactor = grossLoss > 0 ? (grossProfit / grossLoss) : (grossProfit > 0 ? 99.9 : 0);
+
+    // Streaks calculation
+    let currentStreak = 0;
+    let currentStreakType = "";
+    let maxWinStreak = 0;
+    let maxLossStreak = 0;
+    let tempWin = 0;
+    let tempLoss = 0;
+
+    closedTrades.slice().reverse().forEach(t => {
+      if (t.resultR > 0) {
+        tempWin++;
+        tempLoss = 0;
+        if (tempWin > maxWinStreak) maxWinStreak = tempWin;
+      } else if (t.resultR < 0) {
+        tempLoss++;
+        tempWin = 0;
+        if (tempLoss > maxLossStreak) maxLossStreak = tempLoss;
+      }
+    });
+
+    if (closedTrades.length > 0) {
+      const last = closedTrades[0];
+      if (last.resultR > 0) {
+        currentStreakType = "Ganadores";
+        for (let i = 0; i < closedTrades.length; i++) {
+          if (closedTrades[i].resultR > 0) currentStreak++;
+          else break;
+        }
+      } else if (last.resultR < 0) {
+        currentStreakType = "Perdedores";
+        for (let i = 0; i < closedTrades.length; i++) {
+          if (closedTrades[i].resultR < 0) currentStreak++;
+          else break;
+        }
+      }
+    }
+
+    // Populate Top Bar KPIs
+    const kpiExpR = document.getElementById("kpiExpectancyR");
+    kpiExpR.textContent = (expectancyR >= 0 ? "+" : "") + expectancyR.toFixed(2) + " R";
+    kpiExpR.className = "kpi-value " + (expectancyR >= 0 ? "text-tertiary" : "text-error");
+
+    document.getElementById("kpiExpectancyUSD").textContent = (expectancyUSD >= 0 ? "+$" : "-$") + Math.abs(expectancyUSD).toFixed(2) + " / trade";
+
+    document.getElementById("kpiWinRate").textContent = (winRate * 100).toFixed(1) + "%";
+    document.getElementById("kpiWinLossRatio").textContent = wins.length + "W - " + losses.length + "L (" + totalTrades + " trades)";
+
+    document.getElementById("kpiPayoff").textContent = payoff.toFixed(2) + " : 1";
+    document.getElementById("kpiKelly").textContent = (kellyPct > 0 ? kellyPct.toFixed(1) + "%" : "0.0%") + " (1/4 K: " + quarterKelly.toFixed(1) + "%)";
+
+    const kpiTotR = document.getElementById("kpiTotalR");
+    kpiTotR.textContent = (totalR >= 0 ? "+" : "") + totalR.toFixed(2) + " R";
+    kpiTotR.className = "kpi-value " + (totalR >= 0 ? "text-tertiary" : "text-error");
+
+    const kpiPnL = document.getElementById("kpiTotalPnL");
+    kpiPnL.textContent = (totalPnL >= 0 ? "+$" : "-$") + Math.abs(totalPnL).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    kpiPnL.className = "mono-num " + (totalPnL >= 0 ? "text-tertiary" : "text-error");
+
+    document.getElementById("kpiProfitFactor").textContent = profitFactor.toFixed(2);
+
+    // Populate Section 3 Math Cards
+    document.getElementById("mathExpR").textContent = (expectancyR >= 0 ? "+" : "") + expectancyR.toFixed(2) + " R";
+    document.getElementById("mathExpR").className = "kpi-value " + (expectancyR >= 0 ? "text-tertiary" : "text-error");
+    document.getElementById("mathExpRDesc").textContent = (expectancyR >= 0 ? "+" : "") + expectancyR.toFixed(2) + "R ($" + expectancyUSD.toFixed(2) + ")";
+
+    document.getElementById("mathKellyPct").textContent = (kellyPct > 0 ? kellyPct.toFixed(1) + "%" : "0.0%");
+    document.getElementById("mathQuarterKelly").textContent = quarterKelly.toFixed(1) + "%";
+    document.getElementById("mathProfitFactor").textContent = profitFactor.toFixed(2);
+    document.getElementById("mathStreaks").textContent = "Max W: " + maxWinStreak + " | Max L: " + maxLossStreak;
+
+    const currStrkEl = document.getElementById("mathCurrentStreak");
+    if (currStrkEl) {
+      currStrkEl.textContent = currentStreak + " " + currentStreakType;
+      currStrkEl.className = currentStreakType === "Ganadores" ? "text-tertiary" : "text-error";
+    }
+
+    renderEquityChart();
+  }
+
+  /* ==========================================================================
+     EQUITY & R-MULTIPLE CHART ENGINE (CHART.JS)
+     ========================================================================== */
+
+  function setChartMode(mode) {
+    appState.chartMode = mode;
+    const bR = document.getElementById("btnToggleChartR");
+    const bUSD = document.getElementById("btnToggleChartUSD");
+    if (bR && bUSD) {
+      if (mode === "R") {
+        bR.classList.add("btn-primary");
+        bR.classList.remove("btn-secondary");
+        bUSD.classList.add("btn-secondary");
+        bUSD.classList.remove("btn-primary");
+      } else {
+        bUSD.classList.add("btn-primary");
+        bUSD.classList.remove("btn-secondary");
+        bR.classList.add("btn-secondary");
+        bR.classList.remove("btn-primary");
+      }
+    }
+    renderEquityChart();
+  }
+
+  function renderEquityChart() {
+    const canvas = document.getElementById("equityChart");
+    if (!canvas) return;
+
+    const closedTrades = appState.journal
+      .filter(t => t.status === "CLOSED" && t.resultR !== null)
+      .slice()
+      .reverse(); // chronological order
+
+    const labels = ["Inicio"];
+    const dataPoints = [appState.chartMode === "R" ? 0 : appState.accountBalance];
+
+    let cumR = 0;
+    let cumBalance = appState.accountBalance;
+
+    closedTrades.forEach(function (t, idx) {
+      labels.push("T" + (idx + 1) + " (" + t.symbol + ")");
+      if (appState.chartMode === "R") {
+        cumR += t.resultR;
+        dataPoints.push(parseFloat(cumR.toFixed(2)));
+      } else {
+        cumBalance += t.pnlUSD;
+        dataPoints.push(parseFloat(cumBalance.toFixed(2)));
+      }
+    });
+
+    if (equityChartInstance) {
+      equityChartInstance.destroy();
+    }
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Create gradient fill
+    const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+    gradient.addColorStop(0, "rgba(99, 199, 214, 0.28)");
+    gradient.addColorStop(1, "rgba(99, 199, 214, 0.0)");
+
+    equityChartInstance = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: appState.chartMode === "R" ? "R Acumulado" : "Saldo de Cuenta ($ USD)",
+          data: dataPoints,
+          borderColor: "#63c7d6",
+          borderWidth: 2.2,
+          pointBackgroundColor: "#87d69b",
+          pointBorderColor: "#0c1214",
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          backgroundColor: gradient,
+          tension: 0.25
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              color: "#edf3f5",
+              font: { family: "Geist Mono", size: 11 }
+            }
+          },
+          tooltip: {
+            backgroundColor: "#1c2a30",
+            titleColor: "#edf3f5",
+            bodyColor: "#63c7d6",
+            borderColor: "#38515c",
+            borderWidth: 1,
+            titleFont: { family: "Geist Mono" },
+            bodyFont: { family: "Geist Mono" },
+            callbacks: {
+              label: function (context) {
+                return appState.chartMode === "R"
+                  ? context.parsed.y + " R"
+                  : "$" + context.parsed.y.toLocaleString("en-US", { minimumFractionDigits: 2 });
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: "#213138" },
+            ticks: {
+              color: "#94a8b0",
+              font: { family: "Geist Mono", size: 10 }
+            }
+          },
+          y: {
+            grid: { color: "#213138" },
+            ticks: {
+              color: "#94a8b0",
+              font: { family: "Geist Mono", size: 10 },
+              callback: function (val) {
+                return appState.chartMode === "R" ? val + "R" : "$" + val;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /* ==========================================================================
+     18 CANDLESTICK PATTERNS CATALOG ENGINE & SVG VISUALS
+     ========================================================================== */
+
+  function renderPatternsGrid(filterCat) {
+    const grid = document.getElementById("patternsGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    const filtered = CANDLESTICK_PATTERNS.filter(function (p) {
+      if (filterCat === "ALL") return true;
+      return p.category === filterCat;
+    });
+
+    filtered.forEach(function (pattern) {
+      const card = document.createElement("div");
+      card.className = "pattern-card";
+      card.setAttribute("data-pattern-name", pattern.name);
+      card.onclick = function () {
+        selectPatternFromCatalog(pattern.name);
+      };
+
+      let effBadge = "chip-cyan";
+      if (pattern.effectiveness === "Alta") effBadge = "chip-sage";
+      else if (pattern.effectiveness === "Baja") effBadge = "chip-neutral";
+      else effBadge = "chip-warning";
+
+      const catBadge = pattern.category === "ALCISTA" ? "chip-sage" : (pattern.category === "BAJISTA" ? "chip-error" : "chip-neutral");
+
+      const svgDiagram = generateCandleSVG(pattern.svgType);
+
+      card.innerHTML = `
+        <div class="pattern-preview-box">
+          ${svgDiagram}
         </div>
-      </div>
-    `).join('') || '<p class="muted">Esta estrategia no tiene reglas previas.</p>';
-}
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+          <span style="font-weight:600; font-size:0.875rem;">${pattern.name}</span>
+          <span class="status-chip ${catBadge}" style="font-size:0.65rem; padding:1px 5px;">${pattern.category}</span>
+        </div>
+        <div style="display:flex; gap:4px; font-size:0.7rem; color:var(--on-surface-variant);">
+          <span>${pattern.type}</span> •
+          <span class="status-chip ${effBadge}" style="font-size:0.65rem; padding:1px 4px;">Eficacia ${pattern.effectiveness}</span>
+        </div>
+        <p style="font-size:0.75rem; color:var(--on-surface-variant); line-height:1.35; margin-top:2px;">
+          ${pattern.description}
+        </p>
+      `;
 
-function calculate() {
-  const riskPct = Number(document.getElementById('riskPct').value) / 100;
+      grid.appendChild(card);
+    });
+  }
 
-  const data = {
-    capital: Number(document.getElementById('capital').value),
-    entry: Number(document.getElementById('entry').value),
-    stop: Number(document.getElementById('stop').value),
-    rr: Number(document.getElementById('rr').value),
-    riskPct: riskPct,
-    mode: document.getElementById('mode').value
-  };
+  function filterPatterns(cat) {
+    renderPatternsGrid(cat);
+  }
 
-  callApi('api_calculatePosition', data, result => {
-    APP.lastCalculation = result;
+  function generateCandleSVG(type) {
+    // Generates precise vector representations of candlestick patterns
+    const green = "#87d69b";
+    const red = "#f27474";
+    const neutral = "#edf3f5";
 
-    if (!result.ok) {
-      document.getElementById('calcResult').className = 'status warning';
-      document.getElementById('calcResult').textContent =
-        result.reason + '\nNominal calculado: ' + money(result.notional);
+    switch (type) {
+      case "hammer":
+        return `
+          <svg width="60" height="60" viewBox="0 0 60 60">
+            <!-- Candle 1: small body on top, long lower wick 2x -->
+            <line x1="30" y1="12" x2="30" y2="16" stroke="${green}" stroke-width="2"/>
+            <rect x="23" y="16" width="14" height="10" rx="1" fill="${green}"/>
+            <line x1="30" y1="26" x2="30" y2="52" stroke="${green}" stroke-width="2"/>
+          </svg>
+        `;
+      case "inverted-hammer":
+        return `
+          <svg width="60" height="60" viewBox="0 0 60 60">
+            <!-- Inverted Hammer: body on bottom, long upper wick 2x -->
+            <line x1="30" y1="8" x2="30" y2="34" stroke="${green}" stroke-width="2"/>
+            <rect x="23" y="34" width="14" height="10" rx="1" fill="${green}"/>
+            <line x1="30" y1="44" x2="30" y2="48" stroke="${green}" stroke-width="2"/>
+          </svg>
+        `;
+      case "shooting-star":
+        return `
+          <svg width="60" height="60" viewBox="0 0 60 60">
+            <line x1="30" y1="8" x2="30" y2="34" stroke="${red}" stroke-width="2"/>
+            <rect x="23" y="34" width="14" height="10" rx="1" fill="${red}"/>
+            <line x1="30" y1="44" x2="30" y2="48" stroke="${red}" stroke-width="2"/>
+          </svg>
+        `;
+      case "hanging-man":
+        return `
+          <svg width="60" height="60" viewBox="0 0 60 60">
+            <line x1="30" y1="12" x2="30" y2="16" stroke="${red}" stroke-width="2"/>
+            <rect x="23" y="16" width="14" height="10" rx="1" fill="${red}"/>
+            <line x1="30" y1="26" x2="30" y2="52" stroke="${red}" stroke-width="2"/>
+          </svg>
+        `;
+      case "bullish-engulfing":
+        return `
+          <svg width="80" height="60" viewBox="0 0 80 60">
+            <!-- Red candle small -->
+            <line x1="25" y1="18" x2="25" y2="42" stroke="${red}" stroke-width="1.5"/>
+            <rect x="20" y="24" width="10" height="12" rx="1" fill="${red}"/>
+            <!-- Green candle engulfs -->
+            <line x1="50" y1="10" x2="50" y2="50" stroke="${green}" stroke-width="2"/>
+            <rect x="42" y="15" width="16" height="30" rx="1" fill="${green}"/>
+          </svg>
+        `;
+      case "bearish-engulfing":
+        return `
+          <svg width="80" height="60" viewBox="0 0 80 60">
+            <!-- Green candle small -->
+            <line x1="25" y1="18" x2="25" y2="42" stroke="${green}" stroke-width="1.5"/>
+            <rect x="20" y="24" width="10" height="12" rx="1" fill="${green}"/>
+            <!-- Red candle engulfs -->
+            <line x1="50" y1="10" x2="50" y2="50" stroke="${red}" stroke-width="2"/>
+            <rect x="42" y="15" width="16" height="30" rx="1" fill="${red}"/>
+          </svg>
+        `;
+      case "dragonfly-doji":
+        return `
+          <svg width="60" height="60" viewBox="0 0 60 60">
+            <line x1="18" y1="18" x2="42" y2="18" stroke="${green}" stroke-width="3"/>
+            <line x1="30" y1="18" x2="30" y2="52" stroke="${green}" stroke-width="2"/>
+          </svg>
+        `;
+      case "gravestone-doji":
+        return `
+          <svg width="60" height="60" viewBox="0 0 60 60">
+            <line x1="18" y1="46" x2="42" y2="46" stroke="${red}" stroke-width="3"/>
+            <line x1="30" y1="12" x2="30" y2="46" stroke="${red}" stroke-width="2"/>
+          </svg>
+        `;
+      case "morning-star":
+        return `
+          <svg width="90" height="60" viewBox="0 0 90 60">
+            <!-- 1. Bearish large -->
+            <line x1="20" y1="12" x2="20" y2="46" stroke="${red}" stroke-width="1.5"/>
+            <rect x="14" y="18" width="12" height="22" rx="1" fill="${red}"/>
+            <!-- 2. Small indecision star gap down -->
+            <line x1="45" y1="40" x2="45" y2="54" stroke="${neutral}" stroke-width="1.5"/>
+            <rect x="40" y="44" width="10" height="6" rx="1" fill="${neutral}"/>
+            <!-- 3. Bullish large penetrating >50% -->
+            <line x1="70" y1="15" x2="70" y2="48" stroke="${green}" stroke-width="1.5"/>
+            <rect x="64" y="20" width="12" height="20" rx="1" fill="${green}"/>
+          </svg>
+        `;
+      case "evening-star":
+        return `
+          <svg width="90" height="60" viewBox="0 0 90 60">
+            <!-- 1. Bullish large -->
+            <line x1="20" y1="16" x2="20" y2="48" stroke="${green}" stroke-width="1.5"/>
+            <rect x="14" y="22" width="12" height="20" rx="1" fill="${green}"/>
+            <!-- 2. Small indecision star gap up -->
+            <line x1="45" y1="6" x2="45" y2="20" stroke="${neutral}" stroke-width="1.5"/>
+            <rect x="40" y="10" width="10" height="6" rx="1" fill="${neutral}"/>
+            <!-- 3. Bearish large penetrating >50% -->
+            <line x1="70" y1="14" x2="70" y2="50" stroke="${red}" stroke-width="1.5"/>
+            <rect x="64" y="20" width="12" height="22" rx="1" fill="${red}"/>
+          </svg>
+        `;
+      case "dark-cloud-cover":
+        return `
+          <svg width="80" height="60" viewBox="0 0 80 60">
+            <!-- Green candle -->
+            <line x1="25" y1="14" x2="25" y2="48" stroke="${green}" stroke-width="1.5"/>
+            <rect x="19" y="18" width="12" height="24" rx="1" fill="${green}"/>
+            <!-- Red candle gaps up, closes below 50% -->
+            <line x1="48" y1="10" x2="48" y2="46" stroke="${red}" stroke-width="1.5"/>
+            <rect x="42" y="14" width="12" height="22" rx="1" fill="${red}"/>
+          </svg>
+        `;
+      case "piercing-line":
+        return `
+          <svg width="80" height="60" viewBox="0 0 80 60">
+            <!-- Red candle -->
+            <line x1="25" y1="12" x2="25" y2="46" stroke="${red}" stroke-width="1.5"/>
+            <rect x="19" y="16" width="12" height="24" rx="1" fill="${red}"/>
+            <!-- Green candle gaps down, closes above 50% -->
+            <line x1="48" y1="16" x2="48" y2="50" stroke="${green}" stroke-width="1.5"/>
+            <rect x="42" y="22" width="12" height="22" rx="1" fill="${green}"/>
+          </svg>
+        `;
+      case "three-white-soldiers":
+        return `
+          <svg width="90" height="60" viewBox="0 0 90 60">
+            <rect x="12" y="32" width="11" height="18" rx="1" fill="${green}"/>
+            <line x1="17.5" y1="28" x2="17.5" y2="52" stroke="${green}" stroke-width="1.5"/>
+
+            <rect x="36" y="22" width="11" height="18" rx="1" fill="${green}"/>
+            <line x1="41.5" y1="18" x2="41.5" y2="42" stroke="${green}" stroke-width="1.5"/>
+
+            <rect x="60" y="12" width="11" height="18" rx="1" fill="${green}"/>
+            <line x1="65.5" y1="8" x2="65.5" y2="32" stroke="${green}" stroke-width="1.5"/>
+          </svg>
+        `;
+      case "three-black-crows":
+        return `
+          <svg width="90" height="60" viewBox="0 0 90 60">
+            <rect x="12" y="10" width="11" height="18" rx="1" fill="${red}"/>
+            <line x1="17.5" y1="8" x2="17.5" y2="30" stroke="${red}" stroke-width="1.5"/>
+
+            <rect x="36" y="20" width="11" height="18" rx="1" fill="${red}"/>
+            <line x1="41.5" y1="18" x2="41.5" y2="40" stroke="${red}" stroke-width="1.5"/>
+
+            <rect x="60" y="30" width="11" height="18" rx="1" fill="${red}"/>
+            <line x1="65.5" y1="28" x2="65.5" y2="50" stroke="${red}" stroke-width="1.5"/>
+          </svg>
+        `;
+      case "bullish-harami":
+        return `
+          <svg width="70" height="60" viewBox="0 0 70 60">
+            <!-- Large red -->
+            <line x1="22" y1="10" x2="22" y2="50" stroke="${red}" stroke-width="1.5"/>
+            <rect x="16" y="16" width="12" height="28" rx="1" fill="${red}"/>
+            <!-- Small green inside -->
+            <line x1="42" y1="24" x2="42" y2="38" stroke="${green}" stroke-width="1.5"/>
+            <rect x="37" y="26" width="10" height="10" rx="1" fill="${green}"/>
+          </svg>
+        `;
+      case "bearish-harami":
+        return `
+          <svg width="70" height="60" viewBox="0 0 70 60">
+            <!-- Large green -->
+            <line x1="22" y1="10" x2="22" y2="50" stroke="${green}" stroke-width="1.5"/>
+            <rect x="16" y="16" width="12" height="28" rx="1" fill="${green}"/>
+            <!-- Small red inside -->
+            <line x1="42" y1="24" x2="42" y2="38" stroke="${red}" stroke-width="1.5"/>
+            <rect x="37" y="26" width="10" height="10" rx="1" fill="${red}"/>
+          </svg>
+        `;
+      case "classic-doji":
+        return `
+          <svg width="60" height="60" viewBox="0 0 60 60">
+            <line x1="30" y1="14" x2="30" y2="46" stroke="${neutral}" stroke-width="2"/>
+            <line x1="20" y1="30" x2="40" y2="30" stroke="${neutral}" stroke-width="2.5"/>
+          </svg>
+        `;
+      case "long-legged-doji":
+        return `
+          <svg width="60" height="60" viewBox="0 0 60 60">
+            <line x1="30" y1="6" x2="30" y2="54" stroke="${neutral}" stroke-width="2"/>
+            <line x1="20" y1="30" x2="40" y2="30" stroke="${neutral}" stroke-width="2.5"/>
+          </svg>
+        `;
+      default:
+        return `<svg width="40" height="40"></svg>`;
+    }
+  }
+
+  /* ==========================================================================
+     PERSISTENCE & EXPORT API
+     ========================================================================== */
+
+  async function saveActiveAppState() {
+    if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === "function") {
+      try {
+        await window.notebookAppApi.setAppState({
+          accountBalance: appState.accountBalance,
+          riskPercentage: appState.riskPercentage,
+          currentSessionBias: appState.currentSessionBias,
+          checks: appState.checks,
+          routineNotes: appState.routineNotes,
+          journal: appState.journal,
+          chartMode: appState.chartMode
+        });
+      } catch (e) {
+        console.warn("Error persistiendo estado:", e);
+      }
+    }
+  }
+
+  function exportJournalCSV() {
+    if (!appState.journal || appState.journal.length === 0) {
+      alert("No hay registros para exportar en la bitácora.");
       return;
     }
 
-    document.getElementById('calcResult').className = 'status success';
-    document.getElementById('calcResult').textContent =
-      'Cantidad: ' + result.quantity +
-      '\nValor nominal: ' + money(result.notional) +
-      '\nRiesgo estimado: ' + money(result.estimatedRisk) +
-      '\nPresupuesto de riesgo: ' + money(result.riskBudget) +
-      '\nTake Profit: ' + result.takeProfit +
-      '\nBeneficio neto estimado: ' + money(result.netPotential);
-  });
-}
+    const headers = [
+      "ID",
+      "Fecha",
+      "Activo",
+      "Direccion",
+      "Entrada",
+      "StopLoss",
+      "TakeProfit",
+      "SalidaReal",
+      "RiesgoUSD",
+      "RR_Plan",
+      "ResultadoR",
+      "PnL_USD",
+      "Estrategia",
+      "PatronVela",
+      "EstadoEmocional",
+      "RespetoPlan",
+      "Notas"
+    ];
 
-function authorizeTrade() {
-  const strategyId = getSelectedStrategy();
-  const rules = getRules(strategyId, 'PRE');
-  const answers = {};
+    const rows = appState.journal.map(function (t) {
+      return [
+        t.id,
+        `"${t.date}"`,
+        t.symbol,
+        t.direction,
+        t.entry,
+        t.stopLoss,
+        t.takeProfit,
+        t.exitPrice !== null ? t.exitPrice : "",
+        t.riskUSD,
+        t.plannedRR,
+        t.resultR !== null ? t.resultR : "",
+        t.pnlUSD !== null ? t.pnlUSD : "",
+        `"${t.strategy}"`,
+        `"${t.pattern}"`,
+        `"${t.emotion}"`,
+        t.followedPlan ? "SI" : "NO",
+        `"${(t.notes || '').replace(/"/g, '""')}"`
+      ].join(",");
+    });
 
-  rules.forEach(r => {
-    const checkbox = document.getElementById('pre_' + r.ID_REGLA);
-    if (checkbox) answers[r.ID_REGLA] = checkbox.checked;
-  });
+    const csvContent = headers.join(",") + "\n" + rows.join("\n");
 
-  const riskPct = Number(document.getElementById('riskPct').value) / 100;
-
-  const data = {
-    strategyId,
-    symbol: document.getElementById('symbol').value.trim(),
-    direction: 'LONG',
-    capital: Number(document.getElementById('capital').value),
-    entry: Number(document.getElementById('entry').value),
-    stop: Number(document.getElementById('stop').value),
-    rr: Number(document.getElementById('rr').value),
-    riskPct,
-    mode: document.getElementById('mode').value,
-    calculatedRisk: APP.lastCalculation?.estimatedRisk,
-    riskBudget: APP.lastCalculation?.riskBudget,
-    answers
-  };
-
-  if (!APP.lastCalculation || !APP.lastCalculation.ok) {
-    document.getElementById('authorizeResult').className = 'status error';
-    document.getElementById('authorizeResult').textContent =
-      'Primero debes calcular una posición válida.';
-    return;
-  }
-
-  callApi('api_authorizeTrade', data, result => {
-    const box = document.getElementById('authorizeResult');
-
-    if (!result.authorized) {
-      box.className = 'status error';
-      box.textContent = 'OPERACIÓN BLOQUEADA:\n' +
-        result.missing.map(x => '• ' + x).join('\n');
-      return;
+    if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === "function") {
+      window.notebookAppApi.triggerFileDownload({
+        content: csvContent,
+        contentType: "text/csv",
+        encoding: "UTF-8",
+        filename: "cuaderno_trading_v540.csv"
+      });
+    } else {
+      // Fallback
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "cuaderno_trading_v540.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
-
-    box.className = 'status success';
-    box.textContent = 'Operación registrada: ' + result.tradeId +
-      '\nCantidad: ' + result.calculation.quantity;
-
-    loadApp();
-    showTab('journal');
-  });
-}
-
-function createStrategy() {
-  const data = {
-    nombre: document.getElementById('newStrategyName').value,
-    timeframe: document.getElementById('newStrategyTimeframe').value
-  };
-
-  callApi('api_createStrategy', data, result => {
-    alert('Estrategia creada: ' + result.id);
-    document.getElementById('newStrategyName').value = '';
-    document.getElementById('newStrategyTimeframe').value = '';
-    loadApp();
-  });
-}
-
-function addRule() {
-  const data = {
-    strategyId: document.getElementById('ruleStrategy').value,
-    fase: document.getElementById('rulePhase').value,
-    descripcion: document.getElementById('ruleDescription').value,
-    obligatoria: document.getElementById('ruleMandatory').checked
-  };
-
-  callApi('api_addRule', data, result => {
-    alert('Regla agregada: ' + result.id);
-    document.getElementById('ruleDescription').value = '';
-    loadApp();
-  });
-}
-
-function renderRules() {
-  const rows = APP.rules.map(r => `
-    <tr>
-      <td>${escapeHtml(r.ID_REGLA)}</td>
-      <td>${escapeHtml(r.FASE)}</td>
-      <td>${escapeHtml(r.DESCRIPCION)}</td>
-      <td>${r.OBLIGATORIA ? 'Sí' : 'No'}</td>
-      <td>${r.ACTIVA ? 'Sí' : 'No'}</td>
-      <td>
-        ${r.ACTIVA
-          ? `<button class="danger" onclick="deactivateRule('${escapeHtml(r.ID_REGLA)}')">Desactivar</button>`
-          : '—'}
-      </td>
-    </tr>
-  `).join('');
-
-  document.getElementById('rulesTable').innerHTML = rows;
-}
-
-function deactivateRule(id) {
-  if (!confirm('¿Desactivar esta regla? La estrategia pasará a una nueva versión.')) return;
-
-  callApi('api_deactivateRule', id, () => {
-    alert('Regla desactivada.');
-    loadApp();
-  });
-}
-
-function renderTrades() {
-  const rows = APP.trades.slice().reverse().map(t => `
-    <tr>
-      <td>${escapeHtml(t.ID)}</td>
-      <td>${t.FECHA_APERTURA ? new Date(t.FECHA_APERTURA).toLocaleString() : ''}</td>
-      <td>${escapeHtml(t.SIMBOLO)}</td>
-      <td>${escapeHtml(t.ENTRADA)}</td>
-      <td>${escapeHtml(t.STOP_LOSS)}</td>
-      <td>${escapeHtml(t.TAKE_PROFIT)}</td>
-      <td>${escapeHtml(t.CANTIDAD)}</td>
-      <td>${escapeHtml(t.ESTADO)}</td>
-      <td>${t.PNL_NETO === '' ? '—' : money(t.PNL_NETO)}</td>
-      <td>
-        <button onclick="openTrade('${escapeHtml(t.ID)}')">Ver</button>
-      </td>
-    </tr>
-  `).join('');
-
-  document.getElementById('tradesTable').innerHTML =
-    rows || '<tr><td colspan="10">Todavía no hay operaciones.</td></tr>';
-}
-
-function openTrade(tradeId) {
-  const trade = APP.trades.find(t => t.ID === tradeId);
-  if (!trade) return;
-
-  document.getElementById('tradeDetail').classList.remove('hidden');
-  document.getElementById('detailTradeId').value = tradeId;
-  document.getElementById('detailTitle').textContent =
-    'Seguimiento · ' + tradeId + ' · ' + trade.ESTADO;
-
-  renderPhaseChecklist(trade, 'DURANTE', 'duringChecklist');
-  renderPhaseChecklist(trade, 'DESPUES', 'postChecklist');
-
-  showTab('journal');
-}
-
-function renderPhaseChecklist(trade, phase, targetId) {
-  const rules = getRules(trade.ESTRATEGIA_ID, phase);
-
-  document.getElementById(targetId).innerHTML =
-    rules.map(r => `
-      <div class="rule">
-        <input type="checkbox" id="${phase}_${escapeHtml(r.ID_REGLA)}">
-        <div class="rule-text">${escapeHtml(r.DESCRIPCION)}</div>
-      </div>
-    `).join('') || '<p class="muted">No hay reglas activas para esta fase.</p>';
-}
-
-function savePhase(phase) {
-  const tradeId = document.getElementById('detailTradeId').value;
-  const trade = APP.trades.find(t => t.ID === tradeId);
-  if (!trade) return;
-
-  const rules = getRules(trade.ESTRATEGIA_ID, phase);
-  const answers = {};
-
-  rules.forEach(r => {
-    const el = document.getElementById(phase + '_' + r.ID_REGLA);
-    if (el) answers[r.ID_REGLA] = el.checked;
-  });
-
-  const notes = {};
-  const noteText = phase === 'DURANTE'
-    ? document.getElementById('duringNotes').value
-    : document.getElementById('postNotes').value;
-
-  rules.forEach(r => notes[r.ID_REGLA] = noteText);
-
-  callApi('api_saveChecklist', {
-    tradeId, fase: phase, answers, notes
-  }, () => alert('Checklist ' + phase + ' guardado.'));
-}
-
-function closeTrade() {
-  const data = {
-    tradeId: document.getElementById('detailTradeId').value,
-    exit: Number(document.getElementById('exitPrice').value),
-    entryFee: Number(document.getElementById('entryFee').value),
-    exitFee: Number(document.getElementById('exitFee').value),
-    notes: document.getElementById('closeNotes').value
-  };
-
-  if (!data.exit || data.exit <= 0) {
-    alert('Introduce un precio de salida válido.');
-    return;
   }
-
-  if (!confirm('¿Confirmas el cierre y registro de esta operación?')) return;
-
-  callApi('api_closeTrade', data, result => {
-    document.getElementById('closeResult').className = 'status success';
-    document.getElementById('closeResult').textContent =
-      'Operación cerrada.\nPnL bruto: ' + money(result.gross) +
-      '\nPnL neto: ' + money(result.net) +
-      '\nResultado: ' + Number(result.resultR).toFixed(2) + ' R';
-
-    loadApp();
-  });
-}
-
-function renderConfig() {
-  const c = APP.config;
-
-  document.getElementById('cfgCapital').value = c.CAPITAL_USD;
-  document.getElementById('cfgRisk').value = Number(c.RIESGO_REAL_PCT) * 100;
-  document.getElementById('cfgTestRisk').value = Number(c.RIESGO_TEST_PCT) * 100;
-  document.getElementById('cfgFee').value = Number(c.FEE_RATE) * 100;
-  document.getElementById('cfgMin').value = c.MIN_NOTIONAL_USD;
-  document.getElementById('cfgRR').value = c.RR;
-}
-
-function saveConfig() {
-  const data = {
-    CAPITAL_USD: Number(document.getElementById('cfgCapital').value),
-    RIESGO_REAL_PCT: Number(document.getElementById('cfgRisk').value) / 100,
-    RIESGO_TEST_PCT: Number(document.getElementById('cfgTestRisk').value) / 100,
-    FEE_RATE: Number(document.getElementById('cfgFee').value) / 100,
-    MIN_NOTIONAL_USD: Number(document.getElementById('cfgMin').value),
-    RR: Number(document.getElementById('cfgRR').value)
-  };
-
-  callApi('api_saveConfig', data, result => {
-    APP.config = result.config;
-    document.getElementById('configResult').className = 'status success';
-    document.getElementById('configResult').textContent =
-      'Configuración guardada.';
-    renderDashboard();
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadApp();
-
-  document.getElementById('strategySelect')
-    .addEventListener('change', renderPreChecklist);
-});
 </script>
+
 </body>
 </html>
+
