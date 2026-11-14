@@ -1,0 +1,3670 @@
+<!DOCTYPE html>
+<html lang="es-419">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="dashboard">
+  <meta name="design-style" content="aurora">
+  <title>DISENK — TRADER JOURNAL | Consola Cuantitativa &amp; Estrategia A v3.7</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+
+      /* Aurora Palette */
+      --background: #0c1214;
+      --surface-container-low: #111a1e;
+      --surface-container: #152024;
+      --surface-container-high: #1c2a30;
+
+      --on-surface: #edf3f5;
+      --on-surface-variant: #94a8b0;
+
+      --outline: #38515c;
+      --outline-variant: #213138;
+
+      --primary: #63c7d6;
+      --on-primary: #081214;
+      --primary-container: #163840;
+      --on-primary-container: #c7f0f7;
+      --secondary: #5d7882;
+      --tertiary: #87d69b;
+      --error: #f27474;
+      --on-error: #1a0606;
+
+      /* Data series */
+      --data-1: #63c7d6;
+      --data-2: #87d69b;
+      --data-3: #e8b954;
+      --data-4: #f08c70;
+      --data-context: #415861;
+
+      /* Semantic */
+      --positive: #87d69b;
+      --warning: #e8b954;
+      --focus: #63c7d6;
+
+      /* Tints & Effects */
+      --panel-gradient: linear-gradient(180deg, #162226 0%, #111a1e 100%);
+      --sage-tint: color-mix(in srgb, var(--tertiary) 13%, transparent);
+      --cyan-tint: color-mix(in srgb, var(--primary) 13%, transparent);
+      --amber-tint: color-mix(in srgb, var(--warning) 14%, transparent);
+      --error-tint: color-mix(in srgb, var(--error) 14%, transparent);
+      --sage-border: color-mix(in srgb, var(--tertiary) 35%, transparent);
+      --cyan-border: color-mix(in srgb, var(--primary) 35%, transparent);
+      --amber-border: color-mix(in srgb, var(--warning) 38%, transparent);
+      --error-border: color-mix(in srgb, var(--error) 38%, transparent);
+      --hairline: 1px solid var(--outline-variant);
+      --hairline-strong: 1px solid var(--outline);
+
+      /* Typography */
+      --font-headline: 'Instrument Sans', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-label: 'Geist Mono', monospace;
+
+      --display-size: clamp(1.75rem, 1.4rem + 1.1vw, 2.25rem);
+      --headline-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+      --subhead-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+      --body-size: clamp(0.9375rem, 0.9rem + 0.12vw, 1rem);
+      --label-size: 0.75rem;
+
+      --heading-tracking: -0.025em;
+      --label-tracking: 0.06em;
+
+      /* Shape */
+      --rounded: 0.5rem;
+      --rounded-lg: 0.75rem;
+      --rounded-full: 9999px;
+
+      /* Spacing scale */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+      --dur-long: 420ms;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      overflow-x: clip;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    header { position: static !important; }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .page-grid {
+      display: grid;
+      gap: var(--space-lg);
+      padding: var(--space-lg);
+      max-width: 1380px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .page-grid * { min-width: 0; }
+
+    /* Header & Governance Bar */
+    .console-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: var(--space-md);
+      padding-bottom: var(--space-md);
+      border-bottom: var(--hairline);
+    }
+    .title-display {
+      font-family: var(--font-headline);
+      font-size: var(--display-size);
+      font-weight: 600;
+      letter-spacing: var(--heading-tracking);
+      line-height: 1.1;
+      margin: 0;
+      color: var(--on-surface);
+    }
+    .subtitle-lede {
+      margin: var(--space-xs) 0 0 0;
+      color: var(--on-surface-variant);
+      max-width: 72ch;
+      font-size: var(--body-size);
+    }
+    .header-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    /* Traffic Light Bar (Semáforo de Gobernanza) */
+    .semaphore-bar {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md) var(--space-lg);
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: var(--space-lg);
+      align-items: center;
+    }
+    .semaphore-state {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded);
+      border: 1px solid var(--outline-variant);
+      background: var(--background);
+    }
+    .semaphore-state.is-green {
+      background: var(--sage-tint);
+      border-color: var(--sage-border);
+      color: var(--tertiary);
+    }
+    .semaphore-state.is-yellow {
+      background: var(--amber-tint);
+      border-color: var(--amber-border);
+      color: var(--warning);
+    }
+    .semaphore-state.is-red {
+      background: var(--error-tint);
+      border-color: var(--error-border);
+      color: var(--error);
+    }
+    .semaphore-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: var(--rounded-full);
+      background: currentColor;
+      flex-shrink: 0;
+    }
+    .semaphore-label-title {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      display: block;
+    }
+    .semaphore-label-main {
+      font-family: var(--font-headline);
+      font-size: var(--subhead-size);
+      font-weight: 700;
+      line-height: 1.15;
+    }
+    .semaphore-reasons {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .semaphore-reasons-title {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+    .semaphore-reasons-list {
+      font-size: 0.9rem;
+      color: var(--on-surface);
+      margin: 0;
+    }
+    .semaphore-clock {
+      text-align: right;
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-sm) var(--space-md);
+    }
+    .clock-value {
+      font-family: var(--font-label);
+      font-size: 1.125rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--primary);
+    }
+
+    /* Explicit Epistemic Tags */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-family: var(--font-label);
+      font-size: 0.6875rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 2px var(--space-sm);
+      border-radius: var(--rounded);
+      border: var(--hairline);
+      background: var(--surface-container-high);
+      color: var(--on-surface-variant);
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    .tag-approved {
+      background: var(--sage-tint);
+      color: var(--tertiary);
+      border-color: var(--sage-border);
+    }
+    .tag-pending {
+      background: var(--amber-tint);
+      color: var(--warning);
+      border-color: var(--amber-border);
+    }
+    .tag-sim {
+      background: var(--error-tint);
+      color: var(--error);
+      border-color: var(--error-border);
+    }
+    .tag-user {
+      background: var(--cyan-tint);
+      color: var(--primary);
+      border-color: var(--cyan-border);
+    }
+    .tag-calc {
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+      border-color: var(--outline);
+    }
+
+    /* Navigation Tabs across 13 Modules + Architecture */
+    .nav-rail {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+      background: var(--surface-container-low);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-sm);
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      min-height: 44px;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--rounded);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--on-surface-variant);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-out),
+                  color var(--dur-micro) var(--ease-out),
+                  border-color var(--dur-micro) var(--ease-out);
+    }
+    .nav-btn:hover {
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+    }
+    .nav-btn.active {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      border-color: var(--cyan-border);
+      font-weight: 600;
+    }
+    .nav-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 4px;
+      border-radius: var(--rounded);
+      background: var(--background);
+      color: var(--primary);
+      font-size: 0.6875rem;
+    }
+
+    /* Panels & Typography */
+    .panel {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+    }
+    .panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-md);
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-md);
+      border-bottom: var(--hairline);
+    }
+    .title-section {
+      font-family: var(--font-headline);
+      font-size: var(--headline-size);
+      font-weight: 600;
+      letter-spacing: var(--heading-tracking);
+      line-height: 1.15;
+      margin: 0;
+      color: var(--on-surface);
+    }
+    .title-sub {
+      font-family: var(--font-headline);
+      font-size: var(--subhead-size);
+      font-weight: 600;
+      letter-spacing: var(--heading-tracking);
+      margin: 0 0 var(--space-sm) 0;
+      color: var(--on-surface);
+    }
+    .data-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+    .well {
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+    }
+    .metric-value {
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: 1.65rem;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: var(--heading-tracking);
+      color: var(--on-surface);
+      line-height: 1.15;
+    }
+    .mono-num {
+      font-family: var(--font-label);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Grid Layouts */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+    .split-2 {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+    .split-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+    .field-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-md);
+      align-items: end;
+    }
+    .field-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-md);
+      align-items: end;
+    }
+    .field-grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: var(--space-sm);
+      align-items: end;
+    }
+
+    /* Forms */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    input[type="time"],
+    select,
+    textarea {
+      width: 100%;
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--surface-container);
+      border: var(--hairline-strong);
+      border-radius: var(--rounded);
+      color: var(--on-surface);
+      font-size: var(--body-size);
+      transition: border-color var(--dur-micro) var(--ease-out),
+                  background-color var(--dur-micro) var(--ease-out);
+    }
+    select {
+      padding-right: var(--space-xl);
+    }
+    input:hover, select:hover, textarea:hover {
+      background: var(--surface-container-high);
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid var(--focus);
+      outline-offset: 1px;
+      border-color: var(--primary);
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded);
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background-color var(--dur-micro) var(--ease-out),
+                  transform var(--dur-micro) var(--ease-out),
+                  border-color var(--dur-micro) var(--ease-out);
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--on-primary-container);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--on-surface);
+      border: var(--hairline-strong);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--surface-container-high);
+    }
+    .btn-danger {
+      background: var(--error-tint);
+      color: var(--error);
+      border: 1px solid var(--error-border);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: var(--error);
+      color: var(--on-error);
+    }
+    .btn-sage {
+      background: var(--sage-tint);
+      color: var(--tertiary);
+      border: 1px solid var(--sage-border);
+    }
+    .btn-sm {
+      min-height: 36px;
+      padding: var(--space-xs) var(--space-sm);
+      font-size: 0.8125rem;
+    }
+
+    /* Mode Switch */
+    .mode-switch {
+      display: inline-flex;
+      background: var(--background);
+      border: var(--hairline-strong);
+      border-radius: var(--rounded);
+      padding: 3px;
+      gap: 4px;
+    }
+    .mode-option {
+      min-height: 38px;
+      padding: var(--space-xs) var(--space-md);
+      border-radius: calc(var(--rounded) - 2px);
+      border: none;
+      background: transparent;
+      color: var(--on-surface-variant);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .mode-option.active-demo {
+      background: var(--amber-tint);
+      color: var(--warning);
+    }
+    .mode-option.active-real {
+      background: var(--sage-tint);
+      color: var(--tertiary);
+    }
+
+    /* Status chips & alerts */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 3px var(--space-sm);
+      border-radius: var(--rounded);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 600;
+    }
+    .pill-green { background: var(--sage-tint); color: var(--tertiary); border: 1px solid var(--sage-border); }
+    .pill-yellow { background: var(--amber-tint); color: var(--warning); border: 1px solid var(--amber-border); }
+    .pill-red { background: var(--error-tint); color: var(--error); border: 1px solid var(--error-border); }
+    .pill-cyan { background: var(--cyan-tint); color: var(--primary); border: 1px solid var(--cyan-border); }
+
+    .inline-notice {
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded);
+      font-size: 0.875rem;
+      border: var(--hairline);
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+    .inline-notice.is-error { background: var(--error-tint); border-color: var(--error-border); color: var(--error); }
+    .inline-notice.is-warn { background: var(--amber-tint); border-color: var(--amber-border); color: var(--warning); }
+    .inline-notice.is-ok { background: var(--sage-tint); border-color: var(--sage-border); color: var(--tertiary); }
+
+    /* Checklists */
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-md);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-out);
+    }
+    .check-item:hover { background: var(--surface-container-high); }
+    .check-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      accent-color: var(--primary);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .check-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    /* Progress Bar */
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded-full);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      transition: width var(--dur-short) var(--ease-out);
+    }
+    .progress-fill.is-sage { background: var(--tertiary); }
+    .progress-fill.is-warn { background: var(--warning); }
+    .progress-fill.is-danger { background: var(--error); }
+
+    /* Tables */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      background: var(--background);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    th {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      text-align: left;
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: var(--hairline-strong);
+      background: var(--surface-container-low);
+      white-space: nowrap;
+    }
+    td {
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: var(--hairline);
+      color: var(--on-surface);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    .num-col {
+      text-align: right;
+      font-family: var(--font-label);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    /* Code blocks for GAS */
+    pre.code-well {
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+      font-family: var(--font-label);
+      font-size: 0.8125rem;
+      line-height: 1.55;
+      color: var(--on-surface);
+      overflow-x: auto;
+      max-height: 460px;
+      margin: 0;
+    }
+
+    /* Module visibility */
+    .module-view { display: none; }
+    .module-view.active {
+      display: grid;
+      gap: var(--space-lg);
+      animation: panelFade var(--dur-short) var(--ease-out);
+    }
+
+    @keyframes panelFade {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Chart containers */
+    .chart-box {
+      position: relative;
+      width: 100%;
+      min-height: 290px;
+    }
+
+    .text-sage { color: var(--tertiary); }
+    .text-cyan { color: var(--primary); }
+    .text-warn { color: var(--warning); }
+    .text-error { color: var(--error); }
+    .text-muted { color: var(--on-surface-variant); }
+
+    .footer-sources {
+      border-top: var(--hairline);
+      padding-top: var(--space-md);
+      color: var(--on-surface-variant);
+      font-size: 0.8125rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+
+    @media (max-width: 900px) {
+      .semaphore-bar { grid-template-columns: 1fr; }
+      .semaphore-clock { text-align: left; }
+      .split-2 { grid-template-columns: 1fr; }
+      .field-grid-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      .page-grid { padding: var(--space-sm); gap: var(--space-md); }
+      .field-grid-2, .field-grid-3 { grid-template-columns: 1fr; }
+      .panel { padding: var(--space-md); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-grid">
+    <!-- Top Console Header -->
+    <header class="console-header">
+      <div>
+        <h1 class="title-display">DISENK — TRADER JOURNAL</h1>
+        <p class="subtitle-lede">
+          Consola cuantitativa de ejecución y auditoría para <strong>Estrategia A v3.7 (LONG ONLY · Binance Spot)</strong> bajo Gobernanza de Riesgo Inquebrantable.
+        </p>
+      </div>
+      <div class="header-controls">
+        <div class="mode-switch" role="group" aria-label="Modo de cuenta">
+          <button type="button" class="mode-option active-demo" id="btnModeDemo" onclick="setAccountMode('DEMO')">
+            MODO DEMO (1.0% · $0.80)
+          </button>
+          <button type="button" class="mode-option" id="btnModeReal" onclick="setAccountMode('REAL')">
+            MODO REAL (0.5% · $0.40)
+          </button>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="exportJournalCSV()">
+          <i data-lucide="download" aria-hidden="true" style="width:15px;height:15px;"></i>
+          Exportar Bitácora CSV
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="resetDemoSeed(this)">
+          <i data-lucide="rotate-ccw" aria-hidden="true" style="width:15px;height:15px;"></i>
+          Reiniciar Datos
+        </button>
+      </div>
+    </header>
+
+    <!-- Semáforo Global de Gobernanza -->
+    <section class="semaphore-bar" aria-label="Semáforo de gobernanza operativa">
+      <div class="semaphore-state is-yellow" id="semaphoreBox">
+        <span class="semaphore-dot" aria-hidden="true"></span>
+        <div>
+          <span class="semaphore-label-title">Semáforo Operativo</span>
+          <span class="semaphore-label-main" id="semaphoreStatusText">🟡 PRECAUCIÓN</span>
+        </div>
+      </div>
+
+      <div class="semaphore-reasons">
+        <span class="semaphore-reasons-title">Diagnóstico en Tiempo Real <span class="tag tag-approved">[REGLA APROBADA]</span></span>
+        <p class="semaphore-reasons-list" id="semaphoreReasonText">
+          Verificando condiciones de gobernanza y preparación de sesión...
+        </p>
+        <div id="cooldownBanner" class="inline-notice is-warn" style="display:none; padding: var(--space-xs) var(--space-sm);">
+          <span class="mono-num" id="cooldownTimerText">Pausa obligatoria: 15:00</span>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="clearCooldownManual(this)">Forzar Fin Pausa (Auditoría)</button>
+        </div>
+      </div>
+
+      <div class="semaphore-clock">
+        <span class="data-label" style="display:block;">Hora Colombia (UTC-5)</span>
+        <div class="clock-value" id="colombiaClock">--:--:--</div>
+        <span class="data-label" id="overnightFlag" style="display:block; margin-top:2px;">Ventana Intradía</span>
+      </div>
+    </section>
+
+    <!-- Inline System Feedback Banner -->
+    <div id="globalToast" class="inline-notice" style="display:none;" role="status">
+      <span id="globalToastMsg"></span>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="hideGlobalToast()">Cerrar</button>
+    </div>
+
+    <!-- 13-Module + Architecture Navigation Rail -->
+    <nav class="nav-rail" aria-label="Módulos del sistema Disenk">
+      <button type="button" class="nav-btn active" id="nav-m1" onclick="switchModule('m1')"><span class="nav-num">1</span>Estado &amp; Capital</button>
+      <button type="button" class="nav-btn" id="nav-m2" onclick="switchModule('m2')"><span class="nav-num">2</span>Prep. Sesión</button>
+      <button type="button" class="nav-btn" id="nav-m3" onclick="switchModule('m3')"><span class="nav-num">3</span>Multitemporal</button>
+      <button type="button" class="nav-btn" id="nav-m4" onclick="switchModule('m4')"><span class="nav-num">4</span>Calc. SL M5</button>
+      <button type="button" class="nav-btn" id="nav-m5" onclick="switchModule('m5')"><span class="nav-num">5</span>Posición Spot</button>
+      <button type="button" class="nav-btn" id="nav-m6" onclick="switchModule('m6')"><span class="nav-num">6</span>TP &amp; RR Neto</button>
+      <button type="button" class="nav-btn" id="nav-m7" onclick="switchModule('m7')"><span class="nav-num">7</span>Checklist 15P</button>
+      <button type="button" class="nav-btn" id="nav-m8" onclick="switchModule('m8')"><span class="nav-num">8</span>Bitácora</button>
+      <button type="button" class="nav-btn" id="nav-m9" onclick="switchModule('m9')"><span class="nav-num">9</span>Psicotrading</button>
+      <button type="button" class="nav-btn" id="nav-m10" onclick="switchModule('m10')"><span class="nav-num">10</span>25 Métricas</button>
+      <button type="button" class="nav-btn" id="nav-m11" onclick="switchModule('m11')"><span class="nav-num">11</span>Backtesting</button>
+      <button type="button" class="nav-btn" id="nav-m12" onclick="switchModule('m12')"><span class="nav-num">12</span>Pase a Real</button>
+      <button type="button" class="nav-btn" id="nav-m13" onclick="switchModule('m13')"><span class="nav-num">13</span>Cierre Sesión</button>
+      <button type="button" class="nav-btn" id="nav-arch" onclick="switchModule('arch')"><span class="nav-num">GS</span>Apps Script &amp; Sheets</button>
+    </nav>
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 1: DASHBOARD DE ESTADO Y CAPITAL -->
+    <!-- =================================================================== -->
+    <section id="mod-m1" class="module-view active" aria-labelledby="h-m1">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m1">1. Dashboard de Estado, Capital y Límites Inquebrantables</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Control maestro del capital consolidado de USD 80, cuotas diarias/mensuales y bloqueos automáticos de seguridad.
+            </p>
+          </div>
+          <div style="display:flex; gap:var(--space-xs); flex-wrap:wrap;">
+            <span class="tag tag-approved">[REGLA APROBADA]</span>
+            <span class="tag tag-calc">[RESULTADO CALCULADO]</span>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="well">
+            <span class="data-label">Capital Consolidado <span class="tag tag-user">[DATO DE USUARIO]</span></span>
+            <div class="metric-value" id="m1Capital">$80.00</div>
+            <div class="mono-num text-muted" style="font-size:0.8125rem; margin-top:4px;" id="m1EquityDiff">Referencia inicial: $80.00 USDT</div>
+          </div>
+
+          <div class="well">
+            <span class="data-label">Riesgo Máximo por Trade <span class="tag tag-approved">[REGLA APROBADA]</span></span>
+            <div class="metric-value text-cyan" id="m1RiskAllowed">$0.80</div>
+            <div class="mono-num text-muted" style="font-size:0.8125rem; margin-top:4px;" id="m1RiskModeDesc">Modo Demo (1.0% del capital)</div>
+          </div>
+
+          <div class="well">
+            <span class="data-label">Pérdida Diaria (Máx. $0.80) <span class="tag tag-approved">[REGLA APROBADA]</span></span>
+            <div class="metric-value" id="m1DailyLoss">$0.00</div>
+            <div class="progress-track" style="margin-top:8px;">
+              <div class="progress-fill is-sage" id="m1DailyBar" style="width:0%;"></div>
+            </div>
+            <div class="mono-num text-muted" style="font-size:0.75rem; margin-top:4px;" id="m1DailyRem">Disponible hoy: $0.80 (reinicio 00:00 UTC-5)</div>
+          </div>
+
+          <div class="well">
+            <span class="data-label">Pérdida Mensual (Máx. $8.00) <span class="tag tag-approved">[REGLA APROBADA]</span></span>
+            <div class="metric-value" id="m1MonthlyLoss">$0.00</div>
+            <div class="progress-track" style="margin-top:8px;">
+              <div class="progress-fill is-sage" id="m1MonthlyBar" style="width:0%;"></div>
+            </div>
+            <div class="mono-num text-muted" style="font-size:0.75rem; margin-top:4px;" id="m1MonthlyRem">Disponible mes: $8.00</div>
+          </div>
+
+          <div class="well">
+            <span class="data-label">Operaciones Hoy (Máx. 3)</span>
+            <div class="metric-value" id="m1DailyTrades">0 / 3</div>
+            <div class="mono-num text-muted" style="font-size:0.8125rem; margin-top:4px;" id="m1ConsecLosses">Pérdidas seguidas hoy: 0 / 2</div>
+          </div>
+
+          <div class="well">
+            <span class="data-label">Exposición &amp; Spot</span>
+            <div class="metric-value" id="m1OpenPos">0 / 1</div>
+            <div class="mono-num text-muted" style="font-size:0.8125rem; margin-top:4px;">Sin apalancamiento · Sin overnight</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="split-2">
+        <div class="panel">
+          <h3 class="title-sub">Reglas de Capital y Bloqueos Inquebrantables <span class="tag tag-approved">[REGLA APROBADA]</span></h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Parámetro de Gobernanza</th>
+                  <th>Límite Estricto</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="m1RulesTableBody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:var(--space-sm); margin-top:var(--space-md);">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="startCooldownTimer()">
+              <i data-lucide="timer" aria-hidden="true" style="width:15px;height:15px;"></i>
+              Activar Pausa Obligatoria 15 min
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="toggleOpenPositionFlag()">
+              <i data-lucide="activity" aria-hidden="true" style="width:15px;height:15px;"></i>
+              Alternar Posición Abierta (0/1)
+            </button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-sm);">
+            <h3 class="title-sub" style="margin:0;">Curva de Capital Consolidado</h3>
+            <span class="tag tag-calc">[RESULTADO CALCULADO]</span>
+          </div>
+          <div class="chart-box" style="min-height: 290px;">
+            <canvas id="chartM1Equity"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 2: PREPARACIÓN DE SESIÓN -->
+    <!-- =================================================================== -->
+    <section id="mod-m2" class="module-view" aria-labelledby="h-m2">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m2">2. Preparación de Sesión (Pre-Mercado · Colombia UTC-5)</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Protocolo pre-operativo obligatorio antes de evaluar gráficos. Previene operar en noticias extremas o fuera de ventana intradía.
+            </p>
+          </div>
+          <span class="status-pill pill-yellow" id="m2StatusBadge">0 / 6 VERIFICADOS</span>
+        </div>
+
+        <div class="split-2">
+          <div class="check-list" id="m2ChecklistContainer">
+            <label class="check-item">
+              <input type="checkbox" id="prep1" onchange="updateSessionPrep()">
+              <div>
+                <strong>1. Zona horaria sincronizada (Colombia UTC-5)</strong>
+                <div class="text-muted" style="font-size:0.84rem;">El corte diario de pérdida ($0.80) y conteo de trades se reinicia a las 00:00 UTC-5.</div>
+              </div>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" id="prep2" onchange="updateSessionPrep()">
+              <div>
+                <strong>2. Calendario macroeconómico revisado (CPI, FOMC, NFP)</strong>
+                <div class="text-muted" style="font-size:0.84rem;">Sin eventos de volatilidad roja en los próximos 30 minutos para evitar barridos de SL.</div>
+              </div>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" id="prep3" onchange="updateSessionPrep()">
+              <div>
+                <strong>3. Plataforma Binance Spot verificada (Sin margen/futuros)</strong>
+                <div class="text-muted" style="font-size:0.84rem;">Billetera Spot con saldo USDT libre confirmado y comisiones verificadas.</div>
+              </div>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" id="prep4" onchange="updateSessionPrep()">
+              <div>
+                <strong>4. TradingView configurado en 1D, 1H y M5 (solo velas cerradas)</strong>
+                <div class="text-muted" style="font-size:0.84rem;">EMA 50, RSI 14 y ATR 14 (M5) activos. Sin indicadores extra de distracción.</div>
+              </div>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" id="prep5" onchange="updateSessionPrep()">
+              <div>
+                <strong>5. Ventana intradía válida (Prohibido Overnight)</strong>
+                <div class="text-muted" style="font-size:0.84rem;">Tiempo suficiente para gestionar y cerrar antes de las 23:45 UTC-5.</div>
+              </div>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" id="prep6" onchange="updateSessionPrep()">
+              <div>
+                <strong>6. Estado físico y mental óptimo (Descanso y foco)</strong>
+                <div class="text-muted" style="font-size:0.84rem;">Sin cansancio extremo, euforia ni urgencia por recuperar pérdidas previas.</div>
+              </div>
+            </label>
+          </div>
+
+          <div class="well">
+            <h3 class="title-sub">Contexto de Sesión de Hoy <span class="tag tag-user">[DATO DE USUARIO]</span></h3>
+            <div class="field-grid-2" style="margin-bottom:var(--space-md);">
+              <div class="field-group">
+                <label for="m2ParFocus">Par Principal Binance Spot</label>
+                <select id="m2ParFocus" onchange="syncPairEverywhere(this.value)">
+                  <option value="BTCUSDT">BTC / USDT</option>
+                  <option value="ETHUSDT">ETH / USDT</option>
+                  <option value="SOLUSDT">SOL / USDT</option>
+                  <option value="BNBUSDT">BNB / USDT</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label for="m2NewsPolicy">Política de Noticias Hoy</label>
+                <select id="m2NewsPolicy" onchange="saveAppAll()">
+                  <option value="Despejado">Mercado Despejado — Normal</option>
+                  <option value="Precaución">Noticia Media — Esperar cierre M5</option>
+                  <option value="Pausa">Noticia Roja — No operar ventana</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-group" style="margin-bottom:var(--space-md);">
+              <label for="m2BiasPhrase">Hipótesis Direccional en Una Sola Frase (Solo Longs)</label>
+              <input type="text" id="m2BiasPhrase" placeholder="Ej: BTC sobre EMA50 en 1D y 1H buscando retroceso a EMA50 en M5" oninput="saveAppAll()">
+            </div>
+            <div class="field-group">
+              <label for="m2KeyLevels">Niveles Clave 1D / 1H (Soportes y Liquidez)</label>
+              <textarea id="m2KeyLevels" rows="3" placeholder="Soporte diario, PDH/PDL, zona de liquidez relevante..." oninput="saveAppAll()"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 3: ANÁLISIS MULTITEMPORAL (1D / 1H / 5M) -->
+    <!-- =================================================================== -->
+    <section id="mod-m3" class="module-view" aria-labelledby="h-m3">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m3">3. Análisis Multitemporal — Estrategia A (LONG ONLY)</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Validación secuencial top-down sobre velas cerradas: contexto tendencial 1D y 1H antes de buscar gatillo en M5.
+            </p>
+          </div>
+          <span class="status-pill pill-yellow" id="m3VerdictPill">VEREDICTO: INCOMPLETO</span>
+        </div>
+
+        <div class="split-3">
+          <!-- 1D -->
+          <div class="well">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-sm);">
+              <span class="data-label">Temporalidad 1D (Diario)</span>
+              <span class="status-pill pill-yellow" id="m3Badge1D">PENDIENTE</span>
+            </div>
+            <div class="field-group" style="margin-bottom:var(--space-sm);">
+              <label for="m3_1d_close">Precio de Cierre 1D</label>
+              <input type="number" id="m3_1d_close" step="0.01" value="91450" oninput="evaluateMTF()">
+            </div>
+            <div class="field-group" style="margin-bottom:var(--space-sm);">
+              <label for="m3_1d_ema_now">EMA 50 Actual (1D)</label>
+              <input type="number" id="m3_1d_ema_now" step="0.01" value="88200" oninput="evaluateMTF()">
+            </div>
+            <div class="field-group" style="margin-bottom:var(--space-sm);">
+              <label for="m3_1d_ema_5">EMA 50 hace 5 velas (1D)</label>
+              <input type="number" id="m3_1d_ema_5" step="0.01" value="87100" oninput="evaluateMTF()">
+            </div>
+            <div class="inline-notice" id="m3Detail1D" style="font-size:0.8rem;">Calculando filtro 1D...</div>
+          </div>
+
+          <!-- 1H -->
+          <div class="well">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-sm);">
+              <span class="data-label">Temporalidad 1H (Horaria)</span>
+              <span class="status-pill pill-yellow" id="m3Badge1H">PENDIENTE</span>
+            </div>
+            <div class="field-group" style="margin-bottom:var(--space-sm);">
+              <label for="m3_1h_close">Precio de Cierre 1H</label>
+              <input type="number" id="m3_1h_close" step="0.01" value="91450" oninput="evaluateMTF()">
+            </div>
+            <div class="field-group" style="margin-bottom:var(--space-sm);">
+              <label for="m3_1h_ema_now">EMA 50 Actual (1H)</label>
+              <input type="number" id="m3_1h_ema_now" step="0.01" value="90980" oninput="evaluateMTF()">
+            </div>
+            <div class="field-group" style="margin-bottom:var(--space-sm);">
+              <label for="m3_1h_ema_5">EMA 50 hace 5 velas (1H)</label>
+              <input type="number" id="m3_1h_ema_5" step="0.01" value="90620" oninput="evaluateMTF()">
+            </div>
+            <div class="inline-notice" id="m3Detail1H" style="font-size:0.8rem;">Calculando filtro 1H...</div>
+          </div>
+
+          <!-- 5M -->
+          <div class="well">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-sm);">
+              <span class="data-label">Temporalidad M5 (Ejecución)</span>
+              <span class="status-pill pill-yellow" id="m3Badge5M">PENDIENTE</span>
+            </div>
+            <div class="field-group" style="margin-bottom:var(--space-sm);">
+              <label for="m3_5m_rsi">RSI 14 al cierre M5 (&gt; 50)</label>
+              <input type="number" id="m3_5m_rsi" step="0.1" min="0" max="100" value="56.4" oninput="evaluateMTF()">
+            </div>
+            <div class="field-group" style="margin-bottom:var(--space-sm);">
+              <label for="m3_5m_pattern">Patrón de Vela Confirmatorio</label>
+              <select id="m3_5m_pattern" onchange="evaluateMTF()">
+                <option value="Martillo">Martillo (Alcista · Alta efectividad)</option>
+                <option value="Envolvente alcista">Envolvente alcista (Alta efectividad)</option>
+                <option value="Estrella del amanecer">Estrella del amanecer (Alta efectividad)</option>
+                <option value="Libélula o Bullish DOJI">Libélula / Bullish DOJI (Media-alta)</option>
+                <option value="Perforación">Perforación (Alta efectividad)</option>
+                <option value="Tres soldados blancos">Tres soldados blancos (Alta efectividad)</option>
+                <option value="Harami alcista">Harami alcista (Baja efectividad)</option>
+                <option value="Vela de cuerpo alcista sobre EMA50">Vela cerrada alcista sobre EMA 50</option>
+              </select>
+            </div>
+            <div class="check-list" style="margin-bottom:var(--space-sm);">
+              <label class="check-item" style="padding:var(--space-xs) var(--space-sm);">
+                <input type="checkbox" id="m3_5m_touch" checked onchange="evaluateMTF()">
+                <span style="font-size:0.84rem;">Retroceso tocó EMA 50 en M5</span>
+              </label>
+              <label class="check-item" style="padding:var(--space-xs) var(--space-sm);">
+                <input type="checkbox" id="m3_5m_closed" checked onchange="evaluateMTF()">
+                <span style="font-size:0.84rem;">Vela señal cerró alcista &gt; EMA 50 (Sin repainting)</span>
+              </label>
+            </div>
+            <div class="inline-notice" id="m3Detail5M" style="font-size:0.8rem;">Calculando gatillo M5...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 4: CALCULADORA SL (MÍNIMO 10 VELAS M5 + ATR 14) -->
+    <!-- =================================================================== -->
+    <section id="mod-m4" class="module-view" aria-labelledby="h-m4">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m4">4. Calculadora de Stop-Loss Técnico (10 Velas M5 + ATR 14)</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Fórmula: <code>SL = Mínimo(10 velas M5 cerradas anteriores) - (ATR 14 M5 × 0.10)</code>. Excluye la vela de señal.
+            </p>
+          </div>
+          <div style="display:flex; gap:var(--space-xs);">
+            <span class="tag tag-approved">[REGLA APROBADA]</span>
+            <span class="tag tag-calc">[RESULTADO CALCULADO]</span>
+          </div>
+        </div>
+
+        <div class="split-2">
+          <div class="well">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-sm);">
+              <span class="data-label">Mínimos de las 10 velas M5 anteriores <span class="tag tag-user">[DATO DE USUARIO]</span></span>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="loadSampleM5Candles()">Cargar Ejemplo BTC</button>
+            </div>
+            <div class="field-grid-5" style="margin-bottom:var(--space-md);" id="m4CandlesGrid">
+              <div class="field-group"><label for="c_low_1">Vela -10</label><input type="number" id="c_low_1" step="0.01" value="91320" oninput="calcStopLossM5()"></div>
+              <div class="field-group"><label for="c_low_2">Vela -9</label><input type="number" id="c_low_2" step="0.01" value="91345" oninput="calcStopLossM5()"></div>
+              <div class="field-group"><label for="c_low_3">Vela -8</label><input type="number" id="c_low_3" step="0.01" value="91290" oninput="calcStopLossM5()"></div>
+              <div class="field-group"><label for="c_low_4">Vela -7</label><input type="number" id="c_low_4" step="0.01" value="91240" oninput="calcStopLossM5()"></div>
+              <div class="field-group"><label for="c_low_5">Vela -6</label><input type="number" id="c_low_5" step="0.01" value="91210" oninput="calcStopLossM5()"></div>
+              <div class="field-group"><label for="c_low_6">Vela -5</label><input type="number" id="c_low_6" step="0.01" value="91180" oninput="calcStopLossM5()"></div>
+              <div class="field-group"><label for="c_low_7">Vela -4</label><input type="number" id="c_low_7" step="0.01" value="91205" oninput="calcStopLossM5()"></div>
+              <div class="field-group"><label for="c_low_8">Vela -3</label><input type="number" id="c_low_8" step="0.01" value="91230" oninput="calcStopLossM5()"></div>
+              <div class="field-group"><label for="c_low_9">Vela -2</label><input type="number" id="c_low_9" step="0.01" value="91260" oninput="calcStopLossM5()"></div>
+              <div class="field-group"><label for="c_low_10">Vela -1</label><input type="number" id="c_low_10" step="0.01" value="91285" oninput="calcStopLossM5()"></div>
+            </div>
+
+            <div class="field-grid-2">
+              <div class="field-group">
+                <label for="m4EntryPrice">Precio Entrada (Cierre Vela Señal)</label>
+                <input type="number" id="m4EntryPrice" step="0.01" value="91450" oninput="syncEntryAndCalc()">
+              </div>
+              <div class="field-group">
+                <label for="m4Atr14">ATR 14 (M5) en USD</label>
+                <input type="number" id="m4Atr14" step="0.01" value="120" oninput="calcStopLossM5()">
+              </div>
+            </div>
+          </div>
+
+          <div class="well">
+            <span class="data-label">Resultado Técnico del Stop-Loss</span>
+            <div class="kpi-grid" style="margin-top:var(--space-sm); margin-bottom:var(--space-md);">
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">Mínimo 10 Velas</span>
+                <div class="metric-value" id="m4MinLow">$91,180.00</div>
+              </div>
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">Margen (ATR × 0.10)</span>
+                <div class="metric-value text-cyan" id="m4Margin">$12.00</div>
+              </div>
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">Stop-Loss Final</span>
+                <div class="metric-value text-error" id="m4FinalSL">$91,168.00</div>
+              </div>
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">Distancia al SL</span>
+                <div class="metric-value" id="m4DistPct">0.31%</div>
+                <div class="mono-num text-muted" style="font-size:0.75rem;" id="m4DistUsd">$282.00 / unidad</div>
+              </div>
+            </div>
+            <div id="m4RoundWarning" class="inline-notice is-ok" style="font-size:0.84rem;">
+              SL técnico válido y alejado de números redondos psicológicos.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 5: CALCULADORA DE POSICIÓN BINANCE SPOT -->
+    <!-- =================================================================== -->
+    <section id="mod-m5" class="module-view" aria-labelledby="h-m5">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m5">5. Calculadora de Posición &amp; Restricciones Binance Spot</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Dimensionamiento exacto sin apalancamiento. Si el mínimo de Binance Spot exige arriesgar más del límite de Disenk, la orden queda <strong>BLOQUEADA</strong>.
+            </p>
+          </div>
+          <div style="display:flex; gap:var(--space-xs);">
+            <span class="tag tag-approved">[REGLA APROBADA]</span>
+            <span class="tag tag-calc">[RESULTADO CALCULADO]</span>
+          </div>
+        </div>
+
+        <div class="split-2">
+          <div class="well">
+            <div class="field-grid-2" style="margin-bottom:var(--space-md);">
+              <div class="field-group">
+                <label for="m5Pair">Par Binance Spot</label>
+                <select id="m5Pair" onchange="applyBinancePreset(this.value)">
+                  <option value="BTCUSDT">BTCUSDT (Step 0.00001 · Min $5)</option>
+                  <option value="ETHUSDT">ETHUSDT (Step 0.0001 · Min $5)</option>
+                  <option value="SOLUSDT">SOLUSDT (Step 0.001 · Min $5)</option>
+                  <option value="BNBUSDT">BNBUSDT (Step 0.001 · Min $5)</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label for="m5FreeUsdt">Saldo USDT Disponible Spot</label>
+                <input type="number" id="m5FreeUsdt" step="0.01" value="80.00" oninput="calcPositionSpot()">
+              </div>
+            </div>
+
+            <div class="field-grid-2" style="margin-bottom:var(--space-md);">
+              <div class="field-group">
+                <label for="m5Entry">Precio Entrada ($)</label>
+                <input type="number" id="m5Entry" step="0.01" value="91450.00" oninput="calcPositionSpot()">
+              </div>
+              <div class="field-group">
+                <label for="m5SL">Precio Stop-Loss ($)</label>
+                <input type="number" id="m5SL" step="0.01" value="91168.00" oninput="calcPositionSpot()">
+              </div>
+            </div>
+
+            <div class="field-grid-3">
+              <div class="field-group">
+                <label for="m5StepSize">Step Size (Incremento Lote)</label>
+                <input type="number" id="m5StepSize" step="0.00001" value="0.00001" oninput="calcPositionSpot()">
+              </div>
+              <div class="field-group">
+                <label for="m5MinNotional">Min Notional Binance ($)</label>
+                <input type="number" id="m5MinNotional" step="0.1" value="5.00" oninput="calcPositionSpot()">
+              </div>
+              <div class="field-group">
+                <label for="m5FeePct">Comisión Spot (% por lado)</label>
+                <input type="number" id="m5FeePct" step="0.005" value="0.10" oninput="calcPositionSpot()">
+              </div>
+            </div>
+          </div>
+
+          <div class="well">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-md);">
+              <span class="data-label">Veredicto de Ejecución Spot</span>
+              <span class="status-pill pill-green" id="m5SpotVerdict">🟢 VIABLE EN BINANCE SPOT</span>
+            </div>
+
+            <div class="kpi-grid" style="margin-bottom:var(--space-md);">
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">Cantidad Exacta (Tokens)</span>
+                <div class="metric-value text-cyan" id="m5QtyOut">0.00283</div>
+                <div class="mono-num text-muted" style="font-size:0.75rem;" id="m5QtyRaw">Teórico sin redondeo: 0.002836</div>
+              </div>
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">Valor Nocional Spot</span>
+                <div class="metric-value" id="m5NotionalOut">$258.80</div>
+                <div class="mono-num text-muted" style="font-size:0.75rem;" id="m5CapitalCheck">Requiere saldo USDT suficiente</div>
+              </div>
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">Riesgo Real con Fees</span>
+                <div class="metric-value text-error" id="m5RiskTotalOut">$0.80</div>
+                <div class="mono-num text-muted" style="font-size:0.75rem;" id="m5RiskLimitLabel">Límite modo actual: $0.80</div>
+              </div>
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">Pérdida Máx. Precio + Fees</span>
+                <div class="metric-value" id="m5FeesEst">$0.52</div>
+                <div class="mono-num text-muted" style="font-size:0.75rem;">Entrada + Salida estimada</div>
+              </div>
+            </div>
+
+            <div id="m5SpotAlerts" class="inline-notice is-warn">
+              Analizando compatibilidad entre capital de $80 y tamaño mínimo Spot...
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 6: CALCULADORA TP Y RR NETO -->
+    <!-- =================================================================== -->
+    <section id="mod-m6" class="module-view" aria-labelledby="h-m6">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m6">6. Calculadora de Take-Profit y Relación Riesgo/Beneficio (1:2 Neto)</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Diferencia matemática explícita entre 2R Bruto y el objetivo mínimo <strong>1:2 Neto de costes</strong> (comisiones Spot + deslizamiento).
+            </p>
+          </div>
+          <div style="display:flex; gap:var(--space-xs);">
+            <span class="tag tag-pending">[CONFIGURACIÓN PENDIENTE]</span>
+            <span class="tag tag-calc">[RESULTADO CALCULADO]</span>
+          </div>
+        </div>
+
+        <div class="split-2">
+          <div class="well">
+            <div class="field-grid-2" style="margin-bottom:var(--space-md);">
+              <div class="field-group">
+                <label for="m6Entry">Precio Entrada ($)</label>
+                <input type="number" id="m6Entry" step="0.01" value="91450.00" oninput="calcTPNet()">
+              </div>
+              <div class="field-group">
+                <label for="m6SL">Precio Stop-Loss ($)</label>
+                <input type="number" id="m6SL" step="0.01" value="91168.00" oninput="calcTPNet()">
+              </div>
+            </div>
+
+            <div class="field-grid-3" style="margin-bottom:var(--space-md);">
+              <div class="field-group">
+                <label for="m6Qty">Cantidad Tokens (Spot)</label>
+                <input type="number" id="m6Qty" step="0.00001" value="0.00080" oninput="calcTPNet()">
+              </div>
+              <div class="field-group">
+                <label for="m6FeeRate">Comisión por Lado (%)</label>
+                <input type="number" id="m6FeeRate" step="0.005" value="0.10" oninput="calcTPNet()">
+              </div>
+              <div class="field-group">
+                <label for="m6SlippagePct">Deslizamiento Est. (%)</label>
+                <input type="number" id="m6SlippagePct" step="0.01" value="0.05" oninput="calcTPNet()">
+              </div>
+            </div>
+
+            <div class="inline-notice is-warn">
+              <span><strong>Nota de Gobernanza [CONFIGURACIÓN PENDIENTE]:</strong> En Binance Spot usa orden OCO para TP/SL simultáneo. Si el TP se calcula en bruto sin descontar comisiones ida/vuelta y deslizamiento Stop-Limit, tu RR neto real cae por debajo de 1:2.</span>
+            </div>
+          </div>
+
+          <div class="well">
+            <span class="data-label">Comparativa Bruto vs Neto de Costes</span>
+            <div class="kpi-grid" style="margin-top:var(--space-sm); margin-bottom:var(--space-md);">
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">TP 2R Bruto (Sin Costes)</span>
+                <div class="metric-value text-muted" id="m6TpGross">$92,014.00</div>
+                <div class="mono-num text-warn" style="font-size:0.75rem;" id="m6GrossNetRR">RR Neto si sales aquí: 1 : 1.54</div>
+              </div>
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">TP Objetivo 1:2 Neto</span>
+                <div class="metric-value text-sage" id="m6TpNet">$92,380.00</div>
+                <div class="mono-num text-sage" style="font-size:0.75rem;" id="m6NetProfitUsd">Ganancia neta esperada: +$0.80</div>
+              </div>
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">Costes Totales Estimados</span>
+                <div class="metric-value text-warn" id="m6TotalCosts">$0.22</div>
+                <div class="mono-num text-muted" style="font-size:0.75rem;">Comisión entrada + salida + slippage</div>
+              </div>
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">Riesgo Total Neto (1R)</span>
+                <div class="metric-value text-error" id="m6NetRiskTotal">$0.40</div>
+                <div class="mono-num text-muted" style="font-size:0.75rem;">Pérdida en precio + costes salida</div>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" style="width:100%;" onclick="sendCalculatorToJournalDraft()">
+              <i data-lucide="arrow-right-circle" aria-hidden="true" style="width:16px;height:16px;"></i>
+              Pre-cargar Parámetros OCO en Checklist &amp; Bitácora
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 7: CHECKLIST DE APROBACIÓN DE 15 PUNTOS -->
+    <!-- =================================================================== -->
+    <section id="mod-m7" class="module-view" aria-labelledby="h-m7">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m7">7. Checklist de Aprobación Pre-Orden (15 Puntos Obligatorios)</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Ninguna orden puede enviarse a Binance Spot sin cumplir 15/15 puntos. Cualquier ítem incumplido rechaza automáticamente el setup.
+            </p>
+          </div>
+          <span class="status-pill pill-red" id="m7VerdictBadge">🔴 OPERACIÓN RECHAZADA (0 / 15)</span>
+        </div>
+
+        <div class="split-2">
+          <div class="check-list" id="m7ChecklistLeft">
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>01.</strong> Preparación pre-mercado completada en hora Colombia (UTC-5).</span></label>
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>02.</strong> Límite diario ($0.80) y límite mensual ($8.00) tienen margen suficiente.</span></label>
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>03.</strong> Conteo del día &lt; 3 operaciones y &lt; 2 pérdidas consecutivas.</span></label>
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>04.</strong> Sin otra posición abierta (máx. 1 posición simultánea) y sin pausa 15 min activa.</span></label>
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>05.</strong> Filtro 1D válido: Cierre 1D &gt; EMA 50 y EMA 50 actual &gt; EMA 50 hace 5 velas.</span></label>
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>06.</strong> Filtro 1H válido: Cierre 1H &gt; EMA 50 y EMA 50 actual &gt; EMA 50 hace 5 velas.</span></label>
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>07.</strong> Entrada M5: Retroceso tocó EMA 50 y vela señal cerró alcista &gt; EMA 50.</span></label>
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>08.</strong> Momentum confirmado: RSI 14 (M5) &gt; 50 al cierre de la vela señal.</span></label>
+          </div>
+
+          <div class="check-list" id="m7ChecklistRight">
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>09.</strong> Confirmación únicamente sobre velas cerradas (cero repainting/lookahead).</span></label>
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>10.</strong> Stop-Loss calculado con Mínimo 10 velas M5 previas - (ATR 14 × 0.10).</span></label>
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>11.</strong> Riesgo neto con comisiones &le; $0.40 (Real) o &le; $0.80 (Demo).</span></label>
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>12.</strong> Tamaño en Binance Spot cumple Step Size, Min Notional y saldo USDT sin apalancamiento.</span></label>
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>13.</strong> Take-Profit configurado para alcanzar al menos 1:2 neto de costes (orden OCO).</span></label>
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>14.</strong> Compromiso de cierre intradía antes de las 23:45 UTC-5 (cero overnight).</span></label>
+            <label class="check-item"><input type="checkbox" class="chk15" onchange="evalChecklist15()"><span><strong>15.</strong> Psicotrading pre-trade equilibrado (Calma &ge; 5 y FOMO/Ansiedad &le; 6).</span></label>
+
+            <div style="display:flex; gap:var(--space-sm); margin-top:var(--space-sm);">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="autoSyncChecklist15()">Auto-Validar desde Módulos 1–6</button>
+              <button type="button" class="btn btn-primary btn-sm" onclick="switchModule('m8')">Ir a Registrar en Bitácora</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 8: DIARIO DE OPERACIONES Y BITÁCORA CON MATRIZ DE DISCIPLINA -->
+    <!-- =================================================================== -->
+    <section id="mod-m8" class="module-view" aria-labelledby="h-m8">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m8">8. Diario de Operaciones, Registro de Ejecución y Matriz de Disciplina</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Registra cada operación Spot con su origen (<span class="tag tag-sim">[SUPUESTO DE SIMULACIÓN]</span> o <span class="tag tag-user">[DATO DE USUARIO]</span>), R-múltiplo neto y puntaje de disciplina.
+            </p>
+          </div>
+          <div style="display:flex; gap:var(--space-sm); align-items:center;">
+            <label for="m8Filter" style="margin:0;">Filtrar:</label>
+            <select id="m8Filter" onchange="renderJournalTable()" style="width:auto; min-height:38px;">
+              <option value="ALL">Todas</option>
+              <option value="USER">Solo Datos Usuario</option>
+              <option value="SIM">Solo Simulación</option>
+              <option value="WIN">Ganadoras (+R)</option>
+              <option value="LOSS">Perdedoras (-R)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Trade Entry Form -->
+        <div class="well" style="margin-bottom:var(--space-lg);">
+          <h3 class="title-sub">Registrar Nueva Operación (Estrategia A · Long Only)</h3>
+          <div class="field-grid-3" style="margin-bottom:var(--space-md);">
+            <div class="field-group">
+              <label for="jPair">Par Spot</label>
+              <input type="text" id="jPair" value="BTCUSDT">
+            </div>
+            <div class="field-group">
+              <label for="jOrigin">Etiqueta de Origen</label>
+              <select id="jOrigin">
+                <option value="USER">[DATO DE USUARIO] Operación Real/Demo</option>
+                <option value="SIM">[SUPUESTO DE SIMULACIÓN] Prueba</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="jPattern">Patrón de Vela M5</label>
+              <select id="jPattern">
+                <option value="Martillo">Martillo</option>
+                <option value="Envolvente alcista">Envolvente alcista</option>
+                <option value="Estrella del amanecer">Estrella del amanecer</option>
+                <option value="Libélula o Bullish DOJI">Libélula / Bullish DOJI</option>
+                <option value="Perforación">Perforación</option>
+                <option value="Tres soldados blancos">Tres soldados blancos</option>
+                <option value="Vela cerrada > EMA50">Vela cerrada &gt; EMA 50</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-grid-5" style="margin-bottom:var(--space-md);">
+            <div class="field-group"><label for="jEntry">Entrada ($)</label><input type="number" id="jEntry" step="0.01" value="91450"></div>
+            <div class="field-group"><label for="jSL">Stop-Loss ($)</label><input type="number" id="jSL" step="0.01" value="91168"></div>
+            <div class="field-group"><label for="jTP">Take-Profit ($)</label><input type="number" id="jTP" step="0.01" value="92380"></div>
+            <div class="field-group"><label for="jRiskUsd">Riesgo Real ($)</label><input type="number" id="jRiskUsd" step="0.01" value="0.40"></div>
+            <div class="field-group"><label for="jPnlNet">PnL Neto ($ USD)</label><input type="number" id="jPnlNet" step="0.01" value="0.80"></div>
+          </div>
+
+          <div class="field-grid-3" style="margin-bottom:var(--space-md);">
+            <div class="field-group">
+              <label for="jFeesUsd">Comisiones + Deslizamiento ($)</label>
+              <input type="number" id="jFeesUsd" step="0.01" value="0.16">
+            </div>
+            <div class="field-group">
+              <label for="jPsychoPre">Estado Emocional (1–10 Calma)</label>
+              <input type="number" id="jPsychoPre" min="1" max="10" value="8">
+            </div>
+            <div class="field-group">
+              <label for="jNotes">Nota Técnica / Aprendizaje</label>
+              <input type="text" id="jNotes" placeholder="Ej: Vela cerrada confirmó sobre EMA50 con RSI 56">
+            </div>
+          </div>
+
+          <div style="margin-bottom:var(--space-md);">
+            <span class="data-label" style="display:block; margin-bottom:var(--space-xs);">Matriz de Disciplina del Trade (5 Reglas Inquebrantables):</span>
+            <div style="display:flex; flex-wrap:wrap; gap:var(--space-sm);">
+              <label class="check-item" style="padding:var(--space-xs) var(--space-sm);"><input type="checkbox" id="jd1" checked><span>Solo velas cerradas</span></label>
+              <label class="check-item" style="padding:var(--space-xs) var(--space-sm);"><input type="checkbox" id="jd2" checked><span>SL técnico 10 velas + ATR</span></label>
+              <label class="check-item" style="padding:var(--space-xs) var(--space-sm);"><input type="checkbox" id="jd3" checked><span>Riesgo &le; límite</span></label>
+              <label class="check-item" style="padding:var(--space-xs) var(--space-sm);"><input type="checkbox" id="jd4" checked><span>Sin añadir a pérdida</span></label>
+              <label class="check-item" style="padding:var(--space-xs) var(--space-sm);"><input type="checkbox" id="jd5" checked><span>Cerrado intradía (0 overnight)</span></label>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary" onclick="addJournalEntry()">
+            <i data-lucide="plus-circle" aria-hidden="true" style="width:16px;height:16px;"></i>
+            Registrar Operación en Bitácora
+          </button>
+        </div>
+
+        <!-- Journal Table -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha (UTC-5)</th>
+                <th>Etiqueta</th>
+                <th>Par · Patrón</th>
+                <th class="num-col">Entrada / SL / TP</th>
+                <th class="num-col">Riesgo ($)</th>
+                <th class="num-col">Fees ($)</th>
+                <th class="num-col">PnL Neto</th>
+                <th class="num-col">Múltiplo R</th>
+                <th class="num-col">Disciplina</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="m8TableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 9: PSICOTRADING (ESCALAS 1-10 ANTES, DURANTE, DESPUÉS) -->
+    <!-- =================================================================== -->
+    <section id="mod-m9" class="module-view" aria-labelledby="h-m9">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m9">9. Psicotrading — Auditoría Emocional Tri-Fase (Escalas 1–10)</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Evaluación cuantitativa de disciplina mental antes, durante y después de operar. Detecta FOMO y trading de revancha antes de que dañen el capital.
+            </p>
+          </div>
+          <span class="status-pill pill-green" id="m9PsychoVerdict">🟢 ESTADO MENTAL ÓPTIMO</span>
+        </div>
+
+        <div class="split-2">
+          <div class="well">
+            <h3 class="title-sub">Registro Emocional de Sesión <span class="tag tag-user">[DATO DE USUARIO]</span></h3>
+            <div class="split-3" style="margin-bottom:var(--space-md);">
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">1. ANTES (Pre-Trade)</span>
+                <div class="field-group" style="margin-top:var(--space-sm);">
+                  <label for="psyPreCalm">Calma / Claridad: <span id="vPreCalm" class="text-cyan">8</span>/10</label>
+                  <input type="range" id="psyPreCalm" min="1" max="10" value="8" oninput="updatePsychoMonitor()">
+                </div>
+                <div class="field-group" style="margin-top:var(--space-sm);">
+                  <label for="psyPreFomo">FOMO / Urgencia: <span id="vPreFomo" class="text-warn">2</span>/10</label>
+                  <input type="range" id="psyPreFomo" min="1" max="10" value="2" oninput="updatePsychoMonitor()">
+                </div>
+              </div>
+
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">2. DURANTE (Ejecución)</span>
+                <div class="field-group" style="margin-top:var(--space-sm);">
+                  <label for="psyDurAnx">Ansiedad mirando PnL: <span id="vDurAnx" class="text-warn">3</span>/10</label>
+                  <input type="range" id="psyDurAnx" min="1" max="10" value="3" oninput="updatePsychoMonitor()">
+                </div>
+                <div class="field-group" style="margin-top:var(--space-sm);">
+                  <label for="psyDurTrust">Confianza en el SL/TP: <span id="vDurTrust" class="text-sage">9</span>/10</label>
+                  <input type="range" id="psyDurTrust" min="1" max="10" value="9" oninput="updatePsychoMonitor()">
+                </div>
+              </div>
+
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">3. DESPUÉS (Cierre)</span>
+                <div class="field-group" style="margin-top:var(--space-sm);">
+                  <label for="psyPostAccept">Aceptación del Resultado: <span id="vPostAccept" class="text-sage">9</span>/10</label>
+                  <input type="range" id="psyPostAccept" min="1" max="10" value="9" oninput="updatePsychoMonitor()">
+                </div>
+                <div class="field-group" style="margin-top:var(--space-sm);">
+                  <label for="psyPostRevenge">Impulso de Revancha: <span id="vPostRevenge" class="text-error">1</span>/10</label>
+                  <input type="range" id="psyPostRevenge" min="1" max="10" value="1" oninput="updatePsychoMonitor()">
+                </div>
+              </div>
+            </div>
+
+            <div class="field-group" style="margin-bottom:var(--space-md);">
+              <label for="psyTriggerNote">Disparador Emocional o Reflexión de la Sesión</label>
+              <input type="text" id="psyTriggerNote" placeholder="Ej: Esperé la vela M5 cerrada sin perseguir el precio" oninput="saveAppAll()">
+            </div>
+
+            <button type="button" class="btn btn-primary" onclick="savePsychoLog()">
+              <i data-lucide="save" aria-hidden="true" style="width:16px;height:16px;"></i>
+              Guardar Registro Psicotrading
+            </button>
+          </div>
+
+          <div class="well">
+            <h3 class="title-sub">Perfil Psicológico de la Sesión <span class="tag tag-calc">[RESULTADO CALCULADO]</span></h3>
+            <div id="m9WarningBox" class="inline-notice is-ok" style="margin-bottom:var(--space-md);">
+              Perfil estable: sin señales de FOMO ni impulso de revancha.
+            </div>
+            <div class="chart-box" style="min-height: 280px;">
+              <canvas id="chartM9Psycho"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 10: ESTADÍSTICAS DE PERFORMANCE (25 MÉTRICAS) -->
+    <!-- =================================================================== -->
+    <section id="mod-m10" class="module-view" aria-labelledby="h-m10">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m10">10. Estadísticas Cuantitativas de Performance (25 Métricas)</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Cálculo automático en tiempo real sobre todas las operaciones registradas en la bitácora.
+            </p>
+          </div>
+          <span class="tag tag-calc">[RESULTADO CALCULADO]</span>
+        </div>
+
+        <div class="kpi-grid" id="m10MetricsGrid" style="margin-bottom:var(--space-lg);">
+          <!-- 25 Metrics rendered dynamically -->
+        </div>
+
+        <div class="panel">
+          <h3 class="title-sub">Distribución de Resultados en Múltiplos R</h3>
+          <div class="chart-box" style="min-height: 280px;">
+            <canvas id="chartM10RDist"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 11: MÓDULO DE BACKTESTING -->
+    <!-- =================================================================== -->
+    <section id="mod-m11" class="module-view" aria-labelledby="h-m11">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m11">11. Laboratorio de Backtesting &amp; Pruebas de Estrés (Meta: 100 Trades)</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              La Estrategia A requiere una muestra estadística mínima de 100 operaciones históricas antes de operar dinero real.
+            </p>
+          </div>
+          <span class="status-pill pill-cyan" id="m11ProgressBadge">0 / 100 TRADES</span>
+        </div>
+
+        <div class="well" style="margin-bottom:var(--space-lg);">
+          <div style="display:flex; justify-content:space-between; margin-bottom:var(--space-xs);">
+            <span class="data-label">Progreso hacia Muestra Estadística Mínima (100 Operaciones)</span>
+            <span class="mono-num text-cyan" id="m11PctText">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="m11ProgressBar" style="width:0%;"></div>
+          </div>
+        </div>
+
+        <div class="split-2">
+          <div class="well">
+            <h3 class="title-sub">Registrar Lote de Backtesting <span class="tag tag-user">[DATO DE USUARIO]</span></h3>
+            <div class="field-grid-2" style="margin-bottom:var(--space-md);">
+              <div class="field-group"><label for="btPeriod">Periodo / Rango</label><input type="text" id="btPeriod" value="2025-Q4 / 2026-Q1"></div>
+              <div class="field-group"><label for="btPair">Activo Spot</label><input type="text" id="btPair" value="BTCUSDT (M5)"></div>
+            </div>
+            <div class="field-grid-3" style="margin-bottom:var(--space-md);">
+              <div class="field-group"><label for="btTrades">Total Trades</label><input type="number" id="btTrades" min="1" value="35"></div>
+              <div class="field-group"><label for="btWins">Ganadores</label><input type="number" id="btWins" min="0" value="16"></div>
+              <div class="field-group"><label for="btPF">Profit Factor</label><input type="number" id="btPF" step="0.01" value="1.48"></div>
+            </div>
+            <div class="field-grid-2" style="margin-bottom:var(--space-md);">
+              <div class="field-group"><label for="btDD">Max Drawdown (%)</label><input type="number" id="btDD" step="0.1" value="4.2"></div>
+              <div class="field-group"><label for="btExpectR">Expectativa Media (R)</label><input type="number" id="btExpectR" step="0.01" value="0.28"></div>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="addBacktestBatch()">
+              <i data-lucide="plus" aria-hidden="true" style="width:16px;height:16px;"></i>
+              Agregar Lote de Backtest
+            </button>
+          </div>
+
+          <div class="well">
+            <h3 class="title-sub">Prueba de Estrés de 5 Controles <span class="tag tag-approved">[REGLA APROBADA]</span></h3>
+            <div class="check-list">
+              <label class="check-item"><input type="checkbox" id="st1" onchange="saveAppAll()"><span><strong>1. Fuera de muestra (Out-of-Sample):</strong> Expectativa positiva en periodo distinto.</span></label>
+              <label class="check-item"><input type="checkbox" id="st2" onchange="saveAppAll()"><span><strong>2. Sensibilidad (±10% / ±20%):</strong> No depende de sobreajuste en EMA 50 o ATR.</span></label>
+              <label class="check-item"><input type="checkbox" id="st3" onchange="saveAppAll()"><span><strong>3. Costes dobles (0.20% por lado):</strong> Sigue siendo rentable con doble fricción.</span></label>
+              <label class="check-item"><input type="checkbox" id="st4" onchange="saveAppAll()"><span><strong>4. Sin el 5% de las mejores operaciones:</strong> No depende de 1 o 2 trades aislados.</span></label>
+              <label class="check-item"><input type="checkbox" id="st5" onchange="saveAppAll()"><span><strong>5. Peor racha (1,000 simulaciones):</strong> Drawdown tolerado debajo del límite de $8.00.</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap" style="margin-top:var(--space-lg);">
+          <table>
+            <thead>
+              <tr>
+                <th>Periodo</th>
+                <th>Activo</th>
+                <th class="num-col">Trades</th>
+                <th class="num-col">Win Rate</th>
+                <th class="num-col">Profit Factor</th>
+                <th class="num-col">Max DD</th>
+                <th class="num-col">Expectativa (R)</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="m11TableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 12: VALIDACIÓN PARA DINERO REAL (5/5 CONDICIONES) -->
+    <!-- =================================================================== -->
+    <section id="mod-m12" class="module-view" aria-labelledby="h-m12">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m12">12. Validación de Graduación a Dinero Real (5 / 5 Condiciones)</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              El paso a cuenta Real ($80 · máx. $0.40/trade) exige cumplir las 5 compuertas cuantitativas simultáneamente.
+            </p>
+          </div>
+          <span class="status-pill pill-red" id="m12GateBadge">🔴 NO APTO PARA REAL (0 / 5)</span>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Condición Obligatoria de Graduación</th>
+                <th>Umbral Requerido</th>
+                <th>Valor Actual Medido</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="m12TableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 13: CIERRE DE SESIÓN E INFORME AUTOMÁTICO -->
+    <!-- =================================================================== -->
+    <section id="mod-m13" class="module-view" aria-labelledby="h-m13">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m13">13. Cierre de Sesión &amp; Informe Automático de Auditoría</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Verificación de fin de día intradía (sin posiciones overnight) y compilación automática de resultados, disciplina y psicotrading.
+            </p>
+          </div>
+          <div style="display:flex; gap:var(--space-sm);">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="generateSessionReport()">Actualizar Informe</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="downloadSessionReport()">Descargar Reporte (.TXT)</button>
+          </div>
+        </div>
+
+        <div class="split-2">
+          <div class="well">
+            <h3 class="title-sub">Reflexión de Cierre Post-Mercado <span class="tag tag-user">[DATO DE USUARIO]</span></h3>
+            <div class="field-group" style="margin-bottom:var(--space-md);">
+              <label for="m13Good">1 Acierto Técnico o Emocional de Hoy</label>
+              <input type="text" id="m13Good" placeholder="Ej: Respeté la pausa de 15 min después del SL" oninput="generateSessionReport()">
+            </div>
+            <div class="field-group" style="margin-bottom:var(--space-md);">
+              <label for="m13Improve">1 Error o Aspecto a Corregir Mañana</label>
+              <input type="text" id="m13Improve" placeholder="Ej: Verificar Min Notional antes de marcar el setup" oninput="generateSessionReport()">
+            </div>
+            <label class="check-item">
+              <input type="checkbox" id="m13NoOvernight" checked onchange="generateSessionReport()">
+              <span><strong>Confirmación Cero Overnight:</strong> Todas las órdenes abiertas y pendientes OCO fueron cerradas o conciliadas antes de 23:45 UTC-5.</span>
+            </label>
+          </div>
+
+          <div class="well">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-sm);">
+              <span class="data-label">Informe Automático Compilado</span>
+              <button type="button" class="btn btn-secondary btn-sm" id="btnCopyReport" onclick="copyReportText()">Copiar Texto</button>
+            </div>
+            <pre class="code-well" id="m13ReportPreview"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PESTAÑA ARQUITECTURA: GOOGLE APPS SCRIPT & GOOGLE SHEETS -->
+    <!-- =================================================================== -->
+    <section id="mod-arch" class="module-view" aria-labelledby="h-arch">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-arch">Arquitectura Backend — Google Apps Script (.gs) &amp; Esquema Google Sheets</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Modelo relacional de persistencia y motor de reglas de servidor en zona horaria <code>America/Bogota</code> (UTC-5) alineado al perfil Disenk.
+            </p>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" id="btnCopyGas" onclick="copyGasCode()">Copiar Código .gs</button>
+        </div>
+
+        <h3 class="title-sub">Esquema de Tablas Relacionales (Google Sheets)</h3>
+        <div class="table-wrap" style="margin-bottom:var(--space-lg);">
+          <table>
+            <thead>
+              <tr>
+                <th>Hoja (Tabla)</th>
+                <th>Clave Primaria (PK)</th>
+                <th>Relación (FK)</th>
+                <th>Columnas Principales</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="mono-num text-cyan">DISENK_CONFIG</td>
+                <td class="mono-num">clave</td>
+                <td class="text-muted">—</td>
+                <td class="mono-num">clave, valor, etiqueta_estado, actualizado_utc5</td>
+              </tr>
+              <tr>
+                <td class="mono-num text-cyan">DISENK_SESIONES</td>
+                <td class="mono-num">sesion_id</td>
+                <td class="text-muted">Fecha YYYY-MM-DD (UTC-5)</td>
+                <td class="mono-num">sesion_id, fecha_co, modo, prep_ok, pnl_dia, trades_dia, perdidas_seguidas, bloqueada</td>
+              </tr>
+              <tr>
+                <td class="mono-num text-cyan">DISENK_ANALISIS_MTF</td>
+                <td class="mono-num">mtf_id</td>
+                <td class="mono-num">sesion_id</td>
+                <td class="mono-num">mtf_id, sesion_id, par, cierre_1d, ema50_1d, cierre_1h, ema50_1h, rsi_m5, patron_m5, veredicto</td>
+              </tr>
+              <tr>
+                <td class="mono-num text-cyan">DISENK_OPERACIONES</td>
+                <td class="mono-num">trade_id</td>
+                <td class="mono-num">sesion_id, mtf_id</td>
+                <td class="mono-num">trade_id, sesion_id, origen_tag, par, entrada, sl_m5, tp_neto, cantidad_spot, riesgo_usd, fees_usd, pnl_neto, r_multiplo, disciplina_pct</td>
+              </tr>
+              <tr>
+                <td class="mono-num text-cyan">DISENK_PSICOTRADING</td>
+                <td class="mono-num">psy_id</td>
+                <td class="mono-num">trade_id / sesion_id</td>
+                <td class="mono-num">psy_id, sesion_id, calma_antes, fomo_antes, ansiedad_durante, confianza_durante, aceptacion_despues, revancha_despues</td>
+              </tr>
+              <tr>
+                <td class="mono-num text-cyan">DISENK_BACKTEST</td>
+                <td class="mono-num">bt_id</td>
+                <td class="text-muted">estrategia_a_spot</td>
+                <td class="mono-num">bt_id, periodo, par, n_trades, win_rate, profit_factor, max_dd_pct, expectativa_r, estres_5_de_5</td>
+              </tr>
+              <tr>
+                <td class="mono-num text-cyan">DISENK_AUDITORIA_RIESGO</td>
+                <td class="mono-num">audit_id</td>
+                <td class="mono-num">sesion_id</td>
+                <td class="mono-num">audit_id, timestamp_utc5, semaforo, evento, detalle_regla</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="title-sub">Código Fuente Servidor — <code>DisenkCore.gs</code></h3>
+        <pre class="code-well" id="gasCodeBlock"></pre>
+      </div>
+    </section>
+
+    <footer class="footer-sources">
+      <span>DISENK — TRADER JOURNAL · Arquitectura Cuantitativa Estrategia A v3.7 (LONG ONLY · Binance Spot).</span>
+      <span>Fuentes integradas: 18 Patrones de Velas Japonesas, La Biblia de las Velas, Guía de Análisis Fundamental Cripto, Plan de Trading y Arquitectura Cuantitativa Disenk.</span>
+    </footer>
+  </div>
+
+  <api-shim></api-shim>
+
+  <script>
+    /* =========================================================================
+       DISENK — TRADER JOURNAL (STATE & CONSTANTS)
+       ========================================================================= */
+    const DISENK_RULES = {
+      initialCapital: 80.00,
+      maxRiskRealPct: 0.005,   // 0.5% -> $0.40
+      maxRiskDemoPct: 0.010,   // 1.0% -> $0.80
+      dailyLossLimit: 0.80,
+      monthlyLossLimit: 8.00,
+      maxTradesPerDay: 3,
+      maxOpenPositions: 1,
+      maxConsecutiveLosses: 2,
+      cooldownMinutes: 15
+    };
+
+    const BINANCE_PRESETS = {
+      BTCUSDT: { step: 0.00001, minNotional: 5.0, sampleEntry: 91450, sampleSL: 91168, sampleAtr: 120 },
+      ETHUSDT: { step: 0.0001,  minNotional: 5.0, sampleEntry: 3120,  sampleSL: 3098,  sampleAtr: 11.5 },
+      SOLUSDT: { step: 0.001,   minNotional: 5.0, sampleEntry: 215.4, sampleSL: 213.8, sampleAtr: 0.85 },
+      BNBUSDT: { step: 0.001,   minNotional: 5.0, sampleEntry: 625.0, sampleSL: 621.2, sampleAtr: 1.90 }
+    };
+
+    const GAS_SOURCE_CODE = `/* ============================================================
+   DISENK — TRADER JOURNAL (Backend Google Apps Script v3.7)
+   Zona Horaria: America/Bogota (UTC-5) | Binance Spot Only
+   ============================================================ */
+const DISENK_CFG = {
+  TZ: "America/Bogota",
+  CAPITAL_BASE: 80.00,
+  RIESGO_REAL_PCT: 0.005,   // USD 0.40
+  RIESGO_DEMO_PCT: 0.010,   // USD 0.80
+  LIMITE_DIARIO_USD: 0.80,  // Reinicio 00:00 UTC-5
+  LIMITE_MENSUAL_USD: 8.00,
+  MAX_TRADES_DIA: 3,
+  MAX_PERDIDAS_SEGUIDAS: 2,
+  PAUSA_OBLIGATORIA_MIN: 15,
+  SHEETS: {
+    CONFIG: "DISENK_CONFIG",
+    SESIONES: "DISENK_SESIONES",
+    MTF: "DISENK_ANALISIS_MTF",
+    TRADES: "DISENK_OPERACIONES",
+    PSYCHO: "DISENK_PSICOTRADING",
+    BACKTEST: "DISENK_BACKTEST",
+    AUDITORIA: "DISENK_AUDITORIA_RIESGO"
+  }
+};
+
+function setupDisenkSheets() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const schemas = {
+    DISENK_CONFIG: ["clave","valor","etiqueta_estado","actualizado_utc5"],
+    DISENK_SESIONES: ["sesion_id","fecha_co","modo","prep_ok","pnl_dia","trades_dia","perdidas_seguidas","bloqueada"],
+    DISENK_ANALISIS_MTF: ["mtf_id","sesion_id","par","cierre_1d","ema50_1d","cierre_1h","ema50_1h","rsi_m5","patron_m5","veredicto"],
+    DISENK_OPERACIONES: ["trade_id","sesion_id","origen_tag","par","entrada","sl_m5","tp_neto","cantidad_spot","riesgo_usd","fees_usd","pnl_neto","r_multiplo","disciplina_pct"],
+    DISENK_PSICOTRADING: ["psy_id","sesion_id","calma_antes","fomo_antes","ansiedad_durante","confianza_durante","aceptacion_despues","revancha_despues"],
+    DISENK_BACKTEST: ["bt_id","periodo","par","n_trades","win_rate","profit_factor","max_dd_pct","expectativa_r","estres_5_de_5"],
+    DISENK_AUDITORIA_RIESGO: ["audit_id","timestamp_utc5","semaforo","evento","detalle_regla"]
+  };
+  Object.keys(schemas).forEach(function(name) {
+    let sh = ss.getSheetByName(name);
+    if (!sh) sh = ss.insertSheet(name);
+    if (sh.getLastRow() === 0) {
+      sh.getRange(1, 1, 1, schemas[name].length).setValues([schemas[name]]);
+      sh.setFrozenRows(1);
+    }
+  });
+  return "Esquema DISENK v3.7 inicializado en UTC-5.";
+}
+
+function evaluarGobernanzaDiaria(modo, pnlDia, pnlMes, tradesHoy, perdidasSeguidas, enPausa) {
+  const limiteRiesgoTrade = (modo === "REAL")
+    ? DISENK_CFG.CAPITAL_BASE * DISENK_CFG.RIESGO_REAL_PCT
+    : DISENK_CFG.CAPITAL_BASE * DISENK_CFG.RIESGO_DEMO_PCT;
+
+  const bloqueos = [];
+  if (pnlDia <= -DISENK_CFG.LIMITE_DIARIO_USD) bloqueos.push("LIMITE_DIARIO_0.80_ALCANZADO");
+  if (pnlMes <= -DISENK_CFG.LIMITE_MENSUAL_USD) bloqueos.push("LIMITE_MENSUAL_8.00_ALCANZADO");
+  if (tradesHoy >= DISENK_CFG.MAX_TRADES_DIA) bloqueos.push("MAX_3_TRADES_DIA");
+  if (perdidasSeguidas >= DISENK_CFG.MAX_PERDIDAS_SEGUIDAS) bloqueos.push("2_PERDIDAS_CONSECUTIVAS");
+  if (enPausa) bloqueos.push("PAUSA_OBLIGATORIA_15_MIN");
+
+  return {
+    habilitado: bloqueos.length === 0,
+    semaforo: bloqueos.length > 0 ? "ROJO_BLOQUEADO" : "VERDE_HABILITADO",
+    riesgoMaximoUSD: limiteRiesgoTrade,
+    motivos: bloqueos
+  };
+}
+
+function calcularSL_EstrategiaA(minimos10VelasM5, atr14M5) {
+  const minimo = Math.min.apply(null, minimos10VelasM5);
+  const margen = atr14M5 * 0.10;
+  return {
+    minimo10Velas: minimo,
+    margenATR: margen,
+    stopLossM5: Number((minimo - margen).toFixed(4))
+  };
+}`;
+
+    const SAMPLE_SIM_TRADES = [
+      {
+        id: 'TRD-SIM-01',
+        dateCo: '2026-11-12 09:15',
+        origin: 'SIM',
+        pair: 'BTCUSDT',
+        pattern: 'Martillo',
+        entry: 89420.00,
+        sl: 89180.00,
+        tp: 90010.00,
+        riskUsd: 0.40,
+        feesUsd: 0.12,
+        pnlNet: 0.82,
+        psyPre: 8,
+        discipline: [true, true, true, true, true],
+        notes: `Ejemplo educativo [SUPUESTO DE SIMULACIÓN]: Rebote sobre EMA 50 M5 con RSI 54.`
+      },
+      {
+        id: 'TRD-SIM-02',
+        dateCo: '2026-11-12 14:20',
+        origin: 'SIM',
+        pair: 'ETHUSDT',
+        pattern: 'Envolvente alcista',
+        entry: 3085.00,
+        sl: 3064.00,
+        tp: 3134.00,
+        riskUsd: 0.40,
+        feesUsd: 0.10,
+        pnlNet: -0.40,
+        psyPre: 7,
+        discipline: [true, true, true, true, true],
+        notes: `Ejemplo educativo [SUPUESTO DE SIMULACIÓN]: Stop técnico respetado sin mover SL.`
+      },
+      {
+        id: 'TRD-SIM-03',
+        dateCo: '2026-11-13 10:05',
+        origin: 'SIM',
+        pair: 'SOLUSDT',
+        pattern: 'Estrella del amanecer',
+        entry: 210.50,
+        sl: 208.90,
+        tp: 214.10,
+        riskUsd: 0.40,
+        feesUsd: 0.09,
+        pnlNet: 0.84,
+        psyPre: 9,
+        discipline: [true, true, true, true, true],
+        notes: `Ejemplo educativo [SUPUESTO DE SIMULACIÓN]: TP 1:2 neto ejecutado vía OCO.`
+      }
+    ];
+
+    const SAMPLE_BACKTESTS = [
+      {
+        id: 'BT-01',
+        period: '2026-08 / 2026-10',
+        pair: 'BTCUSDT M5',
+        trades: 45,
+        wins: 22,
+        pf: 1.56,
+        dd: 3.8,
+        expectR: 0.31
+      }
+    ];
+
+    let appState = {
+      mode: 'DEMO', // DEMO | REAL
+      activeModule: 'm1',
+      openPositionActive: false,
+      cooldownEndMs: 0,
+      prepChecks: [false, false, false, false, false, false],
+      prepPair: 'BTCUSDT',
+      prepNews: 'Despejado',
+      prepBias: '',
+      prepLevels: '',
+      checklist15: new Array(15).fill(false),
+      trades: JSON.parse(JSON.stringify(SAMPLE_SIM_TRADES)),
+      backtests: JSON.parse(JSON.stringify(SAMPLE_BACKTESTS)),
+      stressTests: [false, false, false, false, false],
+      psycho: {
+        preCalm: 8,
+        preFomo: 2,
+        durAnx: 3,
+        durTrust: 9,
+        postAccept: 9,
+        postRevenge: 1,
+        note: ''
+      },
+      sessionClose: {
+        good: '',
+        improve: '',
+        noOvernight: true
+      }
+    };
+
+    let chartM1 = null;
+    let chartM9 = null;
+    let chartM10 = null;
+    let clockInterval = null;
+
+    /* =========================================================================
+       PERSISTENCE VIA notebookAppApi (NO localStorage)
+       ========================================================================= */
+    async function saveAppAll() {
+      collectDomIntoState();
+      if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === 'function') {
+        try {
+          await window.notebookAppApi.setAppState(appState);
+        } catch (e) {
+          // Ignore transient payload issues quietly
+        }
+      }
+    }
+
+    function collectDomIntoState() {
+      for (let i = 1; i <= 6; i++) {
+        const el = document.getElementById('prep' + i);
+        if (el) appState.prepChecks[i - 1] = el.checked;
+      }
+      const pPair = document.getElementById('m2ParFocus');
+      if (pPair) appState.prepPair = pPair.value;
+      const pNews = document.getElementById('m2NewsPolicy');
+      if (pNews) appState.prepNews = pNews.value;
+      const pBias = document.getElementById('m2BiasPhrase');
+      if (pBias) appState.prepBias = pBias.value;
+      const pLvl = document.getElementById('m2KeyLevels');
+      if (pLvl) appState.prepLevels = pLvl.value;
+
+      const chks = document.querySelectorAll('.chk15');
+      chks.forEach(function(cb, idx) {
+        appState.checklist15[idx] = cb.checked;
+      });
+
+      for (let s = 1; s <= 5; s++) {
+        const st = document.getElementById('st' + s);
+        if (st) appState.stressTests[s - 1] = st.checked;
+      }
+
+      const gEl = document.getElementById('m13Good');
+      if (gEl) appState.sessionClose.good = gEl.value;
+      const iEl = document.getElementById('m13Improve');
+      if (iEl) appState.sessionClose.improve = iEl.value;
+      const nEl = document.getElementById('m13NoOvernight');
+      if (nEl) appState.sessionClose.noOvernight = nEl.checked;
+    }
+
+    function applyStateToDom() {
+      for (let i = 1; i <= 6; i++) {
+        const el = document.getElementById('prep' + i);
+        if (el && appState.prepChecks[i - 1] !== undefined) el.checked = !!appState.prepChecks[i - 1];
+      }
+      const pPair = document.getElementById('m2ParFocus');
+      if (pPair && appState.prepPair) pPair.value = appState.prepPair;
+      const pNews = document.getElementById('m2NewsPolicy');
+      if (pNews && appState.prepNews) pNews.value = appState.prepNews;
+      const pBias = document.getElementById('m2BiasPhrase');
+      if (pBias) pBias.value = appState.prepBias || '';
+      const pLvl = document.getElementById('m2KeyLevels');
+      if (pLvl) pLvl.value = appState.prepLevels || '';
+
+      const chks = document.querySelectorAll('.chk15');
+      chks.forEach(function(cb, idx) {
+        if (appState.checklist15[idx] !== undefined) cb.checked = !!appState.checklist15[idx];
+      });
+
+      for (let s = 1; s <= 5; s++) {
+        const st = document.getElementById('st' + s);
+        if (st && appState.stressTests[s - 1] !== undefined) st.checked = !!appState.stressTests[s - 1];
+      }
+
+      if (appState.psycho) {
+        const map = {
+          psyPreCalm: appState.psycho.preCalm,
+          psyPreFomo: appState.psycho.preFomo,
+          psyDurAnx: appState.psycho.durAnx,
+          psyDurTrust: appState.psycho.durTrust,
+          psyPostAccept: appState.psycho.postAccept,
+          psyPostRevenge: appState.psycho.postRevenge
+        };
+        Object.keys(map).forEach(function(id) {
+          const el = document.getElementById(id);
+          if (el && map[id] !== undefined) el.value = map[id];
+        });
+        const pNote = document.getElementById('psyTriggerNote');
+        if (pNote) pNote.value = appState.psycho.note || '';
+      }
+
+      if (appState.sessionClose) {
+        const gEl = document.getElementById('m13Good');
+        if (gEl) gEl.value = appState.sessionClose.good || '';
+        const iEl = document.getElementById('m13Improve');
+        if (iEl) iEl.value = appState.sessionClose.improve || '';
+        const nEl = document.getElementById('m13NoOvernight');
+        if (nEl) nEl.checked = appState.sessionClose.noOvernight !== false;
+      }
+
+      updateModeButtonsUI();
+    }
+
+    /* =========================================================================
+       COLOMBIA TIME (UTC-5) & CLOCK
+       ========================================================================= */
+    function getColombiaDateParts() {
+      const now = new Date();
+      const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const co = new Date(utcMs - (5 * 3600000));
+      const yyyy = co.getFullYear();
+      const mm = String(co.getMonth() + 1).padStart(2, '0');
+      const dd = String(co.getDate()).padStart(2, '0');
+      const hh = String(co.getHours()).padStart(2, '0');
+      const mi = String(co.getMinutes()).padStart(2, '0');
+      const ss = String(co.getSeconds()).padStart(2, '0');
+      return {
+        dateStr: yyyy + '-' + mm + '-' + dd,
+        monthStr: yyyy + '-' + mm,
+        timeStr: hh + ':' + mi + ':' + ss,
+        shortDateTime: yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + mi,
+        hour: co.getHours(),
+        minute: co.getMinutes()
+      };
+    }
+
+    function tickClockAndCooldown() {
+      const co = getColombiaDateParts();
+      const clk = document.getElementById('colombiaClock');
+      if (clk) clk.textContent = co.timeStr;
+
+      const ovFlag = document.getElementById('overnightFlag');
+      const isOvernightWindow = (co.hour === 23 && co.minute >= 45);
+      if (ovFlag) {
+        ovFlag.textContent = isOvernightWindow ? 'Cierre Overnight Obligatorio' : 'Ventana Intradía Segura';
+        ovFlag.style.color = isOvernightWindow ? 'var(--error)' : 'var(--on-surface-variant)';
+      }
+
+      const nowMs = Date.now();
+      const cdBanner = document.getElementById('cooldownBanner');
+      const cdText = document.getElementById('cooldownTimerText');
+      if (appState.cooldownEndMs > nowMs) {
+        const remSec = Math.ceil((appState.cooldownEndMs - nowMs) / 1000);
+        const m = String(Math.floor(remSec / 60)).padStart(2, '0');
+        const s = String(remSec % 60).padStart(2, '0');
+        if (cdBanner) cdBanner.style.display = 'flex';
+        if (cdText) cdText.textContent = `Pausa obligatoria activa: ${m}:${s} restantes`;
+      } else {
+        if (cdBanner) cdBanner.style.display = 'none';
+      }
+      refreshGovernanceSemaphore();
+    }
+
+    /* =========================================================================
+       TOAST & INLINE FEEDBACK (NO alert/confirm)
+       ========================================================================= */
+    function showGlobalToast(msg, tone) {
+      const box = document.getElementById('globalToast');
+      const txt = document.getElementById('globalToastMsg');
+      if (!box || !txt) return;
+      txt.textContent = msg;
+      box.className = 'inline-notice';
+      if (tone === 'error') box.classList.add('is-error');
+      else if (tone === 'warn') box.classList.add('is-warn');
+      else box.classList.add('is-ok');
+      box.style.display = 'flex';
+    }
+
+    function hideGlobalToast() {
+      const box = document.getElementById('globalToast');
+      if (box) box.style.display = 'none';
+    }
+
+    function resetDemoSeed(btn) {
+      if (btn && btn.dataset.armed !== 'true') {
+        btn.dataset.armed = 'true';
+        btn.textContent = 'Confirmar Reinicio';
+        setTimeout(function() {
+          if (btn) {
+            btn.dataset.armed = 'false';
+            btn.innerHTML = `<i data-lucide="rotate-ccw" aria-hidden="true" style="width:15px;height:15px;"></i> Reiniciar Datos`;
+            if (window.lucide) lucide.createIcons();
+          }
+        }, 4000);
+        return;
+      }
+      if (btn) {
+        btn.dataset.armed = 'false';
+        btn.innerHTML = `<i data-lucide="rotate-ccw" aria-hidden="true" style="width:15px;height:15px;"></i> Reiniciar Datos`;
+        if (window.lucide) lucide.createIcons();
+      }
+      appState.trades = JSON.parse(JSON.stringify(SAMPLE_SIM_TRADES));
+      appState.backtests = JSON.parse(JSON.stringify(SAMPLE_BACKTESTS));
+      appState.cooldownEndMs = 0;
+      appState.openPositionActive = false;
+      appState.prepChecks = [false, false, false, false, false, false];
+      appState.checklist15 = new Array(15).fill(false);
+      applyStateToDom();
+      recalcAllModules();
+      saveAppAll();
+      showGlobalToast('Datos de simulación y sesión reiniciados correctamente.', 'ok');
+    }
+
+    /* =========================================================================
+       NAVIGATION & MODE SWITCH
+       ========================================================================= */
+    function switchModule(modId) {
+      appState.activeModule = modId;
+      document.querySelectorAll('.module-view').forEach(function(sec) {
+        sec.classList.remove('active');
+      });
+      document.querySelectorAll('.nav-btn').forEach(function(btn) {
+        btn.classList.remove('active');
+      });
+      const target = document.getElementById('mod-' + modId);
+      const navBtn = document.getElementById('nav-' + modId);
+      if (target) target.classList.add('active');
+      if (navBtn) navBtn.classList.add('active');
+
+      if (modId === 'm1') renderEquityChart();
+      if (modId === 'm9') renderPsychoChart();
+      if (modId === 'm10') renderRDistChart();
+      if (modId === 'm13') generateSessionReport();
+      saveAppAll();
+    }
+
+    function setAccountMode(mode) {
+      appState.mode = mode;
+      updateModeButtonsUI();
+      recalcAllModules();
+      saveAppAll();
+      showGlobalToast(
+        mode === 'REAL'
+          ? 'Modo REAL activado: Riesgo máximo estricto 0.5% (USD 0.40 por operación).'
+          : 'Modo DEMO/PRUEBAS activado: Riesgo máximo 1.0% (USD 0.80 por operación).',
+        mode === 'REAL' ? 'ok' : 'warn'
+      );
+    }
+
+    function updateModeButtonsUI() {
+      const bDemo = document.getElementById('btnModeDemo');
+      const bReal = document.getElementById('btnModeReal');
+      if (!bDemo || !bReal) return;
+      bDemo.className = 'mode-option' + (appState.mode === 'DEMO' ? ' active-demo' : '');
+      bReal.className = 'mode-option' + (appState.mode === 'REAL' ? ' active-real' : '');
+    }
+
+    /* =========================================================================
+       CORE METRICS ENGINE (CALCULATED OVER JOURNAL + CO TIME)
+       ========================================================================= */
+    function computeCoreMetrics() {
+      const co = getColombiaDateParts();
+      const trades = appState.trades || [];
+      let totalNetPnl = 0;
+      let totalGrossWin = 0;
+      let totalGrossLoss = 0;
+      let totalFees = 0;
+      let wins = 0;
+      let losses = 0;
+      let sumR = 0;
+      let bestR = 0;
+      let worstR = 0;
+      let winSumUsd = 0;
+      let lossSumUsd = 0;
+      let disciplinePoints = 0;
+      let inRuleCount = 0;
+
+      let eq = DISENK_RULES.initialCapital;
+      let peakEq = eq;
+      let maxDdUsd = 0;
+      let maxDdPct = 0;
+      const equitySeries = [eq];
+      const equityLabels = ['Inicio ($80)'];
+
+      let curWinStreak = 0;
+      let maxWinStreak = 0;
+      let curLossStreak = 0;
+      let maxLossStreak = 0;
+
+      let todayTrades = 0;
+      let todayPnl = 0;
+      let todayConsecLosses = 0;
+      let monthPnl = 0;
+      const rValues = [];
+
+      trades.forEach(function(t, idx) {
+        const pnl = Number(t.pnlNet) || 0;
+        const risk = Math.max(0.01, Number(t.riskUsd) || 0.40);
+        const fees = Number(t.feesUsd) || 0;
+        const rMult = pnl / risk;
+        rValues.push(rMult);
+
+        totalNetPnl += pnl;
+        totalFees += fees;
+        sumR += rMult;
+        if (rMult > bestR) bestR = rMult;
+        if (rMult < worstR) worstR = rMult;
+
+        if (pnl >= 0) {
+          wins++;
+          totalGrossWin += pnl;
+          winSumUsd += pnl;
+          curWinStreak++;
+          curLossStreak = 0;
+          if (curWinStreak > maxWinStreak) maxWinStreak = curWinStreak;
+        } else {
+          losses++;
+          totalGrossLoss += Math.abs(pnl);
+          lossSumUsd += Math.abs(pnl);
+          curLossStreak++;
+          curWinStreak = 0;
+          if (curLossStreak > maxLossStreak) maxLossStreak = curLossStreak;
+        }
+
+        eq += pnl;
+        equitySeries.push(Number(eq.toFixed(2)));
+        equityLabels.push(t.id || ('T' + (idx + 1)));
+        if (eq > peakEq) peakEq = eq;
+        const ddUsd = peakEq - eq;
+        if (ddUsd > maxDdUsd) maxDdUsd = ddUsd;
+        const ddPct = peakEq > 0 ? (ddUsd / peakEq) * 100 : 0;
+        if (ddPct > maxDdPct) maxDdPct = ddPct;
+
+        const discArr = Array.isArray(t.discipline) ? t.discipline : [true,true,true,true,true];
+        const discScore = discArr.filter(Boolean).length;
+        disciplinePoints += discScore;
+        if (discScore === 5) inRuleCount++;
+
+        const tDate = (t.dateCo || '').slice(0, 10);
+        const tMonth = (t.dateCo || '').slice(0, 7);
+        if (tMonth === co.monthStr) monthPnl += pnl;
+        if (tDate === co.dateStr) {
+          todayTrades++;
+          todayPnl += pnl;
+          if (pnl < 0) todayConsecLosses++;
+          else todayConsecLosses = 0;
+        }
+      });
+
+      const n = trades.length;
+      const winRate = n > 0 ? (wins / n) * 100 : 0;
+      const lossRate = n > 0 ? (losses / n) * 100 : 0;
+      const avgWin = wins > 0 ? winSumUsd / wins : 0;
+      const avgLoss = losses > 0 ? lossSumUsd / losses : 0;
+      const payoffRatio = avgLoss > 0 ? avgWin / avgLoss : (avgWin > 0 ? 2.0 : 0);
+      const profitFactor = totalGrossLoss > 0 ? totalGrossWin / totalGrossLoss : (totalGrossWin > 0 ? 9.99 : 0);
+      const expectUsd = n > 0 ? totalNetPnl / n : 0;
+      const expectR = n > 0 ? sumR / n : 0;
+      const breakevenWR = payoffRatio > 0 ? (1 / (1 + payoffRatio)) * 100 : 50;
+      const safetyMarginWR = winRate - breakevenWR;
+      const disciplinePct = n > 0 ? (disciplinePoints / (n * 5)) * 100 : 100;
+
+      // Sharpe simplificado sobre retornos R
+      let sharpe = 0;
+      if (rValues.length > 1) {
+        const meanR = sumR / rValues.length;
+        const variance = rValues.reduce(function(acc, r) { return acc + Math.pow(r - meanR, 2); }, 0) / (rValues.length - 1);
+        const stdR = Math.sqrt(variance);
+        sharpe = stdR > 0 ? meanR / stdR : 0;
+      }
+
+      const dailyLossConsumed = todayPnl < 0 ? Math.abs(todayPnl) : 0;
+      const monthlyLossConsumed = monthPnl < 0 ? Math.abs(monthPnl) : 0;
+
+      return {
+        n, wins, losses, winRate, lossRate,
+        capitalNow: eq,
+        totalNetPnl,
+        returnPct: ((eq - DISENK_RULES.initialCapital) / DISENK_RULES.initialCapital) * 100,
+        totalGrossWin, totalGrossLoss, totalFees,
+        avgWin, avgLoss, payoffRatio, profitFactor,
+        expectUsd, expectR, bestR, worstR,
+        maxDdUsd, maxDdPct,
+        maxWinStreak, maxLossStreak,
+        breakevenWR, safetyMarginWR,
+        disciplinePct, inRuleCount,
+        expect100TradesR: expectR * 100,
+        sharpe,
+        todayTrades, todayPnl, todayConsecLosses,
+        dailyLossConsumed, monthlyLossConsumed,
+        monthlyLimitUsePct: Math.min(100, (monthlyLossConsumed / DISENK_RULES.monthlyLossLimit) * 100),
+        equitySeries, equityLabels, rValues
+      };
+    }
+
+    /* =========================================================================
+       MÓDULO 1 & SEMÁFORO DE GOBERNANZA
+       ========================================================================= */
+    function refreshGovernanceSemaphore() {
+      const m = computeCoreMetrics();
+      const co = getColombiaDateParts();
+      const nowMs = Date.now();
+      const inCooldown = appState.cooldownEndMs > nowMs;
+      const isOvernight = (co.hour === 23 && co.minute >= 45);
+      const prepDone = appState.prepChecks.filter(Boolean).length;
+      const psychoBlocked = (appState.psycho.preFomo > 7 || appState.psycho.preCalm < 5 || appState.psycho.postRevenge > 6);
+
+      const blocks = [];
+      const warns = [];
+
+      if (m.dailyLossConsumed >= DISENK_RULES.dailyLossLimit) blocks.push('Límite pérdida diaria ($0.80) alcanzado');
+      if (m.monthlyLossConsumed >= DISENK_RULES.monthlyLossLimit) blocks.push('Límite pérdida mensual ($8.00) alcanzado — Trading suspendido');
+      if (m.todayTrades >= DISENK_RULES.maxTradesPerDay) blocks.push('Máximo 3 operaciones/día alcanzado');
+      if (m.todayConsecLosses >= DISENK_RULES.maxConsecutiveLosses) blocks.push('2 pérdidas consecutivas hoy — Detener sesión');
+      if (inCooldown) blocks.push('Pausa obligatoria de 15 minutos en curso');
+      if (appState.openPositionActive) blocks.push('Ya existe 1 posición abierta (máx. 1)');
+      if (isOvernight) blocks.push('Horario crítico >= 23:45 UTC-5 (Prohibido overnight)');
+      if (psychoBlocked) blocks.push('Alerta Psicotrading (Calma < 5 o FOMO/Revancha elevado)');
+
+      if (prepDone < 6) warns.push(`Prep. Sesión ${prepDone}/6`);
+      if (appState.mode === 'REAL' && !isRealGatePassed(m)) warns.push('Cuenta Real marcada sin 5/5 condiciones de graduación');
+
+      const box = document.getElementById('semaphoreBox');
+      const txt = document.getElementById('semaphoreStatusText');
+      const reason = document.getElementById('semaphoreReasonText');
+      if (!box || !txt || !reason) return;
+
+      box.className = 'semaphore-state';
+      if (blocks.length > 0) {
+        box.classList.add('is-red');
+        txt.textContent = '🔴 BLOQUEADO';
+        reason.textContent = 'Bloqueo activo: ' + blocks.join(' · ') + '.';
+      } else if (warns.length > 0) {
+        box.classList.add('is-yellow');
+        txt.textContent = '🟡 PRECAUCIÓN';
+        reason.textContent = 'Sin bloqueos de pérdida, pero pendiente: ' + warns.join(' · ') + '.';
+      } else {
+        box.classList.add('is-green');
+        txt.textContent = '🟢 HABILITADO';
+        reason.textContent = 'Todas las reglas inquebrantables, prep. de sesión y psicotrading en verde.';
+      }
+    }
+
+    function renderModule1() {
+      const m = computeCoreMetrics();
+      const maxRiskUsd = appState.mode === 'REAL'
+        ? DISENK_RULES.initialCapital * DISENK_RULES.maxRiskRealPct
+        : DISENK_RULES.initialCapital * DISENK_RULES.maxRiskDemoPct;
+
+      const elCap = document.getElementById('m1Capital');
+      if (elCap) elCap.textContent = '$' + m.capitalNow.toFixed(2);
+
+      const elDiff = document.getElementById('m1EquityDiff');
+      if (elDiff) {
+        const sign = m.totalNetPnl >= 0 ? '+' : '';
+        elDiff.textContent = `PnL acumulado: ${sign}$${m.totalNetPnl.toFixed(2)} (${sign}${m.returnPct.toFixed(2)}%)`;
+        elDiff.className = 'mono-num ' + (m.totalNetPnl >= 0 ? 'text-sage' : 'text-error');
+      }
+
+      const elRisk = document.getElementById('m1RiskAllowed');
+      if (elRisk) elRisk.textContent = '$' + maxRiskUsd.toFixed(2);
+      const elRiskDesc = document.getElementById('m1RiskModeDesc');
+      if (elRiskDesc) {
+        elRiskDesc.textContent = appState.mode === 'REAL'
+          ? 'Modo REAL (0.5% sobre $80)'
+          : 'Modo DEMO/PRUEBAS (1.0% sobre $80)';
+      }
+
+      const dPct = Math.min(100, (m.dailyLossConsumed / DISENK_RULES.dailyLossLimit) * 100);
+      const elDL = document.getElementById('m1DailyLoss');
+      if (elDL) elDL.textContent = '$' + m.dailyLossConsumed.toFixed(2);
+      const elDBar = document.getElementById('m1DailyBar');
+      if (elDBar) {
+        elDBar.style.width = dPct + '%';
+        elDBar.className = 'progress-fill ' + (dPct >= 100 ? 'is-danger' : (dPct >= 50 ? 'is-warn' : 'is-sage'));
+      }
+      const elDRem = document.getElementById('m1DailyRem');
+      if (elDRem) elDRem.textContent = `Disponible hoy: $${Math.max(0, DISENK_RULES.dailyLossLimit - m.dailyLossConsumed).toFixed(2)} (reinicio 00:00 UTC-5)`;
+
+      const mPct = Math.min(100, (m.monthlyLossConsumed / DISENK_RULES.monthlyLossLimit) * 100);
+      const elML = document.getElementById('m1MonthlyLoss');
+      if (elML) elML.textContent = '$' + m.monthlyLossConsumed.toFixed(2);
+      const elMBar = document.getElementById('m1MonthlyBar');
+      if (elMBar) {
+        elMBar.style.width = mPct + '%';
+        elMBar.className = 'progress-fill ' + (mPct >= 100 ? 'is-danger' : (mPct >= 60 ? 'is-warn' : 'is-sage'));
+      }
+      const elMRem = document.getElementById('m1MonthlyRem');
+      if (elMRem) elMRem.textContent = `Disponible mes: $${Math.max(0, DISENK_RULES.monthlyLossLimit - m.monthlyLossConsumed).toFixed(2)}`;
+
+      const elDT = document.getElementById('m1DailyTrades');
+      if (elDT) elDT.textContent = `${m.todayTrades} / ${DISENK_RULES.maxTradesPerDay}`;
+      const elCL = document.getElementById('m1ConsecLosses');
+      if (elCL) elCL.textContent = `Pérdidas seguidas hoy: ${m.todayConsecLosses} / ${DISENK_RULES.maxConsecutiveLosses}`;
+
+      const elOP = document.getElementById('m1OpenPos');
+      if (elOP) elOP.textContent = `${appState.openPositionActive ? 1 : 0} / 1`;
+
+      // Rules Table
+      const tbody = document.getElementById('m1RulesTableBody');
+      if (tbody) {
+        const rulesRows = [
+          { name: 'Riesgo máximo por operación', limit: appState.mode === 'REAL' ? '0.5% ($0.40)' : '1.0% ($0.80)', ok: true, txt: 'ACTIVO' },
+          { name: 'Límite pérdida diaria (00:00 UTC-5)', limit: '$0.80 máx.', ok: m.dailyLossConsumed < 0.80, txt: m.dailyLossConsumed < 0.80 ? 'OK' : 'BLOQUEADO' },
+          { name: 'Límite pérdida mensual acumulada', limit: '$8.00 máx.', ok: m.monthlyLossConsumed < 8.00, txt: m.monthlyLossConsumed < 8.00 ? 'OK' : 'SUSPENDIDO' },
+          { name: 'Operaciones máximas por día', limit: '3 trades/día', ok: m.todayTrades < 3, txt: `${m.todayTrades}/3` },
+          { name: 'Regla 2 pérdidas consecutivas', limit: 'Detener sesión', ok: m.todayConsecLosses < 2, txt: m.todayConsecLosses < 2 ? 'OK' : 'DETENER' },
+          { name: 'Pausa obligatoria entre operaciones', limit: '15 minutos', ok: appState.cooldownEndMs <= Date.now(), txt: appState.cooldownEndMs <= Date.now() ? 'LIBRE' : 'EN PAUSA' },
+          { name: 'Posiciones simultáneas / Apalancamiento', limit: 'Máx. 1 · Spot 1x', ok: !appState.openPositionActive, txt: appState.openPositionActive ? '1 ABIERTA' : '0 ABIERTAS' },
+          { name: 'Prohibición de Overnight', limit: 'Cierre < 23:45 UTC-5', ok: true, txt: 'VIGENTE' }
+        ];
+        tbody.innerHTML = rulesRows.map(function(r) {
+          return `<tr>
+            <td>${r.name}</td>
+            <td class="mono-num">${r.limit}</td>
+            <td><span class="status-pill ${r.ok ? 'pill-green' : 'pill-red'}">${r.txt}</span></td>
+          </tr>`;
+        }).join('');
+      }
+    }
+
+    function startCooldownTimer() {
+      appState.cooldownEndMs = Date.now() + (DISENK_RULES.cooldownMinutes * 60000);
+      saveAppAll();
+      tickClockAndCooldown();
+      showGlobalToast('Temporizador de pausa obligatoria de 15 minutos iniciado.', 'warn');
+    }
+
+    function clearCooldownManual(btn) {
+      if (btn && btn.dataset.armed !== 'true') {
+        btn.dataset.armed = 'true';
+        btn.textContent = 'Confirmar Fin Pausa';
+        return;
+      }
+      if (btn) {
+        btn.dataset.armed = 'false';
+        btn.textContent = 'Forzar Fin Pausa (Auditoría)';
+      }
+      appState.cooldownEndMs = 0;
+      saveAppAll();
+      tickClockAndCooldown();
+    }
+
+    function toggleOpenPositionFlag() {
+      appState.openPositionActive = !appState.openPositionActive;
+      renderModule1();
+      refreshGovernanceSemaphore();
+      saveAppAll();
+    }
+
+    /* =========================================================================
+       MÓDULO 2: PREPARACIÓN DE SESIÓN
+       ========================================================================= */
+    function updateSessionPrep() {
+      collectDomIntoState();
+      const count = appState.prepChecks.filter(Boolean).length;
+      const badge = document.getElementById('m2StatusBadge');
+      if (badge) {
+        badge.textContent = `${count} / 6 VERIFICADOS`;
+        badge.className = 'status-pill ' + (count === 6 ? 'pill-green' : (count >= 3 ? 'pill-yellow' : 'pill-red'));
+      }
+      refreshGovernanceSemaphore();
+      saveAppAll();
+    }
+
+    function syncPairEverywhere(pair) {
+      const m5p = document.getElementById('m5Pair');
+      const jp = document.getElementById('jPair');
+      if (m5p && BINANCE_PRESETS[pair]) {
+        m5p.value = pair;
+        applyBinancePreset(pair);
+      }
+      if (jp) jp.value = pair;
+      saveAppAll();
+    }
+
+    /* =========================================================================
+       MÓDULO 3: ANÁLISIS MULTITEMPORAL (1D / 1H / 5M)
+       ========================================================================= */
+    function evaluateMTF() {
+      const c1d = Number(document.getElementById('m3_1d_close')?.value || 0);
+      const e1dNow = Number(document.getElementById('m3_1d_ema_now')?.value || 0);
+      const e1dPrev = Number(document.getElementById('m3_1d_ema_5')?.value || 0);
+
+      const c1h = Number(document.getElementById('m3_1h_close')?.value || 0);
+      const e1hNow = Number(document.getElementById('m3_1h_ema_now')?.value || 0);
+      const e1hPrev = Number(document.getElementById('m3_1h_ema_5')?.value || 0);
+
+      const rsi = Number(document.getElementById('m3_5m_rsi')?.value || 0);
+      const touch = !!document.getElementById('m3_5m_touch')?.checked;
+      const closed = !!document.getElementById('m3_5m_closed')?.checked;
+
+      const ok1D = (c1d > e1dNow) && (e1dNow > e1dPrev);
+      const ok1H = (c1h > e1hNow) && (e1hNow > e1hPrev);
+      const ok5M = (rsi > 50) && touch && closed;
+
+      const b1d = document.getElementById('m3Badge1D');
+      const d1d = document.getElementById('m3Detail1D');
+      if (b1d) {
+        b1d.textContent = ok1D ? 'CUMPLE' : 'NO CUMPLE';
+        b1d.className = 'status-pill ' + (ok1D ? 'pill-green' : 'pill-red');
+      }
+      if (d1d) {
+        d1d.textContent = ok1D
+          ? 'Cierre 1D > EMA 50 y pendiente alcista (EMA actual > hace 5 velas).'
+          : 'Fallo filtro 1D: requiere Cierre > EMA 50 y EMA(t) > EMA(t-5).';
+        d1d.className = 'inline-notice ' + (ok1D ? 'is-ok' : 'is-error');
+      }
+
+      const b1h = document.getElementById('m3Badge1H');
+      const d1h = document.getElementById('m3Detail1H');
+      if (b1h) {
+        b1h.textContent = ok1H ? 'CUMPLE' : 'NO CUMPLE';
+        b1h.className = 'status-pill ' + (ok1H ? 'pill-green' : 'pill-red');
+      }
+      if (d1h) {
+        d1h.textContent = ok1H
+          ? 'Estructura 1H alcista alineada con 1D.'
+          : 'Fallo filtro 1H: sin alineación alcista sobre EMA 50.';
+        d1h.className = 'inline-notice ' + (ok1H ? 'is-ok' : 'is-error');
+      }
+
+      const b5m = document.getElementById('m3Badge5M');
+      const d5m = document.getElementById('m3Detail5M');
+      if (b5m) {
+        b5m.textContent = ok5M ? 'CUMPLE' : 'NO CUMPLE';
+        b5m.className = 'status-pill ' + (ok5M ? 'pill-green' : 'pill-red');
+      }
+      if (d5m) {
+        d5m.textContent = ok5M
+          ? `Gatillo M5 válido: RSI ${rsi.toFixed(1)} > 50 + vela cerrada alcista.`
+          : 'Falta toque EMA 50, cierre alcista o RSI 14 > 50.';
+        d5m.className = 'inline-notice ' + (ok5M ? 'is-ok' : 'is-error');
+      }
+
+      const vPill = document.getElementById('m3VerdictPill');
+      if (vPill) {
+        if (ok1D && ok1H && ok5M) {
+          vPill.textContent = 'CONTEXTO ALCISTA VÁLIDO';
+          vPill.className = 'status-pill pill-green';
+        } else {
+          vPill.textContent = 'NO VÁLIDO PARA LONG';
+          vPill.className = 'status-pill pill-red';
+        }
+      }
+      return { ok1D, ok1H, ok5M };
+    }
+
+    /* =========================================================================
+       MÓDULO 4: CALCULADORA SL (MÍNIMO 10 VELAS M5 + ATR 14)
+       ========================================================================= */
+    function loadSampleM5Candles() {
+      const vals = [91320, 91345, 91290, 91240, 91210, 91180, 91205, 91230, 91260, 91285];
+      for (let i = 1; i <= 10; i++) {
+        const el = document.getElementById('c_low_' + i);
+        if (el) el.value = vals[i - 1];
+      }
+      const ent = document.getElementById('m4EntryPrice');
+      if (ent) ent.value = 91450;
+      const atr = document.getElementById('m4Atr14');
+      if (atr) atr.value = 120;
+      syncEntryAndCalc();
+    }
+
+    function syncEntryAndCalc() {
+      const entry = Number(document.getElementById('m4EntryPrice')?.value || 0);
+      const m5e = document.getElementById('m5Entry');
+      const m6e = document.getElementById('m6Entry');
+      if (m5e && entry > 0) m5e.value = entry;
+      if (m6e && entry > 0) m6e.value = entry;
+      calcStopLossM5();
+    }
+
+    function calcStopLossM5() {
+      const lows = [];
+      for (let i = 1; i <= 10; i++) {
+        const v = Number(document.getElementById('c_low_' + i)?.value || 0);
+        if (v > 0) lows.push(v);
+      }
+      const minLow = lows.length > 0 ? Math.min.apply(null, lows) : 0;
+      const atr = Math.max(0, Number(document.getElementById('m4Atr14')?.value || 0));
+      const entry = Math.max(0.0001, Number(document.getElementById('m4EntryPrice')?.value || 0));
+
+      const margin = atr * 0.10;
+      const finalSL = Math.max(0, minLow - margin);
+      const distUsd = Math.max(0, entry - finalSL);
+      const distPct = entry > 0 ? (distUsd / entry) * 100 : 0;
+
+      const elMin = document.getElementById('m4MinLow');
+      if (elMin) elMin.textContent = '$' + minLow.toFixed(2);
+      const elMar = document.getElementById('m4Margin');
+      if (elMar) elMar.textContent = '$' + margin.toFixed(2);
+      const elSL = document.getElementById('m4FinalSL');
+      if (elSL) elSL.textContent = '$' + finalSL.toFixed(2);
+      const elDP = document.getElementById('m4DistPct');
+      if (elDP) elDP.textContent = distPct.toFixed(2) + '%';
+      const elDU = document.getElementById('m4DistUsd');
+      if (elDU) elDU.textContent = `$${distUsd.toFixed(2)} / unidad`;
+
+      const warnBox = document.getElementById('m4RoundWarning');
+      if (warnBox) {
+        if (finalSL >= entry) {
+          warnBox.textContent = 'Error: El Stop-Loss debe ubicarse por debajo del precio de entrada (Long Only).';
+          warnBox.className = 'inline-notice is-error';
+        } else if (finalSL % 100 === 0 || finalSL % 50 === 0) {
+          warnBox.textContent = 'Precaución: El SL cae cerca de un número redondo psicológico; verifica si el margen ATR lo protege.';
+          warnBox.className = 'inline-notice is-warn';
+        } else {
+          warnBox.textContent = 'SL técnico válido: Mínimo 10 velas M5 previas - (ATR 14 × 0.10).';
+          warnBox.className = 'inline-notice is-ok';
+        }
+      }
+
+      const m5sl = document.getElementById('m5SL');
+      const m6sl = document.getElementById('m6SL');
+      if (m5sl && finalSL > 0) m5sl.value = finalSL.toFixed(2);
+      if (m6sl && finalSL > 0) m6sl.value = finalSL.toFixed(2);
+
+      calcPositionSpot();
+    }
+
+    /* =========================================================================
+       MÓDULO 5: CALCULADORA DE POSICIÓN BINANCE SPOT
+       ========================================================================= */
+    function applyBinancePreset(pair) {
+      const p = BINANCE_PRESETS[pair];
+      if (!p) return;
+      const s = document.getElementById('m5StepSize');
+      const mn = document.getElementById('m5MinNotional');
+      const ent = document.getElementById('m5Entry');
+      const sl = document.getElementById('m5SL');
+      const m4e = document.getElementById('m4EntryPrice');
+      const m4a = document.getElementById('m4Atr14');
+      if (s) s.value = p.step;
+      if (mn) mn.value = p.minNotional;
+      if (ent) ent.value = p.sampleEntry;
+      if (sl) sl.value = p.sampleSL;
+      if (m4e) m4e.value = p.sampleEntry;
+      if (m4a) m4a.value = p.sampleAtr;
+      calcPositionSpot();
+    }
+
+    function calcPositionSpot() {
+      const freeUsdt = Math.max(0, Number(document.getElementById('m5FreeUsdt')?.value || 0));
+      const entry = Math.max(0.0001, Number(document.getElementById('m5Entry')?.value || 0));
+      const sl = Math.max(0, Number(document.getElementById('m5SL')?.value || 0));
+      const stepSize = Math.max(0.00000001, Number(document.getElementById('m5StepSize')?.value || 0.00001));
+      const minNotional = Math.max(0, Number(document.getElementById('m5MinNotional')?.value || 5));
+      const feeRate = Math.max(0, Number(document.getElementById('m5FeePct')?.value || 0.10)) / 100;
+
+      const maxRiskAllowed = appState.mode === 'REAL'
+        ? DISENK_RULES.initialCapital * DISENK_RULES.maxRiskRealPct
+        : DISENK_RULES.initialCapital * DISENK_RULES.maxRiskDemoPct;
+
+      const priceDiff = entry - sl;
+      if (priceDiff <= 0) {
+        const vEl = document.getElementById('m5SpotVerdict');
+        if (vEl) { vEl.textContent = '🔴 SL INVÁLIDO (>= ENTRADA)'; vEl.className = 'status-pill pill-red'; }
+        return;
+      }
+
+      const unitRiskWithFees = priceDiff + (entry * feeRate) + (sl * feeRate);
+      const rawQtyByRisk = maxRiskAllowed / unitRiskWithFees;
+      const maxQtyByBalance = freeUsdt / (entry * (1 + feeRate));
+      const constrainedQty = Math.min(rawQtyByRisk, maxQtyByBalance);
+
+      const decimals = (stepSize.toString().split('.')[1] || '').length;
+      const qtyFloor = Math.floor(constrainedQty / stepSize) * stepSize;
+      const finalQty = Number(qtyFloor.toFixed(decimals));
+
+      const notional = finalQty * entry;
+      const estFees = (finalQty * entry * feeRate) + (finalQty * sl * feeRate);
+      const totalRiskUsd = (finalQty * priceDiff) + estFees;
+
+      const elQty = document.getElementById('m5QtyOut');
+      if (elQty) elQty.textContent = finalQty.toFixed(decimals);
+      const elRaw = document.getElementById('m5QtyRaw');
+      if (elRaw) elRaw.textContent = `Máx. por riesgo: ${rawQtyByRisk.toFixed(decimals + 1)} · Máx. por saldo: ${maxQtyByBalance.toFixed(decimals + 1)}`;
+
+      const elNot = document.getElementById('m5NotionalOut');
+      if (elNot) elNot.textContent = '$' + notional.toFixed(2);
+      const elCapChk = document.getElementById('m5CapitalCheck');
+      if (elCapChk) {
+        elCapChk.textContent = notional <= freeUsdt
+          ? `Dentro del saldo Spot ($${freeUsdt.toFixed(2)})`
+          : `Excede saldo Spot ($${freeUsdt.toFixed(2)})`;
+      }
+
+      const elRsk = document.getElementById('m5RiskTotalOut');
+      if (elRsk) elRsk.textContent = '$' + totalRiskUsd.toFixed(2);
+      const elRskL = document.getElementById('m5RiskLimitLabel');
+      if (elRskL) elRskL.textContent = `Límite modo ${appState.mode}: $${maxRiskAllowed.toFixed(2)}`;
+
+      const elFees = document.getElementById('m5FeesEst');
+      if (elFees) elFees.textContent = '$' + estFees.toFixed(2);
+
+      const vPill = document.getElementById('m5SpotVerdict');
+      const alertBox = document.getElementById('m5SpotAlerts');
+      const minQtyForNotional = Math.ceil((minNotional / entry) / stepSize) * stepSize;
+      const riskAtMinNotional = (minQtyForNotional * unitRiskWithFees);
+
+      if (finalQty <= 0 || notional < minNotional) {
+        if (vPill) { vPill.textContent = '🔴 BLOQUEADO POR MIN NOTIONAL'; vPill.className = 'status-pill pill-red'; }
+        if (alertBox) {
+          alertBox.className = 'inline-notice is-error';
+          alertBox.textContent = `NO OPERAR: El mínimo de Binance ($${minNotional.toFixed(2)}) exige un riesgo de $${riskAtMinNotional.toFixed(2)}, superando tu límite de $${maxRiskAllowed.toFixed(2)} (Regla: nunca aumentar tamaño para alcanzar mínimo de Binance).`;
+        }
+      } else if (rawQtyByRisk > maxQtyByBalance && notional > freeUsdt * 0.99) {
+        if (vPill) { vPill.textContent = '🟡 ACOTADO POR SALDO SPOT ($80)'; vPill.className = 'status-pill pill-yellow'; }
+        if (alertBox) {
+          alertBox.className = 'inline-notice is-warn';
+          alertBox.textContent = `Tamaño limitado por tu saldo libre Spot ($${freeUsdt.toFixed(2)}). Riesgo real asumido: $${totalRiskUsd.toFixed(2)}.`;
+        }
+      } else {
+        if (vPill) { vPill.textContent = '🟢 VIABLE EN BINANCE SPOT'; vPill.className = 'status-pill pill-green'; }
+        if (alertBox) {
+          alertBox.className = 'inline-notice is-ok';
+          alertBox.textContent = `Orden viable: Nocional $${notional.toFixed(2)} >= $${minNotional.toFixed(2)} y riesgo $${totalRiskUsd.toFixed(2)} <= $${maxRiskAllowed.toFixed(2)}.`;
+        }
+      }
+
+      const m6q = document.getElementById('m6Qty');
+      const m6e = document.getElementById('m6Entry');
+      const m6s = document.getElementById('m6SL');
+      const m6f = document.getElementById('m6FeeRate');
+      if (m6q && finalQty > 0) m6q.value = finalQty.toFixed(decimals);
+      if (m6e) m6e.value = entry;
+      if (m6s) m6s.value = sl;
+      if (m6f) m6f.value = (feeRate * 100).toFixed(3);
+
+      calcTPNet();
+    }
+
+    /* =========================================================================
+       MÓDULO 6: CALCULADORA TP Y RR NETO
+       ========================================================================= */
+    function calcTPNet() {
+      const entry = Math.max(0.0001, Number(document.getElementById('m6Entry')?.value || 0));
+      const sl = Math.max(0, Number(document.getElementById('m6SL')?.value || 0));
+      const qty = Math.max(0.00000001, Number(document.getElementById('m6Qty')?.value || 0));
+      const feeRate = Math.max(0, Number(document.getElementById('m6FeeRate')?.value || 0.10)) / 100;
+      const slipRate = Math.max(0, Number(document.getElementById('m6SlippagePct')?.value || 0.05)) / 100;
+
+      const distSL = Math.max(0.0001, entry - sl);
+      const entryCost = qty * entry * feeRate;
+      const slExitCost = qty * sl * (feeRate + slipRate);
+      const totalNetRisk = (qty * distSL) + entryCost + slExitCost;
+
+      const tpGross = entry + (2 * distSL);
+      const grossProfitAtTpGross = qty * (tpGross - entry);
+      const costsAtTpGross = entryCost + (qty * tpGross * (feeRate + slipRate));
+      const netProfitAtTpGross = grossProfitAtTpGross - costsAtTpGross;
+      const realRRatTpGross = totalNetRisk > 0 ? netProfitAtTpGross / totalNetRisk : 0;
+
+      const denom = qty * (1 - feeRate - slipRate);
+      const tpNet = denom > 0 ? (2 * totalNetRisk + qty * entry * (1 + feeRate)) / denom : tpGross;
+      const netProfitTarget = 2 * totalNetRisk;
+      const totalCostsAtNetTP = entryCost + (qty * tpNet * (feeRate + slipRate));
+
+      const elGross = document.getElementById('m6TpGross');
+      if (elGross) elGross.textContent = '$' + tpGross.toFixed(2);
+      const elGRR = document.getElementById('m6GrossNetRR');
+      if (elGRR) elGRR.textContent = `RR Neto real si sales en 2R bruto: 1 : ${realRRatTpGross.toFixed(2)}`;
+
+      const elNet = document.getElementById('m6TpNet');
+      if (elNet) elNet.textContent = '$' + tpNet.toFixed(2);
+      const elNP = document.getElementById('m6NetProfitUsd');
+      if (elNP) elNP.textContent = `Ganancia neta objetivo (2R): +$${netProfitTarget.toFixed(2)}`;
+
+      const elCost = document.getElementById('m6TotalCosts');
+      if (elCost) elCost.textContent = '$' + totalCostsAtNetTP.toFixed(2);
+      const elNR = document.getElementById('m6NetRiskTotal');
+      if (elNR) elNR.textContent = '$' + totalNetRisk.toFixed(2);
+
+      return { entry, sl, tpNet, totalNetRisk, totalCostsAtNetTP };
+    }
+
+    function sendCalculatorToJournalDraft() {
+      const tpData = calcTPNet();
+      const pair = document.getElementById('m5Pair')?.value || 'BTCUSDT';
+      const pat = document.getElementById('m3_5m_pattern')?.value || 'Martillo';
+      const jPair = document.getElementById('jPair');
+      const jPat = document.getElementById('jPattern');
+      const jEnt = document.getElementById('jEntry');
+      const jSl = document.getElementById('jSL');
+      const jTp = document.getElementById('jTP');
+      const jRsk = document.getElementById('jRiskUsd');
+      const jFee = document.getElementById('jFeesUsd');
+      if (jPair) jPair.value = pair;
+      if (jPat) jPat.value = pat;
+      if (jEnt) jEnt.value = tpData.entry.toFixed(2);
+      if (jSl) jSl.value = tpData.sl.toFixed(2);
+      if (jTp) jTp.value = tpData.tpNet.toFixed(2);
+      if (jRsk) jRsk.value = tpData.totalNetRisk.toFixed(2);
+      if (jFee) jFee.value = tpData.totalCostsAtNetTP.toFixed(2);
+      switchModule('m7');
+      showGlobalToast('Parámetros OCO pre-cargados en Bitácora. Completa el Checklist de 15 puntos antes de ejecutar.', 'ok');
+    }
+
+    /* =========================================================================
+       MÓDULO 7: CHECKLIST DE APROBACIÓN 15 PUNTOS
+       ========================================================================= */
+    function evalChecklist15() {
+      collectDomIntoState();
+      const chks = document.querySelectorAll('.chk15');
+      let done = 0;
+      chks.forEach(function(c) { if (c.checked) done++; });
+      const badge = document.getElementById('m7VerdictBadge');
+      if (badge) {
+        if (done === 15) {
+          badge.textContent = '🟢 OPERACIÓN VÁLIDA (15 / 15)';
+          badge.className = 'status-pill pill-green';
+        } else {
+          badge.textContent = `🔴 OPERACIÓN RECHAZADA (${done} / 15)`;
+          badge.className = 'status-pill pill-red';
+        }
+      }
+      saveAppAll();
+    }
+
+    function autoSyncChecklist15() {
+      const m = computeCoreMetrics();
+      const mtf = evaluateMTF();
+      const prepOk = appState.prepChecks.filter(Boolean).length === 6;
+      const riskOk = (m.dailyLossConsumed < 0.80) && (m.monthlyLossConsumed < 8.00);
+      const countOk = (m.todayTrades < 3) && (m.todayConsecLosses < 2);
+      const posOk = !appState.openPositionActive && appState.cooldownEndMs <= Date.now();
+      const slVal = Number(document.getElementById('m4FinalSL')?.textContent.replace('$','').replace(',','') || 0);
+      const entVal = Number(document.getElementById('m4EntryPrice')?.value || 0);
+      const slOk = slVal > 0 && slVal < entVal;
+      const spotOk = (document.getElementById('m5SpotVerdict')?.textContent || '').includes('VIABLE');
+      const psyOk = (appState.psycho.preCalm >= 5 && appState.psycho.preFomo <= 6);
+
+      const states = [
+        prepOk, riskOk, countOk, posOk,
+        mtf.ok1D, mtf.ok1H, mtf.ok5M, mtf.ok5M,
+        true, slOk, true, spotOk,
+        true, true, psyOk
+      ];
+      const chks = document.querySelectorAll('.chk15');
+      chks.forEach(function(cb, idx) {
+        cb.checked = !!states[idx];
+      });
+      evalChecklist15();
+      showGlobalToast('Checklist sincronizado con el estado real de los módulos 1–6 y 9.', 'ok');
+    }
+
+    /* =========================================================================
+       MÓDULO 8: BITÁCORA Y MATRIZ DE DISCIPLINA
+       ========================================================================= */
+    function addJournalEntry() {
+      const m = computeCoreMetrics();
+      const maxRisk = appState.mode === 'REAL' ? 0.40 : 0.80;
+      const riskUsd = Math.max(0.01, Number(document.getElementById('jRiskUsd')?.value || maxRisk));
+      const pnlNet = Number(document.getElementById('jPnlNet')?.value || 0);
+      const origin = document.getElementById('jOrigin')?.value || 'USER';
+
+      if (origin === 'USER' && m.todayTrades >= 3) {
+        showGlobalToast('Bloqueo de Gobernanza: ya registraste 3 operaciones hoy (máximo permitido).', 'error');
+        return;
+      }
+
+      const co = getColombiaDateParts();
+      const disc = [
+        !!document.getElementById('jd1')?.checked,
+        !!document.getElementById('jd2')?.checked,
+        !!document.getElementById('jd3')?.checked,
+        !!document.getElementById('jd4')?.checked,
+        !!document.getElementById('jd5')?.checked
+      ];
+
+      const newTrade = {
+        id: 'TRD-' + String(appState.trades.length + 1).padStart(3, '0'),
+        dateCo: co.shortDateTime,
+        origin: origin,
+        pair: (document.getElementById('jPair')?.value || 'BTCUSDT').toUpperCase(),
+        pattern: document.getElementById('jPattern')?.value || 'Martillo',
+        entry: Number(document.getElementById('jEntry')?.value || 0),
+        sl: Number(document.getElementById('jSL')?.value || 0),
+        tp: Number(document.getElementById('jTP')?.value || 0),
+        riskUsd: riskUsd,
+        feesUsd: Number(document.getElementById('jFeesUsd')?.value || 0),
+        pnlNet: pnlNet,
+        psyPre: Number(document.getElementById('jPsychoPre')?.value || 8),
+        discipline: disc,
+        notes: document.getElementById('jNotes')?.value || ''
+      };
+
+      appState.trades.push(newTrade);
+      if (pnlNet < 0 && origin === 'USER') {
+        appState.cooldownEndMs = Date.now() + (DISENK_RULES.cooldownMinutes * 60000);
+      }
+
+      recalcAllModules();
+      saveAppAll();
+      showGlobalToast(`Operación ${newTrade.id} registrada (${pnlNet >= 0 ? '+' : ''}$${pnlNet.toFixed(2)}).`, pnlNet >= 0 ? 'ok' : 'warn');
+    }
+
+    function deleteTradeEntry(idx, btn) {
+      if (btn && btn.dataset.armed !== 'true') {
+        btn.dataset.armed = 'true';
+        btn.textContent = 'Confirmar';
+        return;
+      }
+      appState.trades.splice(idx, 1);
+      recalcAllModules();
+      saveAppAll();
+    }
+
+    function renderJournalTable() {
+      const tbody = document.getElementById('m8TableBody');
+      if (!tbody) return;
+      const filter = document.getElementById('m8Filter')?.value || 'ALL';
+      const rows = [];
+
+      appState.trades.forEach(function(t, idx) {
+        if (filter === 'USER' && t.origin !== 'USER') return;
+        if (filter === 'SIM' && t.origin !== 'SIM') return;
+        if (filter === 'WIN' && t.pnlNet < 0) return;
+        if (filter === 'LOSS' && t.pnlNet >= 0) return;
+
+        const rMult = t.riskUsd > 0 ? (t.pnlNet / t.riskUsd) : 0;
+        const discScore = Array.isArray(t.discipline) ? t.discipline.filter(Boolean).length : 5;
+        const discPct = Math.round((discScore / 5) * 100);
+        const tagHtml = t.origin === 'SIM'
+          ? `<span class="tag tag-sim">[SUPUESTO DE SIMULACIÓN]</span>`
+          : `<span class="tag tag-user">[DATO DE USUARIO]</span>`;
+
+        rows.push(`<tr>
+          <td class="mono-num">${t.dateCo}<br><span class="text-muted" style="font-size:0.72rem;">${t.id}</span></td>
+          <td>${tagHtml}</td>
+          <td><strong>${t.pair}</strong><br><span class="text-muted" style="font-size:0.8rem;">${t.pattern}</span></td>
+          <td class="num-col">${Number(t.entry).toFixed(2)} / ${Number(t.sl).toFixed(2)} / ${Number(t.tp).toFixed(2)}</td>
+          <td class="num-col">$${Number(t.riskUsd).toFixed(2)}</td>
+          <td class="num-col">$${Number(t.feesUsd).toFixed(2)}</td>
+          <td class="num-col ${t.pnlNet >= 0 ? 'text-sage' : 'text-error'}">${t.pnlNet >= 0 ? '+' : ''}$${Number(t.pnlNet).toFixed(2)}</td>
+          <td class="num-col ${rMult >= 0 ? 'text-sage' : 'text-error'}">${rMult >= 0 ? '+' : ''}${rMult.toFixed(2)}R</td>
+          <td class="num-col"><span class="status-pill ${discPct === 100 ? 'pill-green' : 'pill-yellow'}">${discPct}%</span></td>
+          <td><button type="button" class="btn btn-danger btn-sm" onclick="deleteTradeEntry(${idx}, this)">Borrar</button></td>
+        </tr>`);
+      });
+
+      tbody.innerHTML = rows.length > 0
+        ? rows.join('')
+        : `<tr><td colspan="10" style="text-align:center; padding:var(--space-lg); color:var(--on-surface-variant);">No hay operaciones que coincidan con el filtro seleccionado.</td></tr>`;
+    }
+
+    function exportJournalCSV() {
+      const headers = ['ID','Fecha_UTC5','Origen','Par','Patron','Entrada','SL','TP','Riesgo_USD','Fees_USD','PnL_Neto_USD','Multiplo_R','Disciplina_Pct','Notas'];
+      const lines = [headers.join(',')];
+      appState.trades.forEach(function(t) {
+        const r = t.riskUsd > 0 ? (t.pnlNet / t.riskUsd).toFixed(2) : '0.00';
+        const d = Array.isArray(t.discipline) ? Math.round((t.discipline.filter(Boolean).length / 5) * 100) : 100;
+        const cleanNote = (t.notes || '').replace(/"/g, '""');
+        lines.push([
+          t.id, t.dateCo, t.origin, t.pair, t.pattern, t.entry, t.sl, t.tp,
+          t.riskUsd, t.feesUsd, t.pnlNet, r, d, `"${cleanNote}"`
+        ].join(','));
+      });
+      const csv = lines.join('\n');
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === 'function') {
+        window.notebookAppApi.triggerFileDownload({
+          content: csv,
+          contentType: 'text/csv',
+          encoding: 'UTF-8',
+          filename: 'disenk_bitacora_v37.csv'
+        });
+      }
+      showGlobalToast('Bitácora exportada en formato CSV.', 'ok');
+    }
+
+    /* =========================================================================
+       MÓDULO 9: PSICOTRADING
+       ========================================================================= */
+    function updatePsychoMonitor() {
+      const preCalm = Number(document.getElementById('psyPreCalm')?.value || 8);
+      const preFomo = Number(document.getElementById('psyPreFomo')?.value || 2);
+      const durAnx = Number(document.getElementById('psyDurAnx')?.value || 3);
+      const durTrust = Number(document.getElementById('psyDurTrust')?.value || 9);
+      const postAccept = Number(document.getElementById('psyPostAccept')?.value || 9);
+      const postRevenge = Number(document.getElementById('psyPostRevenge')?.value || 1);
+
+      appState.psycho = {
+        preCalm, preFomo, durAnx, durTrust, postAccept, postRevenge,
+        note: document.getElementById('psyTriggerNote')?.value || ''
+      };
+
+      const setTxt = function(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setTxt('vPreCalm', preCalm);
+      setTxt('vPreFomo', preFomo);
+      setTxt('vDurAnx', durAnx);
+      setTxt('vDurTrust', durTrust);
+      setTxt('vPostAccept', postAccept);
+      setTxt('vPostRevenge', postRevenge);
+
+      const pill = document.getElementById('m9PsychoVerdict');
+      const warn = document.getElementById('m9WarningBox');
+      const isBlocked = (preCalm < 5 || preFomo > 7 || postRevenge > 6);
+      const isCaution = !isBlocked && (preFomo >= 5 || durAnx >= 6 || preCalm <= 6);
+
+      if (pill && warn) {
+        if (isBlocked) {
+          pill.textContent = '🔴 BLOQUEO EMOCIONAL ACTIVO';
+          pill.className = 'status-pill pill-red';
+          warn.className = 'inline-notice is-error';
+          warn.textContent = 'Alerta: Calma < 5 o FOMO/Revancha elevado. Prohibido abrir operaciones hasta restablecer equilibrio.';
+        } else if (isCaution) {
+          pill.textContent = '🟡 PRECAUCIÓN PSICOLÓGICA';
+          pill.className = 'status-pill pill-yellow';
+          warn.className = 'inline-notice is-warn';
+          warn.textContent = 'Precaución: FOMO o ansiedad moderada. Verifica el checklist 15/15 antes de operar.';
+        } else {
+          pill.textContent = '🟢 ESTADO MENTAL ÓPTIMO';
+          pill.className = 'status-pill pill-green';
+          warn.className = 'inline-notice is-ok';
+          warn.textContent = 'Perfil estable: sin señales de FOMO ni impulso de revancha.';
+        }
+      }
+
+      if (appState.activeModule === 'm9') renderPsychoChart();
+      refreshGovernanceSemaphore();
+    }
+
+    function savePsychoLog() {
+      updatePsychoMonitor();
+      saveAppAll();
+      showGlobalToast('Registro de Psicotrading guardado en la sesión.', 'ok');
+    }
+
+    /* =========================================================================
+       MÓDULO 10: 25 MÉTRICAS DE PERFORMANCE
+       ========================================================================= */
+    function renderModule10() {
+      const m = computeCoreMetrics();
+      const grid = document.getElementById('m10MetricsGrid');
+      if (!grid) return;
+
+      const list25 = [
+        { k: '01. Total Operaciones', v: m.n },
+        { k: '02. Operaciones Ganadoras', v: m.wins },
+        { k: '03. Operaciones Perdedoras', v: m.losses },
+        { k: '04. Win Rate (%)', v: m.winRate.toFixed(1) + '%' },
+        { k: '05. Loss Rate (%)', v: m.lossRate.toFixed(1) + '%' },
+        { k: '06. Capital Actual ($)', v: '$' + m.capitalNow.toFixed(2) },
+        { k: '07. Retorno Total (%)', v: (m.returnPct >= 0 ? '+' : '') + m.returnPct.toFixed(2) + '%' },
+        { k: '08. PnL Neto Acumulado', v: (m.totalNetPnl >= 0 ? '+' : '') + '$' + m.totalNetPnl.toFixed(2) },
+        { k: '09. Ganancia Bruta ($)', v: '+$' + m.totalGrossWin.toFixed(2) },
+        { k: '10. Pérdida Bruta ($)', v: '-$' + m.totalGrossLoss.toFixed(2) },
+        { k: '11. Comisiones Totales ($)', v: '$' + m.totalFees.toFixed(2) },
+        { k: '12. Profit Factor', v: m.profitFactor.toFixed(2) },
+        { k: '13. Expectativa Matemática ($)', v: (m.expectUsd >= 0 ? '+' : '') + '$' + m.expectUsd.toFixed(2) },
+        { k: '14. Expectativa Media (R)', v: (m.expectR >= 0 ? '+' : '') + m.expectR.toFixed(2) + 'R' },
+        { k: '15. Ganancia Media ($)', v: '$' + m.avgWin.toFixed(2) },
+        { k: '16. Pérdida Media ($)', v: '$' + m.avgLoss.toFixed(2) },
+        { k: '17. Ratio Payoff (AvgW/AvgL)', v: '1 : ' + m.payoffRatio.toFixed(2) },
+        { k: '18. Mejor Trade (R)', v: '+' + m.bestR.toFixed(2) + 'R' },
+        { k: '19. Peor Trade (R)', v: m.worstR.toFixed(2) + 'R' },
+        { k: '20. Drawdown Máximo ($ / %)', v: `$${m.maxDdUsd.toFixed(2)} (${m.maxDdPct.toFixed(1)}%)` },
+        { k: '21. Racha Máx. Ganadora', v: m.maxWinStreak },
+        { k: '22. Racha Máx. Perdedora', v: m.maxLossStreak },
+        { k: '23. Win Rate Breakeven Req.', v: m.breakevenWR.toFixed(1) + '%' },
+        { k: '24. Cumplimiento Disciplina', v: m.disciplinePct.toFixed(1) + '%' },
+        { k: '25. Sharpe Ratio (Sobre R)', v: m.sharpe.toFixed(2) }
+      ];
+
+      grid.innerHTML = list25.map(function(item) {
+        return `<div class="well" style="padding:var(--space-sm) var(--space-md);">
+          <span class="data-label" style="display:block; font-size:0.7rem;">${item.k}</span>
+          <div class="mono-num" style="font-size:1.2rem; font-weight:600; margin-top:4px; color:var(--on-surface);">${item.v}</div>
+        </div>`;
+      }).join('');
+    }
+
+    /* =========================================================================
+       MÓDULO 11: BACKTESTING
+       ========================================================================= */
+    function addBacktestBatch() {
+      const period = document.getElementById('btPeriod')?.value || '2026';
+      const pair = document.getElementById('btPair')?.value || 'BTCUSDT M5';
+      const trades = Math.max(1, Number(document.getElementById('btTrades')?.value || 1));
+      const wins = Math.min(trades, Math.max(0, Number(document.getElementById('btWins')?.value || 0)));
+      const pf = Number(document.getElementById('btPF')?.value || 1);
+      const dd = Number(document.getElementById('btDD')?.value || 0);
+      const expectR = Number(document.getElementById('btExpectR')?.value || 0);
+
+      appState.backtests.push({
+        id: 'BT-' + String(appState.backtests.length + 1).padStart(2, '0'),
+        period, pair, trades, wins, pf, dd, expectR
+      });
+      renderModule11();
+      renderModule12();
+      saveAppAll();
+      showGlobalToast(`Lote de backtesting (${trades} operaciones) agregado.`, 'ok');
+    }
+
+    function deleteBacktestBatch(idx) {
+      appState.backtests.splice(idx, 1);
+      renderModule11();
+      renderModule12();
+      saveAppAll();
+    }
+
+    function renderModule11() {
+      let totalBt = 0;
+      const tbody = document.getElementById('m11TableBody');
+      if (tbody) {
+        tbody.innerHTML = appState.backtests.map(function(b, idx) {
+          totalBt += Number(b.trades) || 0;
+          const wr = b.trades > 0 ? ((b.wins / b.trades) * 100).toFixed(1) : '0.0';
+          return `<tr>
+            <td>${b.period}</td>
+            <td><strong>${b.pair}</strong></td>
+            <td class="num-col">${b.trades}</td>
+            <td class="num-col">${wr}%</td>
+            <td class="num-col ${b.pf >= 1.3 ? 'text-sage' : 'text-warn'}">${Number(b.pf).toFixed(2)}</td>
+            <td class="num-col">${Number(b.dd).toFixed(1)}%</td>
+            <td class="num-col ${b.expectR > 0 ? 'text-sage' : 'text-error'}">${b.expectR >= 0 ? '+' : ''}${Number(b.expectR).toFixed(2)}R</td>
+            <td><button type="button" class="btn btn-danger btn-sm" onclick="deleteBacktestBatch(${idx})">Quitar</button></td>
+          </tr>`;
+        }).join('');
+      }
+
+      const pct = Math.min(100, Math.round((totalBt / 100) * 100));
+      const badge = document.getElementById('m11ProgressBadge');
+      const bar = document.getElementById('m11ProgressBar');
+      const pctTxt = document.getElementById('m11PctText');
+      if (badge) {
+        badge.textContent = `${totalBt} / 100 TRADES`;
+        badge.className = 'status-pill ' + (totalBt >= 100 ? 'pill-green' : 'pill-cyan');
+      }
+      if (bar) bar.style.width = pct + '%';
+      if (pctTxt) pctTxt.textContent = `${pct}% (${totalBt} de 100 trades)`;
+    }
+
+    /* =========================================================================
+       MÓDULO 12: VALIDACIÓN PARA DINERO REAL (5/5 CONDICIONES)
+       ========================================================================= */
+    function isRealGatePassed(m) {
+      let totalBt = 0;
+      let weightedExp = 0;
+      appState.backtests.forEach(function(b) {
+        totalBt += Number(b.trades) || 0;
+        weightedExp += (Number(b.trades) || 0) * (Number(b.expectR) || 0);
+      });
+      const avgBtExp = totalBt > 0 ? weightedExp / totalBt : 0;
+      const stressOk = appState.stressTests.filter(Boolean).length === 5;
+      const userTrades = appState.trades.filter(function(t) { return t.origin === 'USER'; });
+
+      const c1 = totalBt >= 100 && avgBtExp > 0 && stressOk;
+      const c2 = userTrades.length >= 30 && m.profitFactor >= 1.30;
+      const c3 = m.disciplinePct >= 95 && m.n > 0;
+      const c4 = m.maxDdUsd < 6.40 && m.monthlyLossConsumed < 8.00;
+      const c5 = (document.getElementById('m5SpotVerdict')?.textContent || '').includes('VIABLE');
+      return c1 && c2 && c3 && c4 && c5;
+    }
+
+    function renderModule12() {
+      const m = computeCoreMetrics();
+      let totalBt = 0;
+      let weightedExp = 0;
+      appState.backtests.forEach(function(b) {
+        totalBt += Number(b.trades) || 0;
+        weightedExp += (Number(b.trades) || 0) * (Number(b.expectR) || 0);
+      });
+      const avgBtExp = totalBt > 0 ? weightedExp / totalBt : 0;
+      const stressOk = appState.stressTests.filter(Boolean).length;
+      const userTrades = appState.trades.filter(function(t) { return t.origin === 'USER'; }).length;
+      const spotOk = (document.getElementById('m5SpotVerdict')?.textContent || '').includes('VIABLE');
+
+      const conds = [
+        {
+          idx: 1,
+          title: 'Backtest mínimo + Prueba de Estrés 5/5',
+          req: '>= 100 trades, Expectativa > 0R, Estrés 5/5',
+          cur: `${totalBt} trades · ${avgBtExp.toFixed(2)}R · Estrés ${stressOk}/5`,
+          ok: totalBt >= 100 && avgBtExp > 0 && stressOk === 5
+        },
+        {
+          idx: 2,
+          title: 'Muestra en Demo ([DATO DE USUARIO]) con ventaja',
+          req: '>= 30 trades usuario y Profit Factor >= 1.30',
+          cur: `${userTrades} trades usuario · PF ${m.profitFactor.toFixed(2)}`,
+          ok: userTrades >= 30 && m.profitFactor >= 1.30
+        },
+        {
+          idx: 3,
+          title: 'Disciplina de ejecución inquebrantable',
+          req: 'Cumplimiento Matriz >= 95%',
+          cur: `${m.disciplinePct.toFixed(1)}%`,
+          ok: m.disciplinePct >= 95 && m.n > 0
+        },
+        {
+          idx: 4,
+          title: 'Preservación de capital y límite mensual',
+          req: 'Max DD < $6.40 (8%) y Pérdida mes < $8.00',
+          cur: `DD $${m.maxDdUsd.toFixed(2)} · Mes -$${m.monthlyLossConsumed.toFixed(2)}`,
+          ok: m.maxDdUsd < 6.40 && m.monthlyLossConsumed < 8.00
+        },
+        {
+          idx: 5,
+          title: 'Viabilidad operativa en Binance Spot ($80)',
+          req: 'Orden cumple Min Notional sin exceder $0.40',
+          cur: spotOk ? 'Spot Viable' : 'Revisar Min Notional / Par',
+          ok: spotOk
+        }
+      ];
+
+      let passed = 0;
+      const tbody = document.getElementById('m12TableBody');
+      if (tbody) {
+        tbody.innerHTML = conds.map(function(c) {
+          if (c.ok) passed++;
+          return `<tr>
+            <td class="mono-num">0${c.idx}</td>
+            <td><strong>${c.title}</strong></td>
+            <td class="mono-num">${c.req}</td>
+            <td class="mono-num">${c.cur}</td>
+            <td><span class="status-pill ${c.ok ? 'pill-green' : 'pill-red'}">${c.ok ? 'CUMPLE' : 'PENDIENTE'}</span></td>
+          </tr>`;
+        }).join('');
+      }
+
+      const gate = document.getElementById('m12GateBadge');
+      if (gate) {
+        if (passed === 5) {
+          gate.textContent = '🟢 APTO PARA DINERO REAL (5 / 5)';
+          gate.className = 'status-pill pill-green';
+        } else {
+          gate.textContent = `🔴 NO APTO PARA REAL (${passed} / 5)`;
+          gate.className = 'status-pill pill-red';
+        }
+      }
+    }
+
+    /* =========================================================================
+       MÓDULO 13: CIERRE DE SESIÓN E INFORME AUTOMÁTICO
+       ========================================================================= */
+    function generateSessionReport() {
+      const m = computeCoreMetrics();
+      const co = getColombiaDateParts();
+      const good = document.getElementById('m13Good')?.value || 'Sin registro';
+      const improve = document.getElementById('m13Improve')?.value || 'Sin registro';
+      const noOvernight = !!document.getElementById('m13NoOvernight')?.checked;
+      const sem = document.getElementById('semaphoreStatusText')?.textContent || '';
+
+      const txt = `============================================================
+DISENK — TRADER JOURNAL | INFORME AUTOMÁTICO DE CIERRE
+Fecha / Hora Colombia (UTC-5): ${co.shortDateTime}
+Modo Activo: ${appState.mode} | Semáforo: ${sem}
+============================================================
+1. CAPITAL Y RIESGO
+   - Capital Consolidado: $${m.capitalNow.toFixed(2)} USD (Base: $80.00)
+   - PnL del Día: ${m.todayPnl >= 0 ? '+' : ''}$${m.todayPnl.toFixed(2)} USD (Límite diario: -$0.80)
+   - Pérdida Mensual Consumida: -$${m.monthlyLossConsumed.toFixed(2)} / $8.00 USD
+   - Operaciones Hoy: ${m.todayTrades} / 3 | Pérdidas seguidas: ${m.todayConsecLosses} / 2
+
+2. RENDIMIENTO ACUMULADO (N = ${m.n} TRADES)
+   - Win Rate: ${m.winRate.toFixed(1)}% | Profit Factor: ${m.profitFactor.toFixed(2)}
+   - Expectativa Media: ${m.expectR >= 0 ? '+' : ''}${m.expectR.toFixed(2)}R (${m.expectUsd >= 0 ? '+' : ''}$${m.expectUsd.toFixed(2)})
+   - Cumplimiento de Disciplina: ${m.disciplinePct.toFixed(1)}%
+
+3. PSICOTRADING Y CIERRE INTRADÍA
+   - Calma Pre: ${appState.psycho.preCalm}/10 | FOMO Pre: ${appState.psycho.preFomo}/10 | Revancha Post: ${appState.psycho.postRevenge}/10
+   - Cierre Cero Overnight (< 23:45 UTC-5): ${noOvernight ? 'CONFIRMADO' : 'PENDIENTE'}
+   - Acierto del día: ${good}
+   - Aspecto a corregir: ${improve}
+============================================================`;
+
+      const pre = document.getElementById('m13ReportPreview');
+      if (pre) pre.textContent = txt;
+      saveAppAll();
+      return txt;
+    }
+
+    function copyReportText() {
+      const txt = generateSessionReport();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(function() {
+          showGlobalToast('Informe de cierre copiado al portapapeles.', 'ok');
+        });
+      }
+    }
+
+    function downloadSessionReport() {
+      const txt = generateSessionReport();
+      const co = getColombiaDateParts();
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === 'function') {
+        window.notebookAppApi.triggerFileDownload({
+          content: txt,
+          contentType: 'text/plain',
+          encoding: 'UTF-8',
+          filename: `disenk_cierre_${co.dateStr}.txt`
+        });
+      }
+      showGlobalToast('Informe descargado en formato .TXT.', 'ok');
+    }
+
+    function copyGasCode() {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(GAS_SOURCE_CODE).then(function() {
+          showGlobalToast('Código Google Apps Script (.gs) copiado al portapapeles.', 'ok');
+        });
+      }
+    }
+
+    /* =========================================================================
+       CHARTS (CHART.JS)
+       ========================================================================= */
+    function renderEquityChart() {
+      const ctx = document.getElementById('chartM1Equity');
+      if (!ctx || typeof Chart === 'undefined') return;
+      const m = computeCoreMetrics();
+      if (chartM1) chartM1.destroy();
+
+      chartM1 = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: m.equityLabels,
+          datasets: [{
+            label: 'Capital ($ USD)',
+            data: m.equitySeries,
+            borderColor: '#63c7d6',
+            backgroundColor: 'rgba(99, 199, 214, 0.12)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.25,
+            pointRadius: 4,
+            pointBackgroundColor: '#87d69b'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#edf3f5', font: { family: 'Geist Mono' } } }
+          },
+          scales: {
+            x: { ticks: { color: '#94a8b0', font: { family: 'Geist Mono' } }, grid: { color: '#213138' } },
+            y: { ticks: { color: '#94a8b0', font: { family: 'Geist Mono' } }, grid: { color: '#213138' } }
+          }
+        }
+      });
+    }
+
+    function renderPsychoChart() {
+      const ctx = document.getElementById('chartM9Psycho');
+      if (!ctx || typeof Chart === 'undefined') return;
+      if (chartM9) chartM9.destroy();
+      const p = appState.psycho;
+      chartM9 = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Calma Pre', 'FOMO Pre', 'Ansiedad Dur.', 'Confianza SL', 'Aceptación Post', 'Revancha Post'],
+          datasets: [{
+            label: 'Escala 1–10',
+            data: [p.preCalm, p.preFomo, p.durAnx, p.durTrust, p.postAccept, p.postRevenge],
+            backgroundColor: ['#63c7d6', '#e8b954', '#f08c70', '#87d69b', '#87d69b', '#f27474'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { min: 0, max: 10, ticks: { color: '#94a8b0' }, grid: { color: '#213138' } },
+            x: { ticks: { color: '#94a8b0', font: { size: 11 } }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderRDistChart() {
+      const ctx = document.getElementById('chartM10RDist');
+      if (!ctx || typeof Chart === 'undefined') return;
+      if (chartM10) chartM10.destroy();
+      const m = computeCoreMetrics();
+      const labels = appState.trades.map(function(t) { return t.id; });
+      const colors = m.rValues.map(function(r) { return r >= 0 ? '#87d69b' : '#f27474'; });
+
+      chartM10 = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Resultado Neto (Múltiplo R)',
+            data: m.rValues.map(function(r) { return Number(r.toFixed(2)); }),
+            backgroundColor: colors,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#edf3f5' } } },
+          scales: {
+            y: { ticks: { color: '#94a8b0' }, grid: { color: '#213138' } },
+            x: { ticks: { color: '#94a8b0' }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    /* =========================================================================
+       MASTER RECALC & BOOTSTRAP
+       ========================================================================= */
+    function recalcAllModules() {
+      renderModule1();
+      updateSessionPrep();
+      evaluateMTF();
+      calcStopLossM5();
+      evalChecklist15();
+      renderJournalTable();
+      updatePsychoMonitor();
+      renderModule10();
+      renderModule11();
+      renderModule12();
+      generateSessionReport();
+      refreshGovernanceSemaphore();
+
+      if (appState.activeModule === 'm1') renderEquityChart();
+      if (appState.activeModule === 'm9') renderPsychoChart();
+      if (appState.activeModule === 'm10') renderRDistChart();
+    }
+
+    async function initApp() {
+      const gasPre = document.getElementById('gasCodeBlock');
+      if (gasPre) gasPre.textContent = GAS_SOURCE_CODE;
+
+      if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === 'function') {
+        try {
+          const saved = await window.notebookAppApi.getAppState();
+          if (saved && typeof saved === 'object') {
+            appState = Object.assign({}, appState, saved);
+          }
+        } catch (e) {
+          // Fallback to default state
+        }
+      }
+
+      applyStateToDom();
+      recalcAllModules();
+      if (appState.activeModule && appState.activeModule !== 'm1') {
+        switchModule(appState.activeModule);
+      } else {
+        renderEquityChart();
+      }
+
+      tickClockAndCooldown();
+      if (clockInterval) clearInterval(clockInterval);
+      clockInterval = setInterval(tickClockAndCooldown, 1000);
+
+      if (window.lucide) lucide.createIcons();
+      if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === 'function') {
+        window.notebookAppApi.notifyAppReady();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>

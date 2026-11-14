@@ -1,0 +1,32 @@
+<!--
+<div>
+  <h3>4. Módulo Integrado de Calculadoras (SL, Posición Spot & TP)</h3>
+  <div style="background:#1c1c1c; padding:15px; margin-bottom:15px;">
+    <h4>Calculadora SL M5 <span class="tag-aprobado">[REGLA APROBADA]</span></h4>
+    <label>Mínimo 10 velas M5: <input type="number" id="sl-min10" step="0.1" value="95000"></label>
+    <label>ATR 14 (M5): <input type="number" id="sl-atr" step="0.1" value="120"></label>
+    <label>Precio Entrada: <input type="number" id="sl-entrada" step="0.1" value="95400"></label>
+  </div>
+  <div style="background:#1c1c1c; padding:15px;">
+    <h4>Calculadora de Posición Binance Spot <span class="tag-calculado">[RESULTADO CALCULADO]</span></h4>
+    <p>Riesgo Monetario Máximo: <strong>USD 0.40</strong> (Cuenta Real 0.5%)</p>
+    <button type="button" onclick="evaluarPosicion()" style="background:var(--status-green); color:#000; padding:8px 16px; font-weight:bold; border:none; cursor:pointer;">Calcular Posición & Riesgo</button>
+    <h3 id="res-posicion" style="color:var(--accent-cyan); margin-top:10px;"></h3>
+  </div>
+</div>
+<script>
+  function evaluarPosicion() {
+    let entrada = Number(document.getElementById('sl-entrada').value);
+    let min10 = Number(document.getElementById('sl-min10').value);
+    let atr = Number(document.getElementById('sl-atr').value);
+    let sl = min10 - (atr * 0.10);
+    
+    google.script.run.withSuccessHandler(function(res) {
+      if(res.estado.includes('BLOQUEADO')) {
+        document.getElementById('res-posicion').innerHTML = "<span style='color:var(--status-red);'>" + res.motivo + "</span>";
+      } else {
+        document.getElementById('res-posicion').innerHTML = "🟢 HABILITADO | Cantidad: " + res.cantidadBTC + " BTC | Nocional: USD " + res.nocionalUSD.toFixed(2);
+      }
+    }).calcularPosicionBinanceSpot(entrada, sl, true);
+  }
+</script>
