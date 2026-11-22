@@ -775,6 +775,10 @@
         </p>
       </div>
       <div class="header-controls">
+        <button type="button" class="btn btn-primary btn-sm" id="btnSyncAllHeader" onclick="syncAllToSheets(this)" style="background:var(--tertiary); color:var(--on-primary); font-weight:700;">
+          <i data-lucide="database" aria-hidden="true" style="width:15px;height:15px;"></i>
+          💾 GUARDAR TODO EN SHEETS
+        </button>
         <div class="mode-switch" role="group" aria-label="Modo de cuenta">
           <button type="button" class="mode-option active-demo" id="btnModeDemo" onclick="setAccountMode('DEMO')">
             MODO DEMO (1.0% · $0.80)
@@ -843,6 +847,10 @@
       <button type="button" class="nav-btn" id="nav-m11" onclick="switchModule('m11')"><span class="nav-num">11</span>Backtesting</button>
       <button type="button" class="nav-btn" id="nav-m12" onclick="switchModule('m12')"><span class="nav-num">12</span>Pase a Real</button>
       <button type="button" class="nav-btn" id="nav-m13" onclick="switchModule('m13')"><span class="nav-num">13</span>Cierre Sesión</button>
+      <button type="button" class="nav-btn" id="nav-m14" onclick="switchModule('m14')"><span class="nav-num">14</span>Diseñador Estrategias</button>
+      <button type="button" class="nav-btn" id="nav-m15" onclick="switchModule('m15')"><span class="nav-num">15</span>Notas Personales</button>
+      <button type="button" class="nav-btn" id="nav-m16" onclick="switchModule('m16')"><span class="nav-num">16</span>Cronograma 24H</button>
+      <button type="button" class="nav-btn" id="nav-m17" onclick="switchModule('m17')"><span class="nav-num">17</span>Learn &amp; Academia</button>
       <button type="button" class="nav-btn" id="nav-arch" onclick="switchModule('arch')"><span class="nav-num">GS</span>Apps Script &amp; Sheets</button>
     </nav>
 
@@ -867,7 +875,11 @@
         <div class="kpi-grid">
           <div class="well">
             <span class="data-label">Capital Consolidado <span class="tag tag-user">[DATO DE USUARIO]</span></span>
-            <div class="metric-value" id="m1Capital">$80.00</div>
+            <div style="display:flex; align-items:center; gap:var(--space-xs); margin-top:4px;">
+              <span style="font-size:1.2rem; font-weight:700; color:var(--primary);">$</span>
+              <input type="number" id="m1CapitalInput" step="1" value="80" style="font-family:var(--font-headline); font-size:1.5rem; font-weight:700; width:130px; height:40px; padding:2px 8px; background:var(--surface-container-high); border:1px solid var(--primary); border-radius:var(--rounded); color:var(--on-surface);" oninput="onCapitalInputChange(this.value)">
+            </div>
+            <div class="metric-value" id="m1Capital" style="display:none;">$80.00</div>
             <div class="mono-num text-muted" style="font-size:0.8125rem; margin-top:4px;" id="m1EquityDiff">Referencia inicial: $80.00 USDT</div>
           </div>
 
@@ -1832,10 +1844,373 @@
             <pre class="code-well" id="m13ReportPreview"></pre>
           </div>
         </div>
+
+        <div style="margin-top:var(--space-lg); padding:var(--space-md); background:var(--surface-container-low); border:1px solid var(--tertiary); border-radius:var(--rounded-lg); text-align:center;">
+          <h3 class="title-sub" style="color:var(--tertiary); margin-bottom:var(--space-xs);">Sincronización Total de Base de Datos</h3>
+          <p class="text-muted" style="margin-bottom:var(--space-md); font-size:0.875rem;">Guarda en Google Sheets todas las operaciones, lotes de backtesting, estrategias, notas, agenda de 24h y configuración de capital.</p>
+          <button type="button" class="btn btn-primary" id="btnSyncAllBig" onclick="syncAllToSheets(this)" style="background:var(--tertiary); color:var(--on-primary); font-size:1.05rem; font-weight:700; padding:var(--space-sm) var(--space-xl);">
+            💾 GUARDAR TODO EN GOOGLE SHEETS &amp; CERRAR SESIÓN
+          </button>
+        </div>
       </div>
     </section>
 
     <!-- =================================================================== -->
+    
+    <!-- =================================================================== -->
+    <!-- MÓDULO 14: DISEÑADOR DE ESTRATEGIAS & BIBLIOTECA -->
+    <!-- =================================================================== -->
+    <section id="mod-m14" class="module-view" aria-labelledby="h-m14">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m14">14. Diseñador de Estrategias &amp; Portafolio de Sistemas</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Diseña, audita y documenta tus sistemas cuantitativos. Incluye estrategias optimizadas de Alex Ruiz y creador personalizado con pegado directo de capturas (Ctrl+V).
+            </p>
+          </div>
+          <span class="status-pill pill-green" id="m14ActiveStratBadge">SISTEMA ACTIVO: ESTRATEGIA A v3.7</span>
+        </div>
+
+        <div class="split-2">
+          <!-- Formulario Creador -->
+          <div class="well">
+            <h3 class="title-sub">Crear / Modificar Estrategia <span class="tag tag-user">[DATO DE USUARIO]</span></h3>
+            <div class="field-grid-2" style="margin-bottom:var(--space-md);">
+              <div class="field-group">
+                <label for="stratName">Nombre de la Estrategia</label>
+                <input type="text" id="stratName" placeholder="Ej: Scalping Idiota EMA 50">
+              </div>
+              <div class="field-group">
+                <label for="stratMarket">Mercado / Par</label>
+                <select id="stratMarket">
+                  <option value="Binance Spot (BTC/USDT)">Binance Spot (BTC/USDT)</option>
+                  <option value="Binance Spot (Multi-Crypto)">Binance Spot (Multi-Crypto)</option>
+                  <option value="Forex (EUR/USD)">Forex (EUR/USD)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-grid-3" style="margin-bottom:var(--space-md);">
+              <div class="field-group">
+                <label for="stratTF">Temporalidades</label>
+                <input type="text" id="stratTF" value="1H / 5M / 1M">
+              </div>
+              <div class="field-group">
+                <label for="stratTargetRR">RR Neto Objetivo</label>
+                <input type="text" id="stratTargetRR" value="1 : 2.0 (Mínimo)">
+              </div>
+              <div class="field-group">
+                <label for="stratWinRate">WinRate Esperado</label>
+                <input type="text" id="stratWinRate" value="55% - 65%">
+              </div>
+            </div>
+
+            <div class="field-group" style="margin-bottom:var(--space-md);">
+              <label for="stratIndicators">Indicadores Requeridos</label>
+              <input type="text" id="stratIndicators" value="EMA 50, RSI 14, ATR 14 (M5/1M)">
+            </div>
+
+            <div class="field-group" style="margin-bottom:var(--space-md);">
+              <label for="stratRules">Reglas de Contexto &amp; Filtro (Top-Down)</label>
+              <textarea id="stratRules" rows="3" placeholder="1. Precio > EMA 50 en HTF&#10;2. Desaceleración previa en zona clave..."></textarea>
+            </div>
+
+            <div class="field-group" style="margin-bottom:var(--space-md);">
+              <label for="stratTrigger">Regla de Gatillo &amp; Entrada (LTF)</label>
+              <textarea id="stratTrigger" rows="2" placeholder="Cierre de vela alcista atravesando EMA 50 en 1M con RSI > 50."></textarea>
+            </div>
+
+            <!-- Dropzone para pegado de imágenes -->
+            <div class="field-group" style="margin-bottom:var(--space-md);">
+              <label>Captura del Diagrama / Setup (Pegar con Ctrl+V o Subir)</label>
+              <div id="stratDropzone" style="border: 2px dashed var(--primary); border-radius:var(--rounded); padding:var(--space-md); text-align:center; background:var(--surface-container-low); cursor:pointer;" onclick="document.getElementById('stratFileInput').click()">
+                <i data-lucide="image" style="width:24px; height:24px; color:var(--primary); margin-bottom:4px;"></i>
+                <div style="font-size:0.875rem;">Haz clic para subir o <strong>Presiona Ctrl+V aquí para pegar captura</strong></div>
+                <input type="file" id="stratFileInput" accept="image/*" style="display:none;" onchange="handleStratImageUpload(this)">
+              </div>
+              <div id="stratImgPreviewContainer" style="margin-top:8px; display:none;">
+                <img id="stratImgPreview" src="" style="max-width:100%; max-height:180px; border-radius:var(--rounded); border:var(--hairline);">
+                <button type="button" class="btn btn-danger btn-sm" style="margin-top:4px;" onclick="removeStratImage()">Quitar Imagen</button>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" style="width:100%;" onclick="saveCustomStrategy()">
+              <i data-lucide="save" style="width:16px; height:16px;"></i> Guardar Estrategia en Portafolio
+            </button>
+          </div>
+
+          <!-- Portafolio de Estrategias Registradas -->
+          <div class="well">
+            <h3 class="title-sub">Biblioteca de Estrategias Disponibles</h3>
+            <div id="strategyCardsGrid" style="display:flex; flex-direction:column; gap:var(--space-md);">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 15: NOTAS PERSONALES, BITÁCORA ESCRITA & PIZARRA DE DIBUJO -->
+    <!-- =================================================================== -->
+    <section id="mod-m15" class="module-view" aria-labelledby="h-m15">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m15">15. Diario de Notas Personales, Formato Word &amp; Pizarra</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Cuaderno de apuntes libre estilo Word: formato de texto, listas de verificación, pegado directo de capturas (Ctrl+V) y pizarra gráfica.
+            </p>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="createNewNote()">
+            <i data-lucide="file-plus" style="width:15px; height:15px;"></i> Nueva Nota
+          </button>
+        </div>
+
+        <div class="split-2">
+          <!-- Editor WYSIWYG y Pizarra -->
+          <div class="well">
+            <div class="field-grid-2" style="margin-bottom:var(--space-sm);">
+              <div class="field-group">
+                <label for="noteTitleInput">Título de la Nota</label>
+                <input type="text" id="noteTitleInput" placeholder="Ej: Reflexión post-sesión o Lección de Desaceleración">
+              </div>
+              <div class="field-group">
+                <label for="noteCategorySelect">Categoría</label>
+                <select id="noteCategorySelect">
+                  <option value="Reflexión de Diario">Reflexión de Diario</option>
+                  <option value="Análisis Técnico">Análisis Técnico</option>
+                  <option value="Psicotrading">Psicotrading</option>
+                  <option value="Lección Aprendida">Lección Aprendida</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Toolbar Word estilo WYSIWYG -->
+            <div style="background:var(--surface-container-high); border:var(--hairline-strong); border-radius:var(--rounded-lg) var(--rounded-lg) 0 0; padding:var(--space-xs) var(--space-sm); display:flex; flex-wrap:wrap; gap:var(--space-xs); align-items:center;">
+              <button type="button" class="btn btn-secondary btn-sm" style="min-height:30px; padding:2px 8px; font-weight:700;" onclick="execNoteCmd('bold')" title="Negrita"><b>B</b></button>
+              <button type="button" class="btn btn-secondary btn-sm" style="min-height:30px; padding:2px 8px; font-style:italic;" onclick="execNoteCmd('italic')" title="Cursiva"><i>I</i></button>
+              <button type="button" class="btn btn-secondary btn-sm" style="min-height:30px; padding:2px 8px; text-decoration:underline;" onclick="execNoteCmd('underline')" title="Subrayado"><u>U</u></button>
+              <button type="button" class="btn btn-secondary btn-sm" style="min-height:30px; padding:2px 8px; text-decoration:line-through;" onclick="execNoteCmd('strikeThrough')" title="Tachado"><s>S</s></button>
+              <span style="color:var(--outline); font-size:12px;">|</span>
+              <button type="button" class="btn btn-secondary btn-sm" style="min-height:30px; padding:2px 8px;" onclick="execNoteCmd('insertUnorderedList')" title="Lista viñetas">• Lista</button>
+              <button type="button" class="btn btn-secondary btn-sm" style="min-height:30px; padding:2px 8px;" onclick="execNoteCmd('insertOrderedList')" title="Lista numerada">1. Lista</button>
+              <button type="button" class="btn btn-secondary btn-sm" style="min-height:30px; padding:2px 8px;" onclick="insertNoteChecklist()" title="Insertar Casilla de Verificación">☑ Checklist</button>
+              <span style="color:var(--outline); font-size:12px;">|</span>
+              <select style="height:28px; font-size:0.75rem; width:110px; padding:0 4px;" onchange="execNoteCmd('fontName', this.value)">
+                <option value="Plus Jakarta Sans">Plus Jakarta</option>
+                <option value="Instrument Sans">Instrument</option>
+                <option value="Geist Mono">Geist Mono</option>
+                <option value="Arial">Arial</option>
+                <option value="Courier New">Courier</option>
+              </select>
+              <select style="height:28px; font-size:0.75rem; width:90px; padding:0 4px;" onchange="execNoteCmd('foreColor', this.value)">
+                <option value="#edf3f5">Blanco</option>
+                <option value="#63c7d6">Cian</option>
+                <option value="#87d69b">Verde</option>
+                <option value="#e8b954">Amarillo</option>
+                <option value="#f27474">Rojo</option>
+              </select>
+            </div>
+
+            <!-- Editor Contenido Div -->
+            <div id="noteEditorBody" contenteditable="true" style="min-height:220px; max-height:360px; overflow-y:auto; background:var(--background); border:var(--hairline-strong); border-top:none; border-radius:0 0 var(--rounded-lg) var(--rounded-lg); padding:var(--space-md); color:var(--on-surface); outline:none;" placeholder="Escribe aquí tus notas... Presiona Ctrl+V para pegar imágenes o capturas de pantalla de TradingView directamente.">
+            </div>
+
+            <!-- Collapsible Pizarra de Dibujo -->
+            <div style="margin-top:var(--space-md); background:var(--surface-container-low); border:var(--hairline); border-radius:var(--rounded-lg); padding:var(--space-md);">
+              <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleCanvasPad()">
+                <strong style="font-size:0.875rem;"><i data-lucide="edit-3" style="width:14px; height:14px; vertical-align:middle;"></i> Pizarra de Dibujo Gráfico</strong>
+                <span id="canvasToggleArrow" style="font-size:0.8rem; color:var(--primary);">[Mostrar Pizarra]</span>
+              </div>
+              <div id="canvasPadWrapper" style="display:none; margin-top:var(--space-sm);">
+                <div style="display:flex; gap:var(--space-xs); align-items:center; margin-bottom:6px; flex-wrap:wrap;">
+                  <button type="button" class="btn btn-secondary btn-sm" id="btnBrushPencil" onclick="setCanvasMode('draw')">✏️ Lápiz</button>
+                  <button type="button" class="btn btn-secondary btn-sm" id="btnBrushEraser" onclick="setCanvasMode('erase')">🧹 Borrador</button>
+                  <input type="color" id="canvasColorPicker" value="#63c7d6" style="width:32px; height:28px; padding:0; border:none; cursor:pointer;">
+                  <select id="canvasLineWidth" style="height:28px; font-size:0.75rem; width:80px;" onchange="setCanvasWidth(this.value)">
+                    <option value="2">Fino (2px)</option>
+                    <option value="4" selected>Medio (4px)</option>
+                    <option value="8">Grueso (8px)</option>
+                  </select>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="clearCanvasPad()">Limpiar</button>
+                  <button type="button" class="btn btn-sage btn-sm" onclick="insertCanvasToNote()">Insertar Dibujo en Nota</button>
+                </div>
+                <canvas id="drawingCanvas" width="560" height="220" style="background:#081214; border:1px solid var(--outline); border-radius:var(--rounded); cursor:crosshair; width:100%; max-width:100%;"></canvas>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" style="width:100%; margin-top:var(--space-md);" onclick="saveCurrentNote()">
+              <i data-lucide="save" style="width:16px; height:16px;"></i> Guardar Nota en Historial
+            </button>
+          </div>
+
+          <!-- Historial de Notas Guardadas -->
+          <div class="well">
+            <h3 class="title-sub">Historial de Notas Guardadas</h3>
+            <div id="notesListContainer" style="display:flex; flex-direction:column; gap:var(--space-sm); max-height:540px; overflow-y:auto;">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 16: CRONOGRAMA DE ACTIVIDADES & AGENDA HORARIA 24H -->
+    <!-- =================================================================== -->
+    <section id="mod-m16" class="module-view" aria-labelledby="h-m16">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m16">16. Cronograma de Actividades &amp; Agenda Horaria Intradía 24H</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Diseña y gestiona tu rutina diaria de trading hora por hora (00:00 - 23:00 UTC-5). Evita el overtrading y garantiza tu pausa obligatoria y ventana intradía.
+            </p>
+          </div>
+          <div style="display:flex; gap:var(--space-xs);">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="loadDisenkDefaultSchedule()">
+              <i data-lucide="zap" style="width:14px; height:14px;"></i> Pre-set Rutina Intradía
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="saveScheduleToState()">
+              <i data-lucide="save" style="width:14px; height:14px;"></i> Guardar Agenda
+            </button>
+          </div>
+        </div>
+
+        <div class="split-2">
+          <!-- Agenda 24 Horas Editable -->
+          <div class="well">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-md);">
+              <h3 class="title-sub" style="margin:0;">Jornada Horaria (24 Horas) <span class="tag tag-user">[DATO DE USUARIO]</span></h3>
+              <span class="status-pill pill-cyan" id="m16ProgressBadge">CUMPLIMIENTO: 0%</span>
+            </div>
+
+            <div id="m16ScheduleGrid" style="display:flex; flex-direction:column; gap:6px; max-height:560px; overflow-y:auto; padding-right:4px;">
+              <!-- 24 hourly rows populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Métricas de la Rutina y Distribución -->
+          <div class="well">
+            <h3 class="title-sub">Balance de la Jornada &amp; Disciplina</h3>
+            <div class="kpi-grid" style="margin-bottom:var(--space-md);">
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">Bloques Cumplidos</span>
+                <div class="metric-value text-sage" id="m16BlocksDone">0 / 24</div>
+              </div>
+              <div class="panel" style="padding:var(--space-md);">
+                <span class="data-label">Horas de Ventana Trading</span>
+                <div class="metric-value text-cyan" id="m16TradingHours">3.0 Horas</div>
+              </div>
+            </div>
+
+            <div class="inline-notice is-ok" style="margin-bottom:var(--space-md);">
+              <span><strong>Aviso de Gobernanza Cero Overnight:</strong> Tu agenda debe garantizar el cierre de todas las posiciones antes de las 23:45 UTC-5.</span>
+            </div>
+
+            <div class="panel" style="padding:var(--space-md);">
+              <span class="data-label">Resumen de la Sesión Planeada</span>
+              <p class="text-muted" style="font-size:0.875rem; margin-top:8px;" id="m16ScheduleSummaryText">
+                Carga el pre-set o edita tus horas para ver el desglose de tiempo entre Análisis, Trading, Auditoría, Estudio y Descanso.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =================================================================== -->
+    <!-- MÓDULO 17: LEARN & ACADEMIA (DICCIONARIO, LECCIONES Y CONOCIMIENTO) -->
+    <!-- =================================================================== -->
+    <section id="mod-m17" class="module-view" aria-labelledby="h-m17">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="title-section" id="h-m17">17. Módulo Learn — Academia, Diccionario &amp; Centro de Conocimiento</h2>
+            <p class="text-muted" style="margin: var(--space-xs) 0 0 0;">
+              Biblioteca integradora de conceptos, lecciones visuales, patrones de velas, análisis técnico, macroeconomía y gestión de riesgo.
+            </p>
+          </div>
+          <span class="status-pill pill-cyan" id="m17TotalItemsBadge">18 PATRONES + 20 TÉRMINOS</span>
+        </div>
+
+        <!-- Búsqueda y Filtros de Academia -->
+        <div class="well" style="margin-bottom:var(--space-md);">
+          <div class="field-grid-2" style="align-items:center;">
+            <div class="field-group">
+              <label for="learnSearchInput">🔍 Buscar Concepto, Lección o Término Clave</label>
+              <input type="text" id="learnSearchInput" placeholder="Ej: EMA 50, Desaceleración, Ruptura, OCO, CPI, Win Rate..." oninput="filterLearnContent()">
+            </div>
+            <div class="field-group">
+              <label for="learnCategoryFilter">Filtrar por Categoría</label>
+              <select id="learnCategoryFilter" onchange="filterLearnContent()">
+                <option value="ALL">Todas las Categorías</option>
+                <option value="DICCIONARIO">Diccionario / Glosario de Términos</option>
+                <option value="ANÁLISIS TÉCNICO">Análisis Técnico &amp; Velas</option>
+                <option value="GESTIÓN DE RIESGO">Gestión de Riesgo &amp; Matemática</option>
+                <option value="MACROECONOMÍA">Macroeconomía &amp; Cripto</option>
+                <option value="PSICOTRADING">Psicotrading &amp; Disciplina</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contenedores Principal de Learn -->
+        <div class="split-2">
+          <!-- Tarjetas del Diccionario y Lecciones -->
+          <div style="display:flex; flex-direction:column; gap:var(--space-md);" id="learnCardsContainer">
+            <!-- Populated dynamically via JS -->
+          </div>
+
+          <!-- Panel de Agregar Nuevo Conocimiento / Entrada -->
+          <div class="well">
+            <h3 class="title-sub">Agregar Nueva Lección o Término <span class="tag tag-user">[DATO DE USUARIO]</span></h3>
+            <div class="field-group" style="margin-bottom:var(--space-md);">
+              <label for="learnNewTitle">Título del Concepto o Término</label>
+              <input type="text" id="learnNewTitle" placeholder="Ej: Breaker Block o Inflación CPI">
+            </div>
+            <div class="field-group" style="margin-bottom:var(--space-md);">
+              <label for="learnNewCategory">Categoría</label>
+              <select id="learnNewCategory">
+                <option value="DICCIONARIO">Diccionario / Glosario</option>
+                <option value="ANÁLISIS TÉCNICO">Análisis Técnico</option>
+                <option value="GESTIÓN DE RIESGO">Gestión de Riesgo</option>
+                <option value="MACROECONOMÍA">Macroeconomía</option>
+                <option value="PSICOTRADING">Psicotrading</option>
+              </select>
+            </div>
+            <div class="field-group" style="margin-bottom:var(--space-md);">
+              <label for="learnNewContent">Explicación / Contenido de la Lección</label>
+              <textarea id="learnNewContent" rows="5" placeholder="Escribe la explicación detallada, fórmula o regla técnica..."></textarea>
+            </div>
+
+            <!-- Dropzone para imagen en Learn -->
+            <div class="field-group" style="margin-bottom:var(--space-md);">
+              <label>Imagen o Esquema Explicativo (Subir o Ctrl+V)</label>
+              <div id="learnDropzone" style="border: 2px dashed var(--primary); border-radius:var(--rounded); padding:var(--space-sm); text-align:center; background:var(--surface-container-low); cursor:pointer;" onclick="document.getElementById('learnFileInput').click()">
+                <i data-lucide="image" style="width:20px; height:20px; color:var(--primary);"></i>
+                <div style="font-size:0.8125rem;">Subir o <strong>Ctrl+V para pegar imagen</strong></div>
+                <input type="file" id="learnFileInput" accept="image/*" style="display:none;" onchange="handleLearnImageUpload(this)">
+              </div>
+              <div id="learnImgPreviewContainer" style="margin-top:6px; display:none;">
+                <img id="learnImgPreview" src="" style="max-width:100%; max-height:160px; border-radius:var(--rounded);">
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" style="width:100%;" onclick="saveNewLearnItem()">
+              <i data-lucide="plus-circle" style="width:16px; height:16px;"></i> Guardar Conocimiento en Academia
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
     <!-- PESTAÑA ARQUITECTURA: GOOGLE APPS SCRIPT & GOOGLE SHEETS -->
     <!-- =================================================================== -->
     <section id="mod-arch" class="module-view" aria-labelledby="h-arch">
@@ -3664,7 +4039,637 @@ Modo Activo: ${appState.mode} | Semáforo: ${sem}
       }
     }
 
+
+    /* =========================================================================
+       CAPITAL DYNAMIC CHANGE HANDLER & DYNAMIC MODE BUTTONS
+       ========================================================================= */
+    function onCapitalInputChange(val) {
+      const num = parseFloat(val);
+      if (!isNaN(num) && num > 0) {
+        DISENK_RULES.initialCapital = num;
+        DISENK_RULES.dailyLossLimit = num * 0.010; // 1%
+        DISENK_RULES.monthlyLossLimit = num * 0.10; // 10%
+        appState.initialCapital = num;
+
+        updateModeButtonsUI();
+        recalcAllModules();
+        saveAppAll();
+      }
+    }
+
+    function updateModeButtonsUI() {
+      const bDemo = document.getElementById('btnModeDemo');
+      const bReal = document.getElementById('btnModeReal');
+      if (!bDemo || !bReal) return;
+
+      const cap = DISENK_RULES.initialCapital || 80.0;
+      const demoRisk = cap * DISENK_RULES.maxRiskDemoPct; // 1%
+      const realRisk = cap * DISENK_RULES.maxRiskRealPct; // 0.5%
+
+      bDemo.innerHTML = `MODO DEMO (1.0% · $${demoRisk.toFixed(2)})`;
+      bReal.innerHTML = `MODO REAL (0.5% · $${realRisk.toFixed(2)})`;
+
+      bDemo.className = 'mode-option' + (appState.mode === 'DEMO' ? ' active-demo' : '');
+      bReal.className = 'mode-option' + (appState.mode === 'REAL' ? ' active-real' : '');
+    }
+
+    /* =========================================================================
+       CALCULADORA TARGET +1% NETO EN MÓDULO 6
+       ========================================================================= */
+    function calcTPNet() {
+      const entry = Math.max(0.0001, Number(document.getElementById('m6Entry')?.value || 0));
+      const sl = Math.max(0, Number(document.getElementById('m6SL')?.value || 0));
+      const qty = Math.max(0.00001, Number(document.getElementById('m6Qty')?.value || 0.0008));
+      const feeRate = Math.max(0, Number(document.getElementById('m6FeeRate')?.value || 0.10)) / 100;
+      const slippagePct = Math.max(0, Number(document.getElementById('m6SlippagePct')?.value || 0.05)) / 100;
+
+      const cap = DISENK_RULES.initialCapital || 80.0;
+      const targetNetPct = 0.010; // +1.0% Neto de la cuenta
+      const targetNetUsd = cap * targetNetPct; // e.g. $0.80 para $80
+
+      // Calculo de comisiones
+      const entryFeeUsd = qty * entry * feeRate;
+      const grossTpApprox = entry + ((targetNetUsd + (entryFeeUsd * 2)) / qty);
+      const exitFeeUsd = qty * grossTpApprox * feeRate;
+      const slippageUsd = qty * grossTpApprox * slippagePct;
+      const totalCostsUsd = entryFeeUsd + exitFeeUsd + slippageUsd;
+
+      // Ganancia bruta requerida para que QUEDE +1% NETO libre
+      const grossGainRequired = targetNetUsd + totalCostsUsd;
+      const tpNetPrice = entry + (grossGainRequired / qty);
+
+      // Distancia de riesgo
+      const priceRiskDist = entry - sl;
+      const totalRiskUsd = (priceRiskDist * qty) + entryFeeUsd + (qty * sl * feeRate);
+
+      // DOM Updates
+      const elTpNet = document.getElementById('m6TpNet');
+      if (elTpNet) elTpNet.textContent = '$' + tpNetPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+      const elNetProf = document.getElementById('m6NetProfitUsd');
+      if (elNetProf) elNetProf.textContent = `Ganancia NETA en bolsillo: +$${targetNetUsd.toFixed(2)} (+1.00% neto libre)`;
+
+      const elCosts = document.getElementById('m6TotalCosts');
+      if (elCosts) elCosts.textContent = '$' + totalCostsUsd.toFixed(2);
+
+      const elNetRisk = document.getElementById('m6NetRiskTotal');
+      if (elNetRisk) elNetRisk.textContent = '$' + totalRiskUsd.toFixed(2);
+
+      const elTpGross = document.getElementById('m6TpGross');
+      if (elTpGross) elTpGross.textContent = '$' + (entry + (priceRiskDist * 2)).toLocaleString('en-US', {minimumFractionDigits: 2});
+    }
+
+    /* =========================================================================
+       MÓDULO 14: DISEÑADOR DE ESTRATEGIAS
+       ========================================================================= */
+    const DEFAULT_STRATEGIES = [
+      {
+        id: 'STRAT-A37',
+        name: 'Estrategia A v3.7 (LONG ONLY)',
+        market: 'Binance Spot (BTC/USDT)',
+        tf: '1D / 1H / 5M',
+        targetRR: '1 : 2.0 Neto',
+        winRate: '60% - 68%',
+        indicators: 'EMA 50, RSI 14, ATR 14 (M5)',
+        rules: '1. Precio > EMA 50 en 1D y 1H.\n2. EMA 50 actual > EMA 50 de hace 5 velas en 1D y 1H.\n3. Retroceso a EMA 50 en M5.',
+        trigger: 'Vela de señal M5 cierra alcista sobre EMA 50 con RSI 14 > 50.',
+        imgBase64: ''
+      },
+      {
+        id: 'STRAT-IDIOTA',
+        name: 'Scalping Idiota EMA 50 (Alex Ruiz)',
+        market: 'Binance Spot / Crypto',
+        tf: '1H / 5M / 1M',
+        targetRR: '1 : 2.5 Extendido',
+        winRate: '58% - 64%',
+        indicators: 'EMA 50 (1H, 5M, 1M), RSI 14',
+        rules: '1. 1H: Tendencia clara sobre EMA 50 y desaceleración de velas.\n2. 5M: Cambio de estructura (break de máximos/mínimos) y retroceso a EMA 50.\n3. Sin noticias rojas inmediatas.',
+        trigger: 'En 1M: Cierre de vela alcista atravesando la EMA 50 a favor de la tendencia.',
+        imgBase64: ''
+      },
+      {
+        id: 'STRAT-EXTREMO',
+        name: 'Escalamiento Extremo HTF ($5 a $1000)',
+        market: 'Binance Spot (Crypto Multi-Asset)',
+        tf: '1D / 1H / 1M',
+        targetRR: '1 : 5.0 a 1 : 10.0',
+        winRate: '45% - 52%',
+        indicators: 'EMA 50, Extremos de Liquidez / S&R',
+        rules: '1. Identificación de extremos macro (Soportes/Resistencias clave en 1D/1H).\n2. Barrido de liquidez (puntos de inflexión).\n3. Desaceleración clara en HTF.',
+        trigger: 'Entrada en 1M al primer indicio de giro con SL técnico ajustado en el extremo y TP proyectado a niveles HTF.',
+        imgBase64: ''
+      }
+    ];
+
+    let stratImageBase64 = '';
+
+    function handleStratImageUpload(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          stratImageBase64 = e.target.result;
+          document.getElementById('stratImgPreview').src = stratImageBase64;
+          document.getElementById('stratImgPreviewContainer').style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function removeStratImage() {
+      stratImageBase64 = '';
+      document.getElementById('stratImgPreview').src = '';
+      document.getElementById('stratImgPreviewContainer').style.display = 'none';
+    }
+
+    // Listener para pegar capturas directamente con Ctrl+V en Módulo 14
+    document.addEventListener('paste', function(e) {
+      if (appState.activeModule === 'm14' && e.clipboardData && e.clipboardData.items) {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf('image') !== -1) {
+            const blob = items[i].getAsFile();
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+              stratImageBase64 = evt.target.result;
+              document.getElementById('stratImgPreview').src = stratImageBase64;
+              document.getElementById('stratImgPreviewContainer').style.display = 'block';
+              showGlobalToast('Captura pegada con éxito en la estrategia.', 'ok');
+            };
+            reader.readAsDataURL(blob);
+            break;
+          }
+        }
+      }
+    });
+
+    function saveCustomStrategy() {
+      const name = document.getElementById('stratName')?.value || 'Estrategia Personalizada';
+      const market = document.getElementById('stratMarket')?.value || 'Binance Spot';
+      const tf = document.getElementById('stratTF')?.value || '1H / 5M / 1M';
+      const targetRR = document.getElementById('stratTargetRR')?.value || '1:2 Neto';
+      const winRate = document.getElementById('stratWinRate')?.value || '60%';
+      const indicators = document.getElementById('stratIndicators')?.value || 'EMA 50';
+      const rules = document.getElementById('stratRules')?.value || '';
+      const trigger = document.getElementById('stratTrigger')?.value || '';
+
+      const newStrat = {
+        id: 'STRAT-' + Date.now(),
+        name, market, tf, targetRR, winRate, indicators, rules, trigger,
+        imgBase64: stratImageBase64
+      };
+
+      if (!appState.strategies) appState.strategies = [];
+      appState.strategies.push(newStrat);
+      renderStrategyCards();
+      saveAppAll();
+      showGlobalToast(`Estrategia "${name}" guardada en el portafolio.`, 'ok');
+    }
+
+    function renderStrategyCards() {
+      const grid = document.getElementById('strategyCardsGrid');
+      if (!grid) return;
+
+      const list = (appState.strategies && appState.strategies.length > 0) ? appState.strategies : DEFAULT_STRATEGIES;
+      appState.strategies = list;
+
+      grid.innerHTML = list.map(function(s) {
+        const isActive = appState.activeStrategyId === s.id;
+        return `<div class="panel" style="padding:var(--space-md); border-color:${isActive ? 'var(--tertiary)' : 'var(--outline)'};">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-xs);">
+            <strong style="font-size:1rem; color:var(--on-surface);">${s.name}</strong>
+            <span class="status-pill ${isActive ? 'pill-green' : 'pill-cyan'}">${isActive ? 'ACTIVA EN JOURNAL 🟢' : s.market}</span>
+          </div>
+          <div style="font-size:0.8125rem; color:var(--on-surface-variant); margin-bottom:var(--space-xs);">
+            <strong>TF:</strong> ${s.tf} | <strong>Target RR:</strong> ${s.targetRR} | <strong>WinRate:</strong> ${s.winRate}
+          </div>
+          <p style="font-size:0.84rem; margin:0 0 var(--space-xs) 0;"><strong>Reglas:</strong> ${s.rules}</p>
+          <p style="font-size:0.84rem; margin:0 0 var(--space-sm) 0; color:var(--primary);"><strong>Gatillo:</strong> ${s.trigger}</p>
+          ${s.imgBase64 ? `<img src="${s.imgBase64}" style="max-width:100%; max-height:140px; border-radius:var(--rounded); margin-bottom:var(--space-xs);">` : ''}
+          <button type="button" class="btn btn-secondary btn-sm" onclick="useStrategyInJournal('${s.id}')">📌 Usar en Bitácora</button>
+        </div>`;
+      }).join('');
+    }
+
+    function useStrategyInJournal(stratId) {
+      appState.activeStrategyId = stratId;
+      const found = (appState.strategies || []).find(s => s.id === stratId);
+      if (found) {
+        const badge = document.getElementById('m14ActiveStratBadge');
+        if (badge) badge.textContent = `SISTEMA ACTIVO: ${found.name.toUpperCase()}`;
+        showGlobalToast(`Estrategia activa configurada: ${found.name}`, 'ok');
+      }
+      renderStrategyCards();
+      saveAppAll();
+    }
+
+    /* =========================================================================
+       MÓDULO 15: NOTAS PERSONALES & EDITOR WORD / PIZARRA
+       ========================================================================= */
+    function execNoteCmd(cmd, value = null) {
+      document.execCommand(cmd, false, value);
+    }
+
+    function insertNoteChecklist() {
+      const htmlCheck = '<div><input type="checkbox" style="vertical-align:middle; margin-right:6px;"><span>Item de lista...</span></div>';
+      document.execCommand('insertHTML', false, htmlCheck);
+    }
+
+    // Listener para pegar imágenes con Ctrl+V directamente dentro del editor de notas
+    document.addEventListener('paste', function(e) {
+      if (appState.activeModule === 'm15' && e.clipboardData && e.clipboardData.items) {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf('image') !== -1) {
+            const blob = items[i].getAsFile();
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+              const imgHtml = `<img src="${evt.target.result}" style="max-width:100%; border-radius:8px; margin:8px 0; border:1px solid var(--outline);"><br>`;
+              document.execCommand('insertHTML', false, imgHtml);
+              showGlobalToast('Imagen de TradingView insertada en la nota.', 'ok');
+            };
+            reader.readAsDataURL(blob);
+            break;
+          }
+        }
+      }
+    });
+
+    // Pizarra de Dibujo Canvas HTML5
+    let isDrawing = false;
+    let canvasMode = 'draw';
+    let canvasColor = '#63c7d6';
+    let canvasWidth = 4;
+
+    function toggleCanvasPad() {
+      const w = document.getElementById('canvasPadWrapper');
+      const a = document.getElementById('canvasToggleArrow');
+      if (!w) return;
+      if (w.style.display === 'none') {
+        w.style.display = 'block';
+        if (a) a.textContent = '[Ocultar Pizarra]';
+        initCanvasPad();
+      } else {
+        w.style.display = 'none';
+        if (a) a.textContent = '[Mostrar Pizarra]';
+      }
+    }
+
+    function initCanvasPad() {
+      const cv = document.getElementById('drawingCanvas');
+      if (!cv) return;
+      const ctx = cv.getContext('2d');
+
+      cv.onmousedown = function(e) {
+        isDrawing = true;
+        const rect = cv.getBoundingClientRect();
+        ctx.beginPath();
+        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+      };
+      cv.onmousemove = function(e) {
+        if (!isDrawing) return;
+        const rect = cv.getBoundingClientRect();
+        ctx.lineWidth = canvasWidth;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = canvasMode === 'erase' ? '#081214' : canvasColor;
+        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        ctx.stroke();
+      };
+      cv.onmouseup = function() { isDrawing = false; };
+      cv.onmouseleave = function() { isDrawing = false; };
+    }
+
+    function setCanvasMode(mode) { canvasMode = mode; }
+    function setCanvasWidth(w) { canvasWidth = parseInt(w); }
+    function clearCanvasPad() {
+      const cv = document.getElementById('drawingCanvas');
+      if (cv) {
+        const ctx = cv.getContext('2d');
+        ctx.clearRect(0, 0, cv.width, cv.height);
+      }
+    }
+
+    function insertCanvasToNote() {
+      const cv = document.getElementById('drawingCanvas');
+      if (!cv) return;
+      const dataUrl = cv.toDataURL('image/png');
+      const imgHtml = `<img src="${dataUrl}" style="max-width:100%; border-radius:8px; margin:8px 0; border:1px solid var(--primary);"><br>`;
+      document.execCommand('insertHTML', false, imgHtml);
+      showGlobalToast('Dibujo de la pizarra estampado en tu nota.', 'ok');
+    }
+
+    function saveCurrentNote() {
+      const title = document.getElementById('noteTitleInput')?.value || 'Nota sin título';
+      const category = document.getElementById('noteCategorySelect')?.value || 'Reflexión de Diario';
+      const bodyHtml = document.getElementById('noteEditorBody')?.innerHTML || '';
+
+      const noteObj = {
+        id: 'NOTE-' + Date.now(),
+        title, category, bodyHtml,
+        dateStr: new Date().toLocaleString('es-CO', {timeZone: 'America/Bogota'})
+      };
+
+      if (!appState.notes) appState.notes = [];
+      appState.notes.unshift(noteObj);
+      renderNotesList();
+      saveAppAll();
+      showGlobalToast(`Nota "${title}" guardada con éxito.`, 'ok');
+    }
+
+    function renderNotesList() {
+      const container = document.getElementById('notesListContainer');
+      if (!container) return;
+
+      const list = appState.notes || [];
+      if (list.length === 0) {
+        container.innerHTML = '<p class="text-muted" style="font-size:0.875rem;">No hay notas guardadas aún. Crea tu primera nota en el editor.</p>';
+        return;
+      }
+
+      container.innerHTML = list.map(function(n, idx) {
+        return `<div class="panel" style="padding:var(--space-sm) var(--space-md);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <strong style="font-size:0.95rem;">${n.title}</strong>
+            <span class="status-pill pill-cyan" style="font-size:0.7rem;">${n.category}</span>
+          </div>
+          <div style="font-size:0.75rem; color:var(--on-surface-variant); margin-bottom:6px;">${n.dateStr}</div>
+          <div style="max-height:120px; overflow-y:auto; font-size:0.84rem; background:var(--background); padding:6px; border-radius:4px; margin-bottom:6px;">
+            ${n.bodyHtml}
+          </div>
+          <button type="button" class="btn btn-danger btn-sm" onclick="deleteNote(${idx})">Eliminar</button>
+        </div>`;
+      }).join('');
+    }
+
+    function deleteNote(idx) {
+      if (appState.notes) appState.notes.splice(idx, 1);
+      renderNotesList();
+      saveAppAll();
+    }
+
+    function createNewNote() {
+      if (document.getElementById('noteTitleInput')) document.getElementById('noteTitleInput').value = '';
+      if (document.getElementById('noteEditorBody')) document.getElementById('noteEditorBody').innerHTML = '';
+      clearCanvasPad();
+      showGlobalToast('Editor limpio listo para nueva nota.', 'ok');
+    }
+
+    /* =========================================================================
+       MÓDULO 16: CRONOGRAMA 24H
+       ========================================================================= */
+    const DEFAULT_24H_SCHEDULE = [
+      { hour: '00:00 - 06:00', cat: 'Descanso 💤', desc: 'Sueño reparador y cero overnight', done: true },
+      { hour: '06:00 - 07:00', cat: 'Personal ☕', desc: 'Rutina matutina, ejercicio y café', done: true },
+      { hour: '07:00 - 08:00', cat: 'Análisis Pre-Mercado 🟢', desc: 'Revisión calendario macro CPI/FOMC, 1D/1H BTC', done: false },
+      { hour: '08:00 - 11:00', cat: 'Trading Intradía ⚡', desc: 'Ventana de alta liquidez. Monitoreo M5/1M EMA 50', done: false },
+      { hour: '11:00 - 12:00', cat: 'Auditoría & Bitácora 📊', desc: 'Registro de trades en Journal, capturas y PnL', done: false },
+      { hour: '12:00 - 14:00', cat: 'Personal / Almuerzo ☕', desc: 'Desconexión de pantallas y pausa activa', done: false },
+      { hour: '14:00 - 16:00', cat: 'Backtesting 🧪', desc: 'Pruebas de estrés de 100 trades en Módulo 11', done: false },
+      { hour: '16:00 - 18:00', cat: 'Estudio 📚', desc: 'Módulo Learn, patrones de velas y macroeconomía', done: false },
+      { hour: '18:00 - 23:00', cat: 'Descanso / Cero Overnight 💤', desc: 'Cierre total de órdenes OCO pendientes', done: false }
+    ];
+
+    function loadDisenkDefaultSchedule() {
+      appState.schedule = JSON.parse(JSON.stringify(DEFAULT_24H_SCHEDULE));
+      renderScheduleGrid();
+      saveAppAll();
+      showGlobalToast('Pre-set de Rutina Intradía Disenk cargado.', 'ok');
+    }
+
+    function renderScheduleGrid() {
+      const grid = document.getElementById('m16ScheduleGrid');
+      if (!grid) return;
+
+      const list = (appState.schedule && appState.schedule.length > 0) ? appState.schedule : DEFAULT_24H_SCHEDULE;
+      appState.schedule = list;
+
+      let doneCount = 0;
+      grid.innerHTML = list.map(function(s, idx) {
+        if (s.done) doneCount++;
+        return `<div style="display:flex; align-items:center; gap:var(--space-sm); background:var(--background); padding:6px 10px; border:var(--hairline); border-radius:var(--rounded);">
+          <input type="checkbox" ${s.done ? 'checked' : ''} onchange="toggleScheduleDone(${idx}, this.checked)">
+          <strong style="width:110px; font-size:0.8125rem; font-family:var(--font-label);">${s.hour}</strong>
+          <select style="width:170px; height:28px; font-size:0.75rem;" onchange="updateScheduleCat(${idx}, this.value)">
+            <option value="Análisis Pre-Mercado 🟢" ${s.cat.includes('Análisis') ? 'selected' : ''}>Análisis Pre-Mercado 🟢</option>
+            <option value="Trading Intradía ⚡" ${s.cat.includes('Trading') ? 'selected' : ''}>Trading Intradía ⚡</option>
+            <option value="Auditoría & Bitácora 📊" ${s.cat.includes('Auditoría') ? 'selected' : ''}>Auditoría & Bitácora 📊</option>
+            <option value="Backtesting 🧪" ${s.cat.includes('Backtesting') ? 'selected' : ''}>Backtesting 🧪</option>
+            <option value="Estudio 📚" ${s.cat.includes('Estudio') ? 'selected' : ''}>Estudio 📚</option>
+            <option value="Descanso 💤" ${s.cat.includes('Descanso') ? 'selected' : ''}>Descanso 💤</option>
+            <option value="Personal ☕" ${s.cat.includes('Personal') ? 'selected' : ''}>Personal ☕</option>
+          </select>
+          <input type="text" value="${s.desc}" style="flex:1; height:28px; font-size:0.8125rem;" oninput="updateScheduleDesc(${idx}, this.value)">
+        </div>`;
+      }).join('');
+
+      const pct = Math.round((doneCount / list.length) * 100);
+      const elBadge = document.getElementById('m16ProgressBadge');
+      if (elBadge) {
+        elBadge.textContent = `CUMPLIMIENTO: ${pct}%`;
+        elBadge.className = 'status-pill ' + (pct >= 80 ? 'pill-green' : (pct >= 50 ? 'pill-cyan' : 'pill-yellow'));
+      }
+
+      const elDone = document.getElementById('m16BlocksDone');
+      if (elDone) elDone.textContent = `${doneCount} / ${list.length}`;
+    }
+
+    function toggleScheduleDone(idx, val) {
+      if (appState.schedule && appState.schedule[idx]) appState.schedule[idx].done = val;
+      renderScheduleGrid();
+      saveAppAll();
+    }
+    function updateScheduleCat(idx, val) {
+      if (appState.schedule && appState.schedule[idx]) appState.schedule[idx].cat = val;
+      saveAppAll();
+    }
+    function updateScheduleDesc(idx, val) {
+      if (appState.schedule && appState.schedule[idx]) appState.schedule[idx].desc = val;
+      saveAppAll();
+    }
+    function saveScheduleToState() {
+      saveAppAll();
+      showGlobalToast('Cronograma horario guardado con éxito.', 'ok');
+    }
+
+    /* =========================================================================
+       MÓDULO 17: LEARN & ACADEMIA (DICCIONARIO, LECCIONES Y CONOCIMIENTO)
+       ========================================================================= */
+    const LEARN_ITEMS = [
+      {
+        id: 'L1',
+        title: 'EMA 50 (Media Móvil Exponencial de 50 Periodos)',
+        cat: 'DICCIONARIO',
+        text: 'Indicador dinámico que asigna mayor peso a los precios recientes. Utilizado como filtro tendencial en HTF (1H) y como nivel de soporte/resistencia dinámico y gatillo de entrada en LTF (5M / 1M).',
+        tags: 'EMA, Indicador, Tendencia'
+      },
+      {
+        id: 'L2',
+        title: 'Aceleración vs. Desaceleración (Alex Ruiz)',
+        cat: 'ANÁLISIS TÉCNICO',
+        text: 'Aceleración: Velas de amplio cuerpo hacia un nivel. Desaceleración: Achicamiento del cuerpo de las velas y presencia de mechas en soportes/resistencias HTF, anticipando un giro imminente.',
+        tags: 'Velas, Acción de Precio, Giro'
+      },
+      {
+        id: 'L3',
+        title: 'Ruptura de Estructura (BOS - Break of Structure)',
+        cat: 'ANÁLISIS TÉCNICO',
+        text: 'Ocurre cuando el precio supera con cuerpo de vela el último máximo relevante (HH) en tendencia alcista o el último mínimo (LL) en bajista, confirmando la continuidad o cambio de tendencia.',
+        tags: 'Estructura, BOS, Tendencia'
+      },
+      {
+        id: 'L4',
+        title: 'Gestión de Riesgo: Meta de +1% Neto de la Cuenta',
+        cat: 'GESTIÓN DE RIESGO',
+        text: 'Para ganar +1% NETO libre en bolsillo, las comisiones de Binance Spot (0.10% Maker/Taker) y el deslizamiento se calculan en la Calculadora TP agregándolas SOBRE el precio objetivo OCO.',
+        tags: 'Riesgo, TP Neto, Comisiones'
+      },
+      {
+        id: 'L5',
+        title: 'Anatomía de Velas y los 18 Patrones Fundamentales',
+        cat: 'ANÁLISIS TÉCNICO',
+        text: 'Análisis de cuerpo vs. sombra. Patrones de Alta Efectividad: Martillo, Envolvente Alcista, Estrella del Amanecer, Perforación, Tres Soldados Blancos. Patrones Bajistas: Hombre Colgado, Estrella Fugaz, Cobertura de Nube Oscura.',
+        tags: 'Velas Japonesas, Patrones, Reversión'
+      },
+      {
+        id: 'L6',
+        title: 'Macroeconomía Cripto: CPI, FOMC y Noticias de Volatilidad',
+        cat: 'MACROECONOMÍA',
+        text: 'CPI (Índice de Precios al Consumidor) y decisiones de tasas de la Fed (FOMC) generan volatilidad extrema. Regla de Gobernanza: No operar 30 minutos antes ni después de noticias rojas.',
+        tags: 'Macro, CPI, Volatilidad'
+      }
+    ];
+
+    let learnImageBase64 = '';
+
+    function handleLearnImageUpload(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          learnImageBase64 = e.target.result;
+          document.getElementById('learnImgPreview').src = learnImageBase64;
+          document.getElementById('learnImgPreviewContainer').style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    // Listener para pegar capturas en Learn
+    document.addEventListener('paste', function(e) {
+      if (appState.activeModule === 'm17' && e.clipboardData && e.clipboardData.items) {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf('image') !== -1) {
+            const blob = items[i].getAsFile();
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+              learnImageBase64 = evt.target.result;
+              document.getElementById('learnImgPreview').src = learnImageBase64;
+              document.getElementById('learnImgPreviewContainer').style.display = 'block';
+              showGlobalToast('Imagen pegada en el creador de Academia.', 'ok');
+            };
+            reader.readAsDataURL(blob);
+            break;
+          }
+        }
+      }
+    });
+
+    function renderLearnCards() {
+      const container = document.getElementById('learnCardsContainer');
+      if (!container) return;
+
+      const list = (appState.learnItems && appState.learnItems.length > 0) ? appState.learnItems : LEARN_ITEMS;
+      appState.learnItems = list;
+
+      const searchTxt = (document.getElementById('learnSearchInput')?.value || '').toLowerCase();
+      const catFilter = document.getElementById('learnCategoryFilter')?.value || 'ALL';
+
+      const filtered = list.filter(function(item) {
+        const matchCat = (catFilter === 'ALL' || item.cat === catFilter);
+        const matchSearch = item.title.toLowerCase().includes(searchTxt) || item.text.toLowerCase().includes(searchTxt) || (item.tags && item.tags.toLowerCase().includes(searchTxt));
+        return matchCat && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="well"><p class="text-muted" style="margin:0;">No se encontraron términos o lecciones que coincidan con la búsqueda.</p></div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(function(item) {
+        return `<div class="panel" style="padding:var(--space-md);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-xs);">
+            <strong style="font-size:1.05rem; color:var(--primary);">${item.title}</strong>
+            <span class="status-pill pill-cyan">${item.cat}</span>
+          </div>
+          <p style="font-size:0.875rem; color:var(--on-surface); line-height:1.5; margin-bottom:var(--space-xs);">${item.text}</p>
+          ${item.tags ? `<div style="font-size:0.75rem; color:var(--on-surface-variant);"><i data-lucide="tag" style="width:12px; height:12px; vertical-align:middle;"></i> ${item.tags}</div>` : ''}
+          ${item.imgBase64 ? `<img src="${item.imgBase64}" style="max-width:100%; max-height:180px; border-radius:var(--rounded); margin-top:var(--space-xs);">` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    function filterLearnContent() { renderLearnCards(); }
+
+    function saveNewLearnItem() {
+      const title = document.getElementById('learnNewTitle')?.value || '';
+      const cat = document.getElementById('learnNewCategory')?.value || 'DICCIONARIO';
+      const text = document.getElementById('learnNewContent')?.value || '';
+
+      if (!title || !text) {
+        showGlobalToast('Por favor ingresa un título y explicación para la lección.', 'warn');
+        return;
+      }
+
+      const newItem = {
+        id: 'LEARN-' + Date.now(),
+        title, cat, text,
+        tags: 'Comunidad, Personalizado',
+        imgBase64: learnImageBase64
+      };
+
+      if (!appState.learnItems) appState.learnItems = [];
+      appState.learnItems.unshift(newItem);
+      renderLearnCards();
+      saveAppAll();
+
+      document.getElementById('learnNewTitle').value = '';
+      document.getElementById('learnNewContent').value = '';
+      learnImageBase64 = '';
+      document.getElementById('learnImgPreviewContainer').style.display = 'none';
+
+      showGlobalToast(`Término/Lección "${title}" agregada a la Academia.`, 'ok');
+    }
+
+    /* =========================================================================
+       RECALCULATE ALL MODULES (17 MODULES INTEGRATED)
+       ========================================================================= */
+    function recalcAllModules() {
+      renderModule1();
+      updateSessionPrep();
+      evaluateMTF();
+      calcStopLossM5();
+      calcTPNet();
+      evalChecklist15();
+      renderJournalTable();
+      updatePsychoMonitor();
+      renderModule10();
+      renderModule11();
+      renderModule12();
+      generateSessionReport();
+      refreshGovernanceSemaphore();
+
+      renderStrategyCards();
+      renderNotesList();
+      renderScheduleGrid();
+      renderLearnCards();
+
+      if (appState.activeModule === 'm1') renderEquityChart();
+      if (appState.activeModule === 'm9') renderPsychoChart();
+      if (appState.activeModule === 'm10') renderRDistChart();
+    }
+
+
     document.addEventListener('DOMContentLoaded', initApp);
   </script>
 </body>
 </html>
+

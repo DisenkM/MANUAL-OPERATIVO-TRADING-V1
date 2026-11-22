@@ -1,7 +1,7 @@
 /* ============================================================================
    DISENK — TRADER JOURNAL | 01_Estado_Capital.gs
    Módulo 1: Dashboard de Estado & Capital [REGLA APROBADA]
-   ============================================================================ */
+   ============================================================================ 
 
 function obtenerEstadoCapital() {
   const cfg = DISENK_GLOBAL_CONFIG;
@@ -70,3 +70,4 @@ function obtenerEstadoCapital() {
     motivoBloqueo: motivoBloqueo
   };
 }
+*/

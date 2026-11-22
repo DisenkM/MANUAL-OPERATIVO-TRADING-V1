@@ -1,7 +1,7 @@
 /* ============================================================================
    DISENK — TRADER JOURNAL | 06_CalculadoraTP_RR.gs
    Módulo 6: Calculadora Take-Profit 1:2 Neto & Ratio Riesgo:Beneficio
-   ============================================================================ */
+   ============================================================================ 
 
 function calcularTakeProfitNeto(precioEntrada, cantidadBTC, riesgoUSD) {
   const comision = DISENK_GLOBAL_CONFIG.COMISION_BINANCE_SPOT;
@@ -22,3 +22,4 @@ function calcularTakeProfitNeto(precioEntrada, cantidadBTC, riesgoUSD) {
     costeEstimadoSalidaUSD: cantidadBTC * precioTPNeto * comision
   };
 }
+*/

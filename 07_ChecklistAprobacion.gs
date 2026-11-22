@@ -1,7 +1,7 @@
 /* ============================================================================
    DISENK — TRADER JOURNAL | 07_ChecklistAprobacion.gs
    Módulo 7: Checklist de Aprobación Institucional de 15 Puntos
-   ============================================================================ */
+   ============================================================================ 
 
 function evaluarChecklist15Puntos(itemsChecklist) {
   // itemsChecklist: arreglo de 15 booleans
@@ -20,3 +20,4 @@ function evaluarChecklist15Puntos(itemsChecklist) {
     veredicto: veredicto
   };
 }
+*/

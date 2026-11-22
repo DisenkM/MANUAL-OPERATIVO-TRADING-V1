@@ -1,7 +1,7 @@
 /* ============================================================================
    DISENK — TRADER JOURNAL | 11_Backtesting.gs
    Módulo 11: Motor de Simulación Histórica de Backtesting (5 Años)
-   ============================================================================ */
+   ============================================================================ 
 
 function registrarResultadoBacktest(simulacion) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -17,3 +17,4 @@ function registrarResultadoBacktest(simulacion) {
 
   return { etiqueta: "[SUPUESTO DE SIMULACIÓN]", idBacktest: idBacktest };
 }
+*/

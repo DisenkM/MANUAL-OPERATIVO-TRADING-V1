@@ -1,8 +1,7 @@
 /* ============================================================================
    DISENK — TRADER JOURNAL | 13_CierreSesion.gs
    Módulo 13: Informe de Cierre de Sesión Automático
-   ============================================================================ */
-
+   ============================================================================ 
 function generarInformeCierreSesion(motivoCierre) {
   const estadoCap = obtenerEstadoCapital();
   
@@ -17,3 +16,4 @@ function generarInformeCierreSesion(motivoCierre) {
     estadoFinal: "🟢 SESIÓN CERRADA CON ÉXITO Y REGISTRADA EN DB"
   };
 }
+*/

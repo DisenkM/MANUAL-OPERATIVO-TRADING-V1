@@ -1,7 +1,7 @@
 /* ============================================================================
    DISENK — TRADER JOURNAL | 03_AnalisisMultitemporal.gs
    Módulo 3: Validación Multitemporal Estrategia A v3.7 (1D / 1H / M5)
-   ============================================================================ */
+   ============================================================================ 
 
 function validarAnalisisMultitemporal(datosVelas) {
   // datosVelas: { c1D, ema1D_0, ema1D_5, c1H, ema1H_0, ema1H_5, cM5, emaM5, rsiM5, esVelaAlcista }
@@ -20,3 +20,4 @@ function validarAnalisisMultitemporal(datosVelas) {
     veredicto: esValido ? "🟢 CONTEXTO ALCISTA VÁLIDO" : "🔴 CONTEXTO NO VÁLIDO / BLOQUEADO"
   };
 }
+*/

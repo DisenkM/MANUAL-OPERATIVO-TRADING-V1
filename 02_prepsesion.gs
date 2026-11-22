@@ -1,7 +1,7 @@
 /* ============================================================================
    DISENK — TRADER JOURNAL | 02_PrepSesion.gs
    Módulo 2: Preparación de Sesión & Checklist Pre-Mercado
-   ============================================================================ */
+   ============================================================================ 
 
 function registrarPreparacionSesion(payload) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -25,3 +25,4 @@ function registrarPreparacionSesion(payload) {
     estado: payload.checklistValido ? "🟢 SESIÓN REGISTRADA Y HABILITADA" : "🔴 SESIÓN BLOQUEADA POR CHECKLIST"
   };
 }
+*/

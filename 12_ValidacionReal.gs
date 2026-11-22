@@ -1,7 +1,7 @@
 /* ============================================================================
    DISENK — TRADER JOURNAL | 12_ValidacionReal.gs
    Módulo 12: Protocolo de Validación 5/5 para Paso a Dinero Real
-   ============================================================================ */
+   ============================================================================ 
 
 function evaluarPasoADineroReal(metricasDemo) {
   // metricasDemo: { pnlNetoPositivo, expectativaPositiva, drawdownEnLimite, outOfSamplePositivo, disciplinaDemostrada }
@@ -19,3 +19,4 @@ function evaluarPasoADineroReal(metricasDemo) {
     veredicto: apto ? "🟢 APROBADA PARA OPERAR DINERO REAL" : "🔴 NO APROBADA — PERMANECER EN DEMO"
   };
 }
+*/

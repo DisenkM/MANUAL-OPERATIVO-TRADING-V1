@@ -1,7 +1,7 @@
 /* ============================================================================
    DISENK — TRADER JOURNAL | 10_Estadisticas.gs
    Módulo 10: Estadísticas Cuantitativas de 25 Métricas
-   ============================================================================ */
+   ============================================================================ 
 
 function calcularEstadisticasCuantitativas() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -35,3 +35,4 @@ function calcularEstadisticasCuantitativas() {
     expectativaUSD: expectativaMatematicaUSD.toFixed(2)
   };
 }
+*/

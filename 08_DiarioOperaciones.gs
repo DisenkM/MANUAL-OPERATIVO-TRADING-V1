@@ -1,7 +1,7 @@
 /* ============================================================================
    DISENK — TRADER JOURNAL | 08_DiarioOperaciones.gs
    Módulo 8: Diario de Operaciones & Clasificación Matricial
-   ============================================================================ */
+   ============================================================================ 
 
 function registrarOperacionDiario(trade) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -25,3 +25,5 @@ function registrarOperacionDiario(trade) {
 
   return { etiqueta: "[DATO DE USUARIO]", idTrade: idTrade, clasificacion: matrizClasificacion };
 }
+
+*/

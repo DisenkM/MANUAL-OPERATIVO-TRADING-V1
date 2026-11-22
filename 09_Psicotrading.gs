@@ -1,7 +1,7 @@
 /* ============================================================================
    DISENK — TRADER JOURNAL | 09_Psicotrading.gs
    Módulo 9: Registro Emocional Tri-Fase (Antes, Durante, Después)
-   ============================================================================ */
+   ============================================================================ 
 
 function registrarPsicotrading(emociones) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -20,3 +20,4 @@ function registrarPsicotrading(emociones) {
 
   return { etiqueta: "[RESULTADO CALCULADO]", patronDetectado: patron };
 }
+*/

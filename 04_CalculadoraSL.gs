@@ -1,7 +1,7 @@
 /* ============================================================================
    DISENK — TRADER JOURNAL | 04_CalculadoraSL.gs
    Módulo 4: Calculadora de Stop-Loss M5 (Mínimo 10 Velas + Margen ATR 14)
-   ============================================================================ */
+   ============================================================================ 
 
 function calcularStopLossM5(minimo10VelasM5, atr14M5, precioEntrada) {
   if (!minimo10VelasM5 || !atr14M5 || !precioEntrada) {
@@ -27,3 +27,4 @@ function calcularStopLossM5(minimo10VelasM5, atr14M5, precioEntrada) {
     estado: "🟢 SL VÁLIDO"
   };
 }
+*/

@@ -1,7 +1,7 @@
 /* ============================================================================
    DISENK — TRADER JOURNAL | 05_CalculadoraPosicion.gs
    Módulo 5: Calculadora de Tamaño de Posición Binance Spot 1x
-   ============================================================================ */
+   ============================================================================ 
 
 function calcularPosicionBinanceSpot(precioEntrada, precioSL, esCuentaReal) {
   const cfg = DISENK_GLOBAL_CONFIG;
@@ -35,3 +35,4 @@ function calcularPosicionBinanceSpot(precioEntrada, precioSL, esCuentaReal) {
     cuentaTipo: esCuentaReal ? "REAL (0.5%)" : "DEMO (1.0%)"
   };
 }
+*/
