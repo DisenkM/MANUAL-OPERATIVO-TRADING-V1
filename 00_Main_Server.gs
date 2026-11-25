@@ -2,7 +2,7 @@
    DISENK — TRADER JOURNAL | 00_Main_Server.gs
    Gobernanza: [REGLA APROBADA] - Servidor Principal y Enrutador de Plantillas
    ============================================================================ 
-
+asdasdas
 function doGet() {
   return HtmlService.createTemplateFromFile('V0_Index')
     .evaluate()
